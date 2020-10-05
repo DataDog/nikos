@@ -1,0 +1,52 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+  - name: Install dependencies
+    package:
+      name: "{{ item }}"
+    with_items:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+    become: true
+
+  - name: Add docker official key
+    shell: "curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -"
+    become: true
+
+  - name: Add APT repository
+    shell: 'add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"'
+    become: true
+
+  - name: Update repositories cache and install "docker-ce" package
+    apt:
+      name: docker-ce
+      update_cache: yes
+    become: true
+
+  - name: Install pip
+    package:
+      name: python-pip
+    become: true
+    when: ansible_distribution_release == 'jessie'
+
+  - name: Install docker-py
+    shell: 'pip install docker'
+    become: true
+    when: ansible_distribution_release == 'jessie'
+
+  - name: Install docker-py
+    package:
+      name: python3-docker
+    become: true
+    when: ansible_distribution_release != 'jessie'
+
+  - name: Start docker
+    service:
+      name: docker
+      state: started
+    become: true
+

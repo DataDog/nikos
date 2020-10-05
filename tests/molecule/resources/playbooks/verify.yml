@@ -1,0 +1,12 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+  - include_tasks: run-igor.yml
+    vars:
+      output_path: /tmp/result.host
+
+  - include_tasks: run-igor.yml
+    vars:
+      output_path: /tmp/result.docker
+      prefix: sudo docker exec -ti debian

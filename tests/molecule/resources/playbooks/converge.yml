@@ -1,0 +1,47 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+  - synchronize:
+      src: ../../../../opt.igor/
+      dest: /opt/igor
+    become: true
+
+  - name: Create a directory if it does not exist
+    file:
+      path: /opt/igor/bin
+      state: directory
+      mode: 0755
+
+  - name: Create a directory if it does not exist
+    file:
+      path: /opt/igor/bin
+      state: directory
+      mode: 0755
+
+  - name: Copy Igor
+    copy:
+      src: ../../../../igor
+      dest: /opt/igor/bin/igor
+      mode: 0755
+
+  - name: Create a directory if it does not exist
+    file:
+      path: /tmp/result.docker
+      state: directory
+      mode: 0755
+
+  - name: Create a debian container
+    community.general.docker_container:
+      name: debian
+      image: debian
+      volumes:
+        - /opt/igor:/opt/igor:ro
+        - /etc/os-release:/etc/os-release:ro
+        - /etc/redhat-release:/etc/redhat-release:ro
+        - /etc/apt:/etc/apt:ro
+        - /etc/zypp/repos.d:/etc/zypp/repos.d:ro
+        - /opt/igor/embedded/var/lib/rpm:/var/lib/rpm:ro
+        - /tmp/result.docker:/tmp/result.docker
+      command: sleep 3600
+    become: true

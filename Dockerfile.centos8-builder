@@ -1,0 +1,7 @@
+FROM centos:8
+
+ADD rpmbuild/RPMS/x86_64/*.rpm /rpms/
+RUN cd /rpms && yum -y install libdnf-0.39.1-6.el8.x86_64.rpm librepo-1.11.0-3.el8.x86_64.rpm libdnf-devel-0.39.1-6.el8.x86_64.rpm librepo-devel-1.11.0-3.el8.x86_64.rpm libsolv-0.7.7-1.el8.x86_64.rpm libsolv-devel-0.7.7-1.el8.x86_64.rpm python3-hawkey-0.39.1-6.el8.x86_64.rpm python3-libdnf-0.39.1-6.el8.x86_64.rpm
+RUN yum -y install golang make
+VOLUME [ "/go/src/github.com/lebauce/igor" ]
+WORKDIR /go/src/github.com/lebauce/igor

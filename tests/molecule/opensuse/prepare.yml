@@ -1,0 +1,30 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+  - name: Install rsync
+    package:
+      name: rsync
+      state: present
+    become: true
+
+  - name: Install docker
+    package:
+      name: docker
+      state: present
+    become: true
+    when: ansible_distribution == 'openSUSE Leap' and ansible_os_family == 'Suse'
+
+  - name: Install docker-py
+    package:
+      name: python3-docker
+      state: present
+    become: true
+    when: ansible_distribution == 'openSUSE Leap' and ansible_os_family == 'Suse'
+
+  - name: Start docker
+    service:
+      name: docker
+      state: started
+    become: true
+

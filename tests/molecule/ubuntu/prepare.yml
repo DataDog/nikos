@@ -1,0 +1,27 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+  - name: Update repositories cache and install "docker.io" package
+    apt:
+      name: docker.io
+      update_cache: yes
+    become: true
+
+  - name: Install Python requisites
+    package:
+      name: python3-docker
+    become: true
+
+  - name: Install Python requisites
+    package:
+      name: python3-distutils
+    become: true
+    when: ansible_distribution_major_version > '16'
+
+  - name: Start docker
+    service:
+      name: docker
+      state: started
+    become: true
+
