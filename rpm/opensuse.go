@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/lebauce/igor/types"
+	"github.com/lebauce/nikos/types"
 )
 
 type OpenSUSEBackend struct {

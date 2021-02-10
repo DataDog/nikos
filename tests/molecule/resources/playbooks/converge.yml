@@ -3,26 +3,26 @@
   hosts: all
   tasks:
   - synchronize:
-      src: ../../../../opt.igor/
-      dest: /opt/igor
+      src: ../../../../opt.nikos/
+      dest: /opt/nikos
     become: true
 
   - name: Create a directory if it does not exist
     file:
-      path: /opt/igor/bin
+      path: /opt/nikos/bin
       state: directory
       mode: 0755
 
   - name: Create a directory if it does not exist
     file:
-      path: /opt/igor/bin
+      path: /opt/nikos/bin
       state: directory
       mode: 0755
 
-  - name: Copy Igor
+  - name: Copy Nikos
     copy:
-      src: ../../../../igor
-      dest: /opt/igor/bin/igor
+      src: ../../../../nikos
+      dest: /opt/nikos/bin/nikos
       mode: 0755
 
   - name: Create a directory if it does not exist
@@ -36,12 +36,12 @@
       name: debian
       image: debian
       volumes:
-        - /opt/igor:/opt/igor:ro
+        - /opt/nikos:/opt/nikos:ro
         - /etc/os-release:/etc/os-release:ro
         - /etc/redhat-release:/etc/redhat-release:ro
         - /etc/apt:/etc/apt:ro
         - /etc/zypp/repos.d:/etc/zypp/repos.d:ro
-        - /opt/igor/embedded/var/lib/rpm:/var/lib/rpm:ro
+        - /opt/nikos/embedded/var/lib/rpm:/var/lib/rpm:ro
         - /tmp/result.docker:/tmp/result.docker
       command: sleep 3600
     become: true

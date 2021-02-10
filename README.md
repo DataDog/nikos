@@ -1,6 +1,6 @@
-# Igor
+# Nikos
 
-Igor is a simple command line tool to download Kernel headers for multiple Linux distributions.
+Nikos is a simple command line tool to download Kernel headers for multiple Linux distributions.
 
 ## Support
 
@@ -18,7 +18,7 @@ Igor is a simple command line tool to download Kernel headers for multiple Linux
 
 ### On a host
 
-`$ igor download --output /tmp`
+`$ nikos download --output /tmp`
 
 ### Inside a container
 
@@ -43,7 +43,7 @@ Both `APT` and `Container Optimized OS` use pure Golang implementationns.
 
 To support RPM based distributions, you need [libdnf](https://github.com/rpm-software-management/libdnf).
 On Fedora, simply use `dnf install libdnf-devel`. To target machines that do not have `libdnf`, an
-[omnibus](https://github.com/chef/omnibus) project is available [here](https://github.com/lebauce/omnibus-igor).
+[omnibus](https://github.com/chef/omnibus) project is available [here](https://github.com/lebauce/omnibus-nikos).
 
 ### Compilation
 
@@ -51,7 +51,7 @@ On Fedora, simply use `dnf install libdnf-devel`. To target machines that do not
 
 If you used the `omnibus` method described above, you should use:
 
-`$ PKG_CONFIG_PATH=/opt/igor/embedded/lib/pkgconfig CGO_LDFLAGS="-Wl,-rpath,/opt/igor/embedded/lib" go build -tags dnf`
+`$ PKG_CONFIG_PATH=/opt/nikos/embedded/lib/pkgconfig CGO_LDFLAGS="-Wl,-rpath,/opt/nikos/embedded/lib" go build -tags dnf`
 
 ## Testing
 
@@ -59,9 +59,9 @@ Tests are using the [Molecule framework](https://github.com/ansible-community/mo
 
 To run the tests, you can either:
 
- * Compile the Igor dependencies using `omnibus` as described in [Requirements](#requirements).
- * Download a precompiled version of it [here](https://glumol.com/igor/opt.igor.xz). You then need to
-   decompress it in your local Igor repository folder.
+ * Compile the Nikos dependencies using `omnibus` as described in [Requirements](#requirements).
+ * Download a precompiled version of it [here](https://glumol.com/nikos/opt.nikos.xz). You then need to
+   decompress it in your local Nikos repository folder.
 
 To run the tests for Debian, simply run in the `tests` folder:
 

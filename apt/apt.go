@@ -20,9 +20,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/xor-gate/ar"
 
-	"github.com/lebauce/igor/cmd"
-	"github.com/lebauce/igor/tarball"
-	"github.com/lebauce/igor/types"
+	"github.com/lebauce/nikos/cmd"
+	"github.com/lebauce/nikos/tarball"
+	"github.com/lebauce/nikos/types"
 )
 
 var aptConfigDir string

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"cloud.google.com/go/storage"
-	"github.com/lebauce/igor/tarball"
-	"github.com/lebauce/igor/types"
+	"github.com/lebauce/nikos/tarball"
+	"github.com/lebauce/nikos/types"
 	"github.com/pkg/errors"
 	"google.golang.org/api/option"
 )

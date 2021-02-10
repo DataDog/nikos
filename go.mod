@@ -1,4 +1,4 @@
-module github.com/lebauce/igor
+module github.com/lebauce/nikos
 
 go 1.14
 

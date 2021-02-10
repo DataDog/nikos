@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/lebauce/igor/types"
+	"github.com/lebauce/nikos/types"
 )
 
 var (
@@ -18,7 +18,7 @@ var (
 )
 
 var RootCmd = &cobra.Command{
-	Use:          "igor [sub]",
+	Use:          "nikos [sub]",
 	SilenceUsage: true,
 	PersistentPreRun: func(c *cobra.Command, args []string) {
 		if osReleaseFile != "" {

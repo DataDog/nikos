@@ -5,7 +5,7 @@ package rpm
 import (
 	"errors"
 
-	"github.com/lebauce/igor/types"
+	"github.com/lebauce/nikos/types"
 )
 
 func NewBackend(target *types.Target) (types.Backend, error) {

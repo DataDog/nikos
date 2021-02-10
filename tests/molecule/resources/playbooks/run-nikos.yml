@@ -5,17 +5,17 @@
     state: directory
     mode: 0777
 
-- name: run igor
-  shell: "{{ prefix | default('') }} bash -c 'SSL_CERT_DIR=/opt/igor/embedded/ssl/ PATH=$PATH:/opt/igor/embedded/bin /opt/igor/bin/igor download --output {{ output_path }} 2>&1 tee {{ output_path }}/logs.txt'"
-  register: igor_result
+- name: run nikos
+  shell: "{{ prefix | default('') }} bash -c 'SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --output {{ output_path }} 2>&1 tee {{ output_path }}/logs.txt'"
+  register: nikos_result
 
 - debug:
-    var: igor_result.stdout
+    var: nikos_result.stdout
     verbosity: 2
 
-- name: igor ran successfully
+- name: nikos ran successfully
   assert:
-    that: igor_result.rc == 0
+    that: nikos_result.rc == 0
 
 - include_tasks: verify-apt.yml
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'

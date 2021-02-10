@@ -25,8 +25,8 @@ import (
 	"github.com/vbauerster/mpb/v5"
 	"github.com/vbauerster/mpb/v5/decor"
 
-	"github.com/lebauce/igor/cmd"
-	"github.com/lebauce/igor/types"
+	"github.com/lebauce/nikos/cmd"
+	"github.com/lebauce/nikos/types"
 )
 
 var (
@@ -257,8 +257,8 @@ func NewDnfBackend(release string) (*DnfBackend, error) {
 	C.dnf_set_default_handler()
 
 	tmpDir := "/tmp"
-	cacheDir := "/tmp/igor-cache"
-	solvDir := "/tmp/igor-solv"
+	cacheDir := "/tmp/nikos-cache"
+	solvDir := "/tmp/nikos-solv"
 
 	tmpDirC := C.CString(tmpDir)
 	defer C.free(unsafe.Pointer(tmpDirC))

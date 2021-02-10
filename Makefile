@@ -1,18 +1,18 @@
 .PHONY: centos-builder
 centos-builder:
-	docker build -f Dockerfile.centos8-builder -t igor-centos8-builder .
+	docker build -f Dockerfile.centos8-builder -t nikos-centos8-builder .
 
-.PHONY: igor-centos8
-igor-centos8:
-	docker run --rm -ti -v `pwd`:/go/src/github.com/lebauce/igor igor-centos8-builder go build -o igor-centos8
+.PHONY: nikos-centos8
+nikos-centos8:
+	docker run --rm -ti -v `pwd`:/go/src/github.com/lebauce/nikos nikos-centos8-builder go build -o nikos-centos8
 
-.PHONY: igor-dnf
-igor-dnf:
-	PKG_CONFIG_PATH=/opt/igor/embedded/lib/pkgconfig CGO_LDFLAGS="-Wl,-rpath,/opt/igor/embedded/lib" go build -tags dnf
+.PHONY: nikos-dnf
+nikos-dnf:
+	PKG_CONFIG_PATH=/opt/nikos/embedded/lib/pkgconfig CGO_LDFLAGS="-Wl,-rpath,/opt/nikos/embedded/lib" go build -tags dnf
 
 rpmdb:
-	rpmdb --initdb --root=/opt/igor/embedded
+	rpmdb --initdb --root=/opt/nikos/embedded
 
-test: igor-nodnf
-	cd tests/igor; \
+test: nikos-nodnf
+	cd tests/nikos; \
 	molecule create

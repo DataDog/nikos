@@ -6,12 +6,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/lebauce/igor/apt"
-	"github.com/lebauce/igor/cmd"
-	"github.com/lebauce/igor/cos"
-	"github.com/lebauce/igor/rpm"
-	"github.com/lebauce/igor/types"
-	"github.com/lebauce/igor/wsl"
+	"github.com/lebauce/nikos/apt"
+	"github.com/lebauce/nikos/cmd"
+	"github.com/lebauce/nikos/cos"
+	"github.com/lebauce/nikos/rpm"
+	"github.com/lebauce/nikos/types"
+	"github.com/lebauce/nikos/wsl"
 )
 
 func main() {
