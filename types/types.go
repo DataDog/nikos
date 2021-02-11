@@ -2,6 +2,7 @@ package types
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/cobaugh/osrelease"
 	"github.com/pkg/errors"
@@ -24,7 +25,7 @@ type Target struct {
 	Uname     Utsname
 }
 
-func NewTarget(logger Logger) (Target, error) {
+func NewTarget() (Target, error) {
 	target := Target{
 		Distro: osutil.GetDist(),
 	}
@@ -38,12 +39,9 @@ func NewTarget(logger Logger) (Target, error) {
 	target.Uname.Kernel = string(uname.Release[:bytes.IndexByte(uname.Release[:], 0)])
 	target.Uname.Machine = string(uname.Machine[:bytes.IndexByte(uname.Machine[:], 0)])
 
-	target.OSRelease, err = osrelease.Read()
-	if err != nil {
-		logger.Errorf("failed to read /etc/os-release file: %s", err)
-		target.OSRelease = make(map[string]string)
+	if target.OSRelease, err = osrelease.Read(); err != nil {
+		return target, fmt.Errorf("failed to read default os-release file: %s", err)
 	}
-
 	return target, nil
 }
 

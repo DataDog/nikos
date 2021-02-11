@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/cobaugh/osrelease"
 	log "github.com/sirupsen/logrus"
@@ -93,8 +94,11 @@ var DownloadCmd = &cobra.Command{
 
 func SetupCommands() error {
 	var err error
-	target, err = types.NewTarget(&types.DefaultLogger{})
-	if err != nil {
+	target, err = types.NewTarget()
+	if err != nil && strings.HasPrefix(err.Error(), "failed to read default os-release file") {
+		log.Warnf("%s: please use the -os-release flag to provide the path to a valid os-release file", err)
+		target.OSRelease = make(map[string]string)
+	} else if err != nil {
 		return fmt.Errorf("failed to retrieve target information: %s", err)
 	}
 
