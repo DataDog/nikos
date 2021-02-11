@@ -25,8 +25,8 @@ import (
 	"github.com/vbauerster/mpb/v5"
 	"github.com/vbauerster/mpb/v5/decor"
 
-	"github.com/lebauce/nikos/cmd"
-	"github.com/lebauce/nikos/types"
+	"github.com/DataDog/nikos/cmd"
+	"github.com/DataDog/nikos/types"
 )
 
 var (

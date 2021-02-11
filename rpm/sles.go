@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/lebauce/nikos/types"
+	"github.com/DataDog/nikos/types"
 )
 
 type SLESBackend struct {

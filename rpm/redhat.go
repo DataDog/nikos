@@ -5,7 +5,7 @@ package rpm
 import (
 	"github.com/pkg/errors"
 
-	"github.com/lebauce/nikos/types"
+	"github.com/DataDog/nikos/types"
 )
 
 type RedHatBackend struct {

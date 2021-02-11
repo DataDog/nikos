@@ -8,8 +8,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/lebauce/nikos/tarball"
-	"github.com/lebauce/nikos/types"
+	"github.com/DataDog/nikos/tarball"
+	"github.com/DataDog/nikos/types"
 )
 
 type Backend struct {
