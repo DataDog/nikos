@@ -22,8 +22,8 @@ func (b *RedHatBackend) Close() {
 	b.dnfBackend.Close()
 }
 
-func NewRedHatBackend(target *types.Target) (*RedHatBackend, error) {
-	dnfBackend, err := NewDnfBackend(target.Distro.Release)
+func NewRedHatBackend(target *types.Target, reposDir string) (*RedHatBackend, error) {
+	dnfBackend, err := NewDnfBackend(target.Distro.Release, reposDir)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}

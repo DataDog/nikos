@@ -1,6 +1,6 @@
 # Nikos
 
-Nikos is a simple command line tool to download Kernel headers for multiple Linux distributions.
+Nikos is a simple tool for downloading Kernel headers for multiple Linux distributions. It can be used both as a CLI application and a library.
 
 ## Support
 

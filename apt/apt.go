@@ -20,12 +20,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/xor-gate/ar"
 
-	"github.com/DataDog/nikos/cmd"
 	"github.com/DataDog/nikos/tarball"
 	"github.com/DataDog/nikos/types"
 )
-
-var aptConfigDir string
 
 type Backend struct {
 	target         *types.Target
@@ -154,7 +151,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	return b.extractPackage(outputFile, directory)
 }
 
-func NewBackend(target *types.Target) (*Backend, error) {
+func NewBackend(target *types.Target, aptConfigDir string) (*Backend, error) {
 	var debArch string
 	switch target.Uname.Machine {
 	case "x86_64":
@@ -220,8 +217,4 @@ func NewBackend(target *types.Target) (*Backend, error) {
 	}
 
 	return backend, nil
-}
-
-func init() {
-	cmd.RootCmd.PersistentFlags().StringVarP(&aptConfigDir, "apt-config-dir", "", "/etc/apt", "APT configuration dir")
 }

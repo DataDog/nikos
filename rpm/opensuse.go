@@ -48,8 +48,8 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 	return nil
 }
 
-func NewOpenSUSEBackend(target *types.Target) (types.Backend, error) {
-	dnfBackend, err := NewDnfBackend(target.Distro.Release)
+func NewOpenSUSEBackend(target *types.Target, reposDir string) (types.Backend, error) {
+	dnfBackend, err := NewDnfBackend(target.Distro.Release, reposDir)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}

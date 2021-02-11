@@ -25,13 +25,11 @@ import (
 	"github.com/vbauerster/mpb/v5"
 	"github.com/vbauerster/mpb/v5/decor"
 
-	"github.com/DataDog/nikos/cmd"
 	"github.com/DataDog/nikos/types"
 )
 
 var (
-	bar      *mpb.Bar
-	reposDir string
+	bar *mpb.Bar
 )
 
 func wrapGError(err *C.struct__GError, format string, a ...interface{}) error {
@@ -249,7 +247,7 @@ func (b *DnfBackend) EnableRepository(repo *Repository) error {
 	return wrapGError(gerr, "failed to enable repository '%s'", repo.id)
 }
 
-func NewDnfBackend(release string) (*DnfBackend, error) {
+func NewDnfBackend(release string, reposDir string) (*DnfBackend, error) {
 	backend := &DnfBackend{
 		dnfContext: C.dnf_context_new(),
 	}
@@ -297,12 +295,4 @@ func NewDnfBackend(release string) (*DnfBackend, error) {
 	C.dnf_context_set_write_history(backend.dnfContext, 0)
 
 	return backend, nil
-}
-
-func init() {
-	defaultReposDir := "/etc/yum.repos.d"
-	if strings.HasPrefix(cmd.Target.Distro.Display, "openSUSE") || strings.HasPrefix(cmd.Target.Distro.Display, "SLE") {
-		defaultReposDir = "/etc/zypp/repos.d"
-	}
-	cmd.RootCmd.PersistentFlags().StringVarP(&reposDir, "yum-repos-dir", "", defaultReposDir, "YUM configuration dir")
 }

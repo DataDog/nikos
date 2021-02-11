@@ -85,14 +85,14 @@ func (b *CentOSBackend) Close() {
 	b.dnfBackend.Close()
 }
 
-func NewCentOSBackend(target *types.Target) (*CentOSBackend, error) {
+func NewCentOSBackend(target *types.Target, reposDir string) (*CentOSBackend, error) {
 	release, err := getRedhatRelease()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to detect CentOS release")
 	}
 
 	version, _ := strconv.Atoi(strings.SplitN(release, ".", 2)[0])
-	dnfBackend, err := NewDnfBackend(fmt.Sprintf("%d", version))
+	dnfBackend, err := NewDnfBackend(fmt.Sprintf("%d", version), reposDir)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}
