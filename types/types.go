@@ -5,7 +5,6 @@ import (
 
 	"github.com/cobaugh/osrelease"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"github.com/wille/osutil"
 	"golang.org/x/sys/unix"
 )
@@ -25,7 +24,7 @@ type Target struct {
 	Uname     Utsname
 }
 
-func NewTarget() (Target, error) {
+func NewTarget(logger Logger) (Target, error) {
 	target := Target{
 		Distro: osutil.GetDist(),
 	}
@@ -41,9 +40,18 @@ func NewTarget() (Target, error) {
 
 	target.OSRelease, err = osrelease.Read()
 	if err != nil {
-		log.Errorf("failed to read /etc/os-release file: %s", err)
+		logger.Errorf("failed to read /etc/os-release file: %s", err)
 		target.OSRelease = make(map[string]string)
 	}
 
 	return target, nil
+}
+
+type Logger interface {
+	Debug(args ...interface{})
+	Info(args ...interface{})
+	Debugf(format string, args ...interface{})
+	Infof(format string, args ...interface{})
+	Warnf(format string, args ...interface{})
+	Errorf(format string, args ...interface{})
 }

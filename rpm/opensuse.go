@@ -4,13 +4,13 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/DataDog/nikos/types"
 )
 
 type OpenSUSEBackend struct {
 	target     *types.Target
+	logger     types.Logger
 	dnfBackend *DnfBackend
 }
 
@@ -38,7 +38,7 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 	}
 
 	if err := b.dnfBackend.GetKernelHeaders(pkgNevra, directory); err != nil {
-		log.Infof("Retrying with the full set of repositories")
+		b.logger.Info("Retrying with the full set of repositories")
 		for _, repo := range disabledRepositories {
 			b.dnfBackend.EnableRepository(repo)
 		}
@@ -48,14 +48,15 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 	return nil
 }
 
-func NewOpenSUSEBackend(target *types.Target, reposDir string) (types.Backend, error) {
-	dnfBackend, err := NewDnfBackend(target.Distro.Release, reposDir)
+func NewOpenSUSEBackend(target *types.Target, reposDir string, logger types.Logger) (types.Backend, error) {
+	dnfBackend, err := NewDnfBackend(target.Distro.Release, reposDir, logger)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}
 
 	return &OpenSUSEBackend{
 		target:     target,
+		logger:     logger,
 		dnfBackend: dnfBackend,
 	}, nil
 }

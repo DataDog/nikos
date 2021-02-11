@@ -8,12 +8,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/DataDog/nikos/types"
 	"github.com/pkg/errors"
-	"github.com/prometheus/common/log"
 	"github.com/xi2/xz"
 )
 
-func ExtractTarball(reader io.Reader, filename, directory string) error {
+func ExtractTarball(reader io.Reader, filename, directory string, logger types.Logger) error {
 	var compressedTarReader io.Reader
 	var err error
 	switch filepath.Ext(filename) {
@@ -40,7 +40,7 @@ func ExtractTarball(reader io.Reader, filename, directory string) error {
 		}
 
 		path := filepath.Join(directory, hdr.Name)
-		log.Debugf("Extracting %s to %s", hdr.Name, path)
+		logger.Debugf("Extracting %s to %s", hdr.Name, path)
 
 		switch hdr.Typeflag {
 		case tar.TypeSymlink:
@@ -59,7 +59,7 @@ func ExtractTarball(reader io.Reader, filename, directory string) error {
 			}
 			output.Close()
 		default:
-			log.Warnf("Unsupported header flag '%d' for '%s'", hdr.Typeflag, hdr.Name)
+			logger.Warnf("Unsupported header flag '%d' for '%s'", hdr.Typeflag, hdr.Name)
 		}
 	}
 

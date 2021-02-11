@@ -55,21 +55,25 @@ var DownloadCmd = &cobra.Command{
 			err     error
 		)
 
+		logger := log.New()
+		if verbose {
+			logger.SetLevel(log.DebugLevel)
+		}
 		switch target.Distro.Display {
 		case "Fedora", "RHEL":
-			backend, err = rpm.NewRedHatBackend(&target, rpmReposDir)
+			backend, err = rpm.NewRedHatBackend(&target, rpmReposDir, logger)
 		case "CentOS":
-			backend, err = rpm.NewCentOSBackend(&target, rpmReposDir)
+			backend, err = rpm.NewCentOSBackend(&target, rpmReposDir, logger)
 		case "openSUSE":
-			backend, err = rpm.NewOpenSUSEBackend(&target, rpmReposDir)
+			backend, err = rpm.NewOpenSUSEBackend(&target, rpmReposDir, logger)
 		case "SLE":
-			backend, err = rpm.NewSLESBackend(&target, rpmReposDir)
+			backend, err = rpm.NewSLESBackend(&target, rpmReposDir, logger)
 		case "Debian", "Ubuntu":
-			backend, err = apt.NewBackend(&target, aptConfigDir)
+			backend, err = apt.NewBackend(&target, aptConfigDir, logger)
 		case "cos":
-			backend, err = cos.NewBackend(&target)
+			backend, err = cos.NewBackend(&target, logger)
 		case "wsl":
-			backend, err = wsl.NewBackend(&target)
+			backend, err = wsl.NewBackend(&target, logger)
 		default:
 			err = fmt.Errorf("Unsupported distribution '%s'", target.Distro.Display)
 		}
@@ -89,7 +93,7 @@ var DownloadCmd = &cobra.Command{
 
 func SetupCommands() error {
 	var err error
-	target, err = types.NewTarget()
+	target, err = types.NewTarget(&types.DefaultLogger{})
 	if err != nil {
 		return fmt.Errorf("failed to retrieve target information: %s", err)
 	}

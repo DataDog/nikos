@@ -5,13 +5,13 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/DataDog/nikos/types"
 )
 
 type SLESBackend struct {
 	target     *types.Target
+	logger     types.Logger
 	dnfBackend *DnfBackend
 }
 
@@ -28,7 +28,7 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 
 	// On a registered SUSE Entreprise Linux, we should be able to find
 	// the kernel headers without doing anything
-	log.Infof("Trying with the configured set of repositories")
+	b.logger.Info("Trying with the configured set of repositories")
 	if err := b.dnfBackend.GetKernelHeaders(pkgNevra, directory); err == nil {
 		return nil
 	}
@@ -42,7 +42,7 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 			baseurl := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/", version)
 			gpgKey := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/repodata/repomd.xml.key")
 
-			log.Infof("Using with %s repository", repoID)
+			b.logger.Infof("Using with %s repository", repoID)
 			b.dnfBackend.AddRepository(repoID, baseurl, true, gpgKey)
 		}
 
@@ -58,21 +58,22 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 		repoID := "Jump-" + versionID
 		baseurl := fmt.Sprintf("https://download.opensuse.org/distribution/jump/%s/repo/oss/", versionID)
 
-		log.Infof("Using with %s repository", repoID)
+		b.logger.Infof("Using with %s repository", repoID)
 		b.dnfBackend.AddRepository(repoID, baseurl, true, "")
 	}
 
 	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 }
 
-func NewSLESBackend(target *types.Target, reposDir string) (types.Backend, error) {
-	dnfBackend, err := NewDnfBackend(target.Distro.Release, reposDir)
+func NewSLESBackend(target *types.Target, reposDir string, logger types.Logger) (types.Backend, error) {
+	dnfBackend, err := NewDnfBackend(target.Distro.Release, reposDir, logger)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}
 
 	return &SLESBackend{
 		target:     target,
+		logger:     logger,
 		dnfBackend: dnfBackend,
 	}, nil
 }

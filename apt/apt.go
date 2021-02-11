@@ -17,7 +17,6 @@ import (
 	"github.com/aptly-dev/aptly/http"
 	"github.com/arduino/go-apt-client"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"github.com/xor-gate/ar"
 
 	"github.com/DataDog/nikos/tarball"
@@ -26,6 +25,7 @@ import (
 
 type Backend struct {
 	target         *types.Target
+	logger         types.Logger
 	repoCollection *deb.RemoteRepoCollection
 	db             database.Storage
 	tmpDir         string
@@ -50,10 +50,10 @@ func (b *Backend) extractPackage(pkg, directory string) error {
 		} else if err != nil {
 			return errors.Wrap(err, "failed to decompress deb")
 		}
-		log.Debugf("Found header: %s", header.Name)
+		b.logger.Debugf("Found header: %s", header.Name)
 
 		if strings.HasPrefix(header.Name, "data.tar") {
-			return tarball.ExtractTarball(reader, header.Name, directory)
+			return tarball.ExtractTarball(reader, header.Name, directory, b.logger)
 		}
 	}
 
@@ -75,7 +75,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 		Relation: deb.VersionPatternMatch,
 		Value:    "linux-headers-" + kernelRelease + "*",
 	}
-	log.Infof("Looking for %s", query.Value)
+	b.logger.Infof("Looking for %s", query.Value)
 
 	var packageURL *url.URL
 
@@ -84,12 +84,12 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 			return nil
 		}
 
-		log.Debugf("Fetching repository %s %s %v %v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
+		b.logger.Debugf("Fetching repository %s %s %v %v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
 		if err := repo.Fetch(downloader, nil); err != nil {
 			return err
 		}
 
-		log.Debugf("Downloading package indexes")
+		b.logger.Debug("Downloading package indexes")
 		if err := repo.DownloadPackageIndexes(progress, downloader, nil, collectionFactory, false); err != nil {
 			return errors.Wrap(err, "failed to download package indexes")
 		}
@@ -117,7 +117,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 
 		packageList := repo.PackageList()
 		packageList.ForEach(func(pkg *deb.Package) error {
-			log.Infof("Found package %s with version %s", pkg.Name, pkg.Version)
+			b.logger.Infof("Found package %s with version %s", pkg.Name, pkg.Version)
 
 			packageFiles := pkg.Files()
 			if len(packageFiles) == 0 {
@@ -125,7 +125,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 			}
 
 			packageURL = repo.PackageURL(packageFiles[0].DownloadURL())
-			log.Infof("Package URL: %s", packageURL)
+			b.logger.Infof("Package URL: %s", packageURL)
 			return nil
 		})
 
@@ -140,7 +140,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 		return errors.New("failed to find package linux-headers-" + kernelRelease)
 	}
 
-	log.Infof("Downloading package")
+	b.logger.Info("Downloading package")
 	url := packageURL.String()
 	outputFile := filepath.Join(directory, filepath.Base(url))
 	if err := downloader.Download(context.Background(), url, outputFile); err != nil {
@@ -151,7 +151,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	return b.extractPackage(outputFile, directory)
 }
 
-func NewBackend(target *types.Target, aptConfigDir string) (*Backend, error) {
+func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) (*Backend, error) {
 	var debArch string
 	switch target.Uname.Machine {
 	case "x86_64":
@@ -179,6 +179,7 @@ func NewBackend(target *types.Target, aptConfigDir string) (*Backend, error) {
 
 	backend := &Backend{
 		target: target,
+		logger: logger,
 		tmpDir: tmpDir,
 	}
 
@@ -212,7 +213,7 @@ func NewBackend(target *types.Target, aptConfigDir string) (*Backend, error) {
 				return nil, errors.Wrap(err, "failed to add collection")
 			}
 
-			log.Debugf("Added repository '%s' %s %s %v %v", repoID, repo.URI, repo.Distribution, components, debArch)
+			backend.logger.Debugf("Added repository '%s' %s %s %v %v", repoID, repo.URI, repo.Distribution, components, debArch)
 		}
 	}
 
