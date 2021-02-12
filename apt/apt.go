@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/aptly-dev/aptly/console"
 	"github.com/aptly-dev/aptly/database"
 	"github.com/aptly-dev/aptly/database/goleveldb"
 	"github.com/aptly-dev/aptly/deb"
@@ -61,8 +60,7 @@ func (b *Backend) extractPackage(pkg, directory string) error {
 }
 
 func (b *Backend) GetKernelHeaders(directory string) error {
-	progress := console.NewProgress()
-	downloader := http.NewDownloader(0, 1, progress)
+	downloader := http.NewDownloader(0, 1, nil)
 
 	// TODO(lebauce) fix GPG verifier
 	// gpgVerifier := pgp.NewGpgVerifier(pgp.GPGDefaultFinder())
@@ -91,12 +89,12 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 		}
 
 		b.logger.Debug("Downloading package indexes")
-		if err := repo.DownloadPackageIndexes(progress, downloader, nil, collectionFactory, false); err != nil {
+		if err := repo.DownloadPackageIndexes(nil, downloader, nil, collectionFactory, false); err != nil {
 			b.logger.Debugf("Failed to download package indexes: %s", err)
 			return err
 		}
 
-		_, _, err := repo.ApplyFilter(-1, query, progress)
+		_, _, err := repo.ApplyFilter(-1, query, nil)
 		if err != nil {
 			b.logger.Debugf("Failed to apply filter: %s", err)
 			return err
