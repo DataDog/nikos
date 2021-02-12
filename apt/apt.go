@@ -84,19 +84,22 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 			return nil
 		}
 
-		b.logger.Debugf("Fetching repository %s %s %v %v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
+		b.logger.Debugf("Fetching repository: name=%s, distribution=%s, components=%v, arch=%v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
 		if err := repo.Fetch(downloader, nil); err != nil {
+			b.logger.Debugf("Error fetching repo: %s", err)
 			return err
 		}
 
 		b.logger.Debug("Downloading package indexes")
 		if err := repo.DownloadPackageIndexes(progress, downloader, nil, collectionFactory, false); err != nil {
-			return errors.Wrap(err, "failed to download package indexes")
+			b.logger.Debugf("Failed to download package indexes: %s", err)
+			return err
 		}
 
 		_, _, err := repo.ApplyFilter(-1, query, progress)
 		if err != nil {
-			return errors.Wrap(err, "failed to apply filter")
+			b.logger.Debugf("Failed to apply filter: %s", err)
+			return err
 		}
 
 		/*

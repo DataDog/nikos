@@ -40,7 +40,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 		}
 
 		path := filepath.Join(directory, hdr.Name)
-		logger.Debugf("Extracting %s to %s", hdr.Name, path)
+		// logger.Debugf("Extracting %s to %s", hdr.Name, path)
 
 		switch hdr.Typeflag {
 		case tar.TypeSymlink:
