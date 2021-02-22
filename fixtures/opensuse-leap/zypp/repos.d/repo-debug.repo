@@ -1,0 +1,5 @@
+[repo-debug]
+name=Debug Repository
+enabled=0
+autorefresh=1
+baseurl=http://download.opensuse.org/debug/distribution/leap/$releasever/repo/oss/
