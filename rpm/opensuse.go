@@ -1,3 +1,5 @@
+// +build dnf
+
 package rpm
 
 import (

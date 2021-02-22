@@ -8,6 +8,18 @@ import (
 	"github.com/lebauce/nikos/types"
 )
 
-func NewBackend(target *types.Target) (types.Backend, error) {
+func NewRedHatBackend(target *types.Target) (types.Backend, error) {
+	return nil, errors.New("dnf backend not supported")
+}
+
+func NewCentOSBackend(target *types.Target) (types.Backend, error) {
+	return nil, errors.New("dnf backend not supported")
+}
+
+func NewOpenSUSEBackend(target *types.Target) (types.Backend, error) {
+	return nil, errors.New("dnf backend not supported")
+}
+
+func NewSLESBackend(target *types.Target) (types.Backend, error) {
 	return nil, errors.New("dnf backend not supported")
 }
