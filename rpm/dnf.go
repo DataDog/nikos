@@ -16,22 +16,18 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"unsafe"
 
 	"github.com/pkg/errors"
 	"github.com/sassoftware/go-rpmutils"
-	log "github.com/sirupsen/logrus"
 	"github.com/vbauerster/mpb/v5"
 	"github.com/vbauerster/mpb/v5/decor"
 
-	"github.com/lebauce/nikos/cmd"
-	"github.com/lebauce/nikos/types"
+	"github.com/DataDog/nikos/types"
 )
 
 var (
-	bar      *mpb.Bar
-	reposDir string
+	bar *mpb.Bar
 )
 
 func wrapGError(err *C.struct__GError, format string, a ...interface{}) error {
@@ -50,6 +46,7 @@ type Repository struct {
 
 type DnfBackend struct {
 	target     *types.Target
+	logger     types.Logger
 	dnfContext *C.struct__DnfContext
 	isSuse     bool
 }
@@ -60,18 +57,18 @@ func download_percentage_changed_cb(state *C.struct__DnfState, value C.guint, da
 }
 
 //export go_log_handler
-func go_log_handler(log_domain *C.cgchar_t, log_level C.GLogLevelFlags, message *C.cgchar_t, data C.gpointer) {
-	switch log_level {
-	case C.G_LOG_LEVEL_DEBUG:
-		log.Debug(C.GoString(message))
-	case C.G_LOG_LEVEL_INFO:
-		log.Info(C.GoString(message))
-	case C.G_LOG_LEVEL_WARNING:
-		log.Warn(C.GoString(message))
-	case C.G_LOG_LEVEL_ERROR, C.G_LOG_LEVEL_CRITICAL:
-		log.Error(C.GoString(message))
-	}
-}
+// func go_log_handler(log_domain *C.cgchar_t, log_level C.GLogLevelFlags, message *C.cgchar_t, data C.gpointer) {
+// 	switch log_level {
+// 	case C.G_LOG_LEVEL_DEBUG:
+// 		log.Debug(C.GoString(message))
+// 	case C.G_LOG_LEVEL_INFO:
+// 		log.Info(C.GoString(message))
+// 	case C.G_LOG_LEVEL_WARNING:
+// 		log.Warn(C.GoString(message))
+// 	case C.G_LOG_LEVEL_ERROR, C.G_LOG_LEVEL_CRITICAL:
+// 		log.Error(C.GoString(message))
+// 	}
+// }
 
 func (b *DnfBackend) extractPackage(pkg, directory string) error {
 	pkgFile, err := os.Open(pkg)
@@ -169,7 +166,7 @@ func (b *DnfBackend) GetKernelHeaders(pkgNevra, directory string) error {
 		return wrapGError(gerr, "failed to setup dnf sack")
 	}
 
-	log.Infof("Looking for package %s", pkgNevra)
+	b.logger.Infof("Looking for package %s", pkgNevra)
 
 	pkg, err := b.lookupPackage(C.HY_PKG_NEVRA, C.HY_EQ, pkgNevra)
 	if err != nil {
@@ -177,7 +174,7 @@ func (b *DnfBackend) GetKernelHeaders(pkgNevra, directory string) error {
 			return err
 		}
 	}
-	log.Infof("Found package %s", C.GoString(C.dnf_package_get_nevra(pkg)))
+	b.logger.Infof("Found package %s", C.GoString(C.dnf_package_get_nevra(pkg)))
 
 	transaction := C.dnf_context_get_transaction(b.dnfContext)
 	C.dnf_transaction_ensure_repo(transaction, pkg, &gerr)
@@ -195,7 +192,7 @@ func (b *DnfBackend) GetKernelHeaders(pkgNevra, directory string) error {
 
 	C.dnf_state_set_percentage_changed_cb(dnfState)
 
-	log.Infof("Downloading package")
+	b.logger.Info("Downloading package")
 
 	p := mpb.New()
 	bar = p.AddBar(int64(100), mpb.AppendDecorators(decor.Percentage()))
@@ -249,9 +246,10 @@ func (b *DnfBackend) EnableRepository(repo *Repository) error {
 	return wrapGError(gerr, "failed to enable repository '%s'", repo.id)
 }
 
-func NewDnfBackend(release string) (*DnfBackend, error) {
+func NewDnfBackend(release string, reposDir string, logger types.Logger) (*DnfBackend, error) {
 	backend := &DnfBackend{
 		dnfContext: C.dnf_context_new(),
+		logger:     logger,
 	}
 
 	C.dnf_set_default_handler()
@@ -281,7 +279,7 @@ func NewDnfBackend(release string) (*DnfBackend, error) {
 	}
 
 	if solvDirC := C.dnf_context_get_solv_dir(backend.dnfContext); solvDirC != nil {
-		log.Printf("Solv directory: %s\n", C.GoString(solvDirC))
+		backend.logger.Infof("Solv directory: %s\n", C.GoString(solvDirC))
 	}
 
 	releaseVerC := C.CString(release)
@@ -297,12 +295,4 @@ func NewDnfBackend(release string) (*DnfBackend, error) {
 	C.dnf_context_set_write_history(backend.dnfContext, 0)
 
 	return backend, nil
-}
-
-func init() {
-	defaultReposDir := "/etc/yum.repos.d"
-	if strings.HasPrefix(cmd.Target.Distro.Display, "openSUSE") || strings.HasPrefix(cmd.Target.Distro.Display, "SLE") {
-		defaultReposDir = "/etc/zypp/repos.d"
-	}
-	cmd.RootCmd.PersistentFlags().StringVarP(&reposDir, "yum-repos-dir", "", defaultReposDir, "YUM configuration dir")
 }

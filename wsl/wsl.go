@@ -8,12 +8,13 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/lebauce/nikos/tarball"
-	"github.com/lebauce/nikos/types"
+	"github.com/DataDog/nikos/tarball"
+	"github.com/DataDog/nikos/types"
 )
 
 type Backend struct {
 	target *types.Target
+	logger types.Logger
 }
 
 func (b *Backend) GetKernelHeaders(directory string) error {
@@ -33,12 +34,13 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	}
 	defer resp.Body.Close()
 
-	return tarball.ExtractTarball(resp.Body, filename, directory)
+	return tarball.ExtractTarball(resp.Body, filename, directory, b.logger)
 }
 
-func NewBackend(target *types.Target) (*Backend, error) {
+func NewBackend(target *types.Target, logger types.Logger) (*Backend, error) {
 	backend := &Backend{
 		target: target,
+		logger: logger,
 	}
 
 	return backend, nil

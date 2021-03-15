@@ -4,14 +4,15 @@ import (
 	"context"
 
 	"cloud.google.com/go/storage"
-	"github.com/lebauce/nikos/tarball"
-	"github.com/lebauce/nikos/types"
+	"github.com/DataDog/nikos/tarball"
+	"github.com/DataDog/nikos/types"
 	"github.com/pkg/errors"
 	"google.golang.org/api/option"
 )
 
 type Backend struct {
 	buildID string
+	logger  types.Logger
 	client  *storage.Client
 }
 
@@ -25,11 +26,11 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	}
 	defer reader.Close()
 
-	tarball.ExtractTarball(reader, filename, directory)
+	tarball.ExtractTarball(reader, filename, directory, b.logger)
 	return err
 }
 
-func NewBackend(target *types.Target) (*Backend, error) {
+func NewBackend(target *types.Target, logger types.Logger) (*Backend, error) {
 	buildID := target.OSRelease["BUILD_ID"]
 	if buildID == "" {
 		return nil, errors.New("failed to detect COS version, missing BUILD_ID in /etc/os-release")
@@ -42,6 +43,7 @@ func NewBackend(target *types.Target) (*Backend, error) {
 
 	return &Backend{
 		client:  client,
+		logger:  logger,
 		buildID: buildID,
 	}, nil
 }

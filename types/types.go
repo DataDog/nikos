@@ -2,10 +2,10 @@ package types
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/cobaugh/osrelease"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"github.com/wille/osutil"
 	"golang.org/x/sys/unix"
 )
@@ -39,11 +39,17 @@ func NewTarget() (Target, error) {
 	target.Uname.Kernel = string(uname.Release[:bytes.IndexByte(uname.Release[:], 0)])
 	target.Uname.Machine = string(uname.Machine[:bytes.IndexByte(uname.Machine[:], 0)])
 
-	target.OSRelease, err = osrelease.Read()
-	if err != nil {
-		log.Errorf("failed to read /etc/os-release file: %s", err)
-		target.OSRelease = make(map[string]string)
+	if target.OSRelease, err = osrelease.Read(); err != nil {
+		return target, fmt.Errorf("failed to read default os-release file: %s", err)
 	}
-
 	return target, nil
+}
+
+type Logger interface {
+	Debug(args ...interface{})
+	Info(args ...interface{})
+	Debugf(format string, args ...interface{})
+	Infof(format string, args ...interface{})
+	Warnf(format string, args ...interface{})
+	Errorf(format string, args ...interface{})
 }

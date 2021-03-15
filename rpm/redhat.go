@@ -1,11 +1,9 @@
-// +build dnf
-
 package rpm
 
 import (
 	"github.com/pkg/errors"
 
-	"github.com/lebauce/nikos/types"
+	"github.com/DataDog/nikos/types"
 )
 
 type RedHatBackend struct {
@@ -22,8 +20,8 @@ func (b *RedHatBackend) Close() {
 	b.dnfBackend.Close()
 }
 
-func NewRedHatBackend(target *types.Target) (*RedHatBackend, error) {
-	dnfBackend, err := NewDnfBackend(target.Distro.Release)
+func NewRedHatBackend(target *types.Target, reposDir string, logger types.Logger) (*RedHatBackend, error) {
+	dnfBackend, err := NewDnfBackend(target.Distro.Release, reposDir, logger)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}

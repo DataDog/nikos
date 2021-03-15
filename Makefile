@@ -4,7 +4,7 @@ centos-builder:
 
 .PHONY: nikos-centos8
 nikos-centos8:
-	docker run --rm -ti -v `pwd`:/go/src/github.com/lebauce/nikos nikos-centos8-builder go build -o nikos-centos8
+	docker run --rm -ti -v `pwd`:/go/src/github.com/DataDog/nikos nikos-centos8-builder go build -o nikos-centos8
 
 .PHONY: nikos-dnf
 nikos-dnf:

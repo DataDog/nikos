@@ -1,5 +1,3 @@
-// +build dnf
-
 package rpm
 
 import (
@@ -10,9 +8,8 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 
-	"github.com/lebauce/nikos/types"
+	"github.com/DataDog/nikos/types"
 )
 
 type CentOSBackend struct {
@@ -20,6 +17,7 @@ type CentOSBackend struct {
 	release    string
 	dnfBackend *DnfBackend
 	target     *types.Target
+	logger     types.Logger
 }
 
 func getRedhatRelease() (string, error) {
@@ -42,7 +40,7 @@ func (b *CentOSBackend) GetKernelHeaders(directory string) error {
 
 	// First try with the 'base' and 'updates' repositories.
 	// This should work if the user is using the latest minor version
-	log.Infof("Trying with 'base' and 'updates' repositories")
+	b.logger.Info("Trying with 'base' and 'updates' repositories")
 
 	var disabledRepositories []*Repository
 	for _, repo := range b.dnfBackend.GetEnabledRepositories() {
@@ -57,7 +55,7 @@ func (b *CentOSBackend) GetKernelHeaders(directory string) error {
 	}
 
 	// Otherwise, we try with Vault
-	log.Infof("Trying with Vault repositories for %s", b.release)
+	b.logger.Infof("Trying with Vault repositories for %s", b.release)
 
 	var baseURL string
 	gpgKey := "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-"
@@ -85,14 +83,14 @@ func (b *CentOSBackend) Close() {
 	b.dnfBackend.Close()
 }
 
-func NewCentOSBackend(target *types.Target) (*CentOSBackend, error) {
+func NewCentOSBackend(target *types.Target, reposDir string, logger types.Logger) (*CentOSBackend, error) {
 	release, err := getRedhatRelease()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to detect CentOS release")
 	}
 
 	version, _ := strconv.Atoi(strings.SplitN(release, ".", 2)[0])
-	dnfBackend, err := NewDnfBackend(fmt.Sprintf("%d", version))
+	dnfBackend, err := NewDnfBackend(fmt.Sprintf("%d", version), reposDir, logger)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}
@@ -100,6 +98,7 @@ func NewCentOSBackend(target *types.Target) (*CentOSBackend, error) {
 	return &CentOSBackend{
 		version:    version,
 		target:     target,
+		logger:     logger,
 		release:    release,
 		dnfBackend: dnfBackend,
 	}, nil
