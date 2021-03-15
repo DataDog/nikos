@@ -1,0 +1,5 @@
+[repo-debug-non-oss]
+name=Debug Repository (Non-OSS)
+enabled=0
+autorefresh=1
+baseurl=http://download.opensuse.org/debug/distribution/leap/$releasever/repo/non-oss/

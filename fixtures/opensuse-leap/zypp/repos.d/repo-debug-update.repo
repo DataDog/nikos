@@ -1,0 +1,5 @@
+[repo-debug-update]
+name=Update Repository (Debug)
+enabled=0
+autorefresh=1
+baseurl=http://download.opensuse.org/debug/update/leap/$releasever/oss/
