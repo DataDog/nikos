@@ -83,6 +83,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 		}
 
 		b.logger.Debugf("Fetching repository: name=%s, distribution=%s, components=%v, arch=%v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
+		repo.SkipComponentCheck = true
 		if err := repo.Fetch(downloader, nil); err != nil {
 			b.logger.Debugf("Error fetching repo: %s", err)
 			return err
