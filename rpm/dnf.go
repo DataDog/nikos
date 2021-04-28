@@ -4,7 +4,6 @@ package rpm
 
 // #cgo pkg-config: gio-2.0
 // #cgo pkg-config: libdnf
-//
 // #include <libdnf/libdnf.h>
 //
 // typedef const gchar cgchar_t;

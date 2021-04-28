@@ -10,26 +10,12 @@ contain the __secure_getenv symbol (in glibc 2.17, the symbol was renamed secure
 
 #if defined(__GLIBC__) && defined(__GLIBC_PREREQ) && __GLIBC_PREREQ(2, 17)
 
-#define symver_wrap___secure_getenv()                                  \
-char * ____secure_getenv_glibc_2_17(char const *name);                 \
-                                                                       \
-asm(".symver ____secure_getenv_glibc_2_17, secure_getenv@GLIBC_2.17"); \
-                                                                       \
-char * __wrap___secure_getenv (char const *name) {                     \
-  return ____secure_getenv_glibc_2_17(name);                           \
-}
+char * ____secure_getenv_glibc_2_17(char const *name);
 
-# else
+asm(".symver ____secure_getenv_glibc_2_17, secure_getenv@GLIBC_2.17");
 
-// Use the function directly for older glibc / non-glibc environments
-
-#define symver_wrap___secure_getenv()              \
-char * __secure_getenv(char const *name);          \
-                                                   \
-char * __wrap___secure_getenv (char const *name) { \
-  return __secure_getenv(name);                    \
+char * __wrap___secure_getenv (char const *name) {
+  return ____secure_getenv_glibc_2_17(name);
 }
 
 #endif
-
-symver_wrap___secure_getenv()
