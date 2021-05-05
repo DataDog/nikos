@@ -5,7 +5,7 @@ package rpm
 // #cgo pkg-config: gio-2.0
 // #cgo pkg-config: libdnf
 //
-// #cgo LDFLAGS: -Wl,--wrap=__secure_getenv
+// #cgo LDFLAGS: -Wl,--wrap=__secure_getenv -Wl,--wrap=glob64 -Wl,--wrap=glob
 // #include "wrapper.h"
 // #include <libdnf/libdnf.h>
 //
