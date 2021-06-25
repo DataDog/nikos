@@ -1,6 +1,6 @@
 // +build dnf
 
-package rpm
+package dnf
 
 // #cgo pkg-config: gio-2.0
 // #cgo pkg-config: libdnf

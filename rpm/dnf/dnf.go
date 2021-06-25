@@ -1,6 +1,6 @@
 // +build dnf
 
-package rpm
+package dnf
 
 // #cgo pkg-config: gio-2.0
 // #cgo pkg-config: libdnf
@@ -40,8 +40,8 @@ func wrapGError(err *C.struct__GError, format string, a ...interface{}) error {
 }
 
 type Repository struct {
+	Id         string
 	libdnfRepo *C.DnfRepo
-	id         string
 	enabled    bool
 }
 
@@ -152,8 +152,8 @@ func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey stri
 	C.g_ptr_array_add(C.dnf_context_get_repos(b.dnfContext), C.gpointer(libdnfRepo))
 
 	return &Repository{
+		Id:         id,
 		libdnfRepo: libdnfRepo,
-		id:         id,
 		enabled:    enabled,
 	}, nil
 }
@@ -217,8 +217,8 @@ func (b *DnfBackend) GetRepositories() (repos []*Repository) {
 	for i := 0; i < int(repositories.len); i++ {
 		repository := getRepository(repositories, i)
 		repos = append(repos, &Repository{
+			Id:         C.GoString(C.dnf_repo_get_id(repository)),
 			libdnfRepo: repository,
-			id:         C.GoString(C.dnf_repo_get_id(repository)),
 			enabled:    C.dnf_repo_get_enabled(repository) != 0,
 		})
 	}
@@ -243,7 +243,7 @@ func (b *DnfBackend) DisableRepository(repo *Repository) error {
 func (b *DnfBackend) EnableRepository(repo *Repository) error {
 	var gerr *C.struct__GError
 	C.dnf_context_repo_enable(b.dnfContext, C.dnf_repo_get_id(repo.libdnfRepo), &gerr)
-	return wrapGError(gerr, "failed to enable repository '%s'", repo.id)
+	return wrapGError(gerr, "failed to enable repository '%s'", repo.Id)
 }
 
 func NewDnfBackend(release string, reposDir string, l types.Logger) (*DnfBackend, error) {
