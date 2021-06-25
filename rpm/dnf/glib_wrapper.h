@@ -14,6 +14,9 @@ $ objdump -p nikos
 $ nm nikos | grep GLIBC_2.27
 */
 
+#ifndef GLIB_WRAPPER_H
+#define GLIB_WRAPPER_H
+
 #include <features.h>
 #include <glob.h>
 
@@ -74,3 +77,5 @@ double __wrap_pow(double x, double y) {
 }
 
 #endif
+
+#endif /* GLIB_WRAPPER_H */
