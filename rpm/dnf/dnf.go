@@ -22,7 +22,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sassoftware/go-rpmutils"
 	"github.com/vbauerster/mpb/v5"
-	"github.com/vbauerster/mpb/v5/decor"
 
 	"github.com/DataDog/nikos/types"
 )
@@ -71,6 +70,47 @@ func go_log_handler(log_domain *C.cgchar_t, log_level C.GLogLevelFlags, message 
 	}
 }
 
+func (b *DnfBackend) GetKernelHeaders(pkgNevra, directory string) error {
+	result := C.SetupDNFSack(b.dnfContext)
+	if result.err_msg != nil {
+		defer C.free(unsafe.Pointer(result.err_msg))
+		return errors.New("failed to setup dnf sack: " + C.GoString(result.err_msg))
+	}
+
+	logger.Infof("Looking for package %s", pkgNevra)
+	pkg, err := b.lookupPackage(C.HY_PKG_NEVRA, C.HY_EQ, pkgNevra)
+	if err != nil {
+		if pkg, err = b.lookupPackage(C.HY_PKG_NEVRA, C.HY_GLOB, pkgNevra+"*"); err != nil {
+			return err
+		}
+	}
+	logger.Infof("Found package %s", C.GoString(C.dnf_package_get_nevra(pkg)))
+
+	outputDirectoryC := C.CString(directory)
+	defer C.free(unsafe.Pointer(outputDirectoryC))
+
+	dwnldResult := C.DownloadPackage(b.dnfContext, result.dnf_state, pkg, outputDirectoryC)
+	if dwnldResult.err_msg != nil {
+		defer C.free(unsafe.Pointer(dwnldResult.err_msg))
+		return errors.New("failed to download package: " + C.GoString(dwnldResult.err_msg))
+	}
+
+	return b.extractPackage(filepath.Join(directory, filepath.Base(C.GoString(dwnldResult.filename))), directory)
+}
+
+func (b *DnfBackend) lookupPackage(filter, comparison int, value string) (*C.DnfPackage, error) {
+	valueC := C.CString(value)
+	defer C.free(unsafe.Pointer(valueC))
+
+	result := C.LookupPackage(b.dnfContext, C.int(filter), C.int(comparison), valueC)
+
+	if result.err_msg != nil {
+		defer C.free(unsafe.Pointer(result.err_msg))
+		return nil, errors.New("error looking up package " + value + ": " + C.GoString(result.err_msg))
+	}
+	return result.pkg, nil
+}
+
 func (b *DnfBackend) extractPackage(pkg, directory string) error {
 	pkgFile, err := os.Open(pkg)
 	if err != nil {
@@ -87,24 +127,6 @@ func (b *DnfBackend) extractPackage(pkg, directory string) error {
 	}
 
 	return nil
-}
-
-func (b *DnfBackend) lookupPackage(filter, comparison int, value string) (*C.DnfPackage, error) {
-	sack := C.dnf_context_get_sack(b.dnfContext)
-	query := C.hy_query_create(sack)
-	defer C.hy_query_free(query)
-
-	valueC := C.CString(value)
-	defer C.free(unsafe.Pointer(valueC))
-
-	C.hy_query_filter(query, C.int(filter), C.int(comparison), valueC)
-	plist := C.hy_query_run(query)
-
-	if plist.len == 0 {
-		return nil, errors.New("failed to find package " + value)
-	}
-
-	return getPackage(plist), nil
 }
 
 func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey string) (*Repository, error) {
@@ -157,54 +179,6 @@ func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey stri
 		libdnfRepo: libdnfRepo,
 		enabled:    enabled,
 	}, nil
-}
-
-func (b *DnfBackend) GetKernelHeaders(pkgNevra, directory string) error {
-	var gerr *C.struct__GError
-	dnfState := C.dnf_state_new()
-	C.dnf_context_setup_sack(b.dnfContext, dnfState, &gerr)
-	if gerr != nil {
-		return wrapGError(gerr, "failed to setup dnf sack")
-	}
-
-	logger.Infof("Looking for package %s", pkgNevra)
-
-	pkg, err := b.lookupPackage(C.HY_PKG_NEVRA, C.HY_EQ, pkgNevra)
-	if err != nil {
-		if pkg, err = b.lookupPackage(C.HY_PKG_NEVRA, C.HY_GLOB, pkgNevra+"*"); err != nil {
-			return err
-		}
-	}
-	logger.Infof("Found package %s", C.GoString(C.dnf_package_get_nevra(pkg)))
-
-	transaction := C.dnf_context_get_transaction(b.dnfContext)
-	C.dnf_transaction_ensure_repo(transaction, pkg, &gerr)
-	if gerr != nil {
-		defer C.g_error_free(gerr)
-		return fmt.Errorf("failed to set package repository: %s", C.GoString(gerr.message))
-	}
-
-	if C.dnf_package_installed(pkg) != 0 {
-		return fmt.Errorf("package already installed")
-	}
-
-	outputDirectoryC := C.CString(directory)
-	defer C.free(unsafe.Pointer(outputDirectoryC))
-
-	C.dnf_state_set_percentage_changed_cb(dnfState)
-
-	logger.Info("Downloading package")
-
-	p := mpb.New()
-	bar = p.AddBar(int64(100), mpb.AppendDecorators(decor.Percentage()))
-
-	C.dnf_package_download(pkg, outputDirectoryC, dnfState, &gerr)
-	if gerr != nil {
-		return wrapGError(gerr, "failed to download package")
-	}
-
-	filename := C.GoString(C.dnf_package_get_filename(pkg))
-	return b.extractPackage(filepath.Join(directory, filepath.Base(filename)), directory)
 }
 
 func (b *DnfBackend) Close() {

@@ -31,6 +31,14 @@ typedef struct {                                    \
     const char* err_msg;                            \
 } struct_name
 
+RETURN_VAL_STRUCT(SetupDNFSackResult, DnfState* dnf_state);
+SetupDNFSackResult SetupDNFSack(DnfContext* context);
+
+RETURN_VAL_STRUCT(LookupPackageResult, DnfPackage* pkg);
+LookupPackageResult LookupPackage(DnfContext* context, int filter, int comparison, const char* value);
+
+RETURN_VAL_STRUCT(DownloadPackageResult, const char* filename);
+DownloadPackageResult DownloadPackage(DnfContext* context, DnfState* dnf_state, DnfPackage* pkg, const char* output_dir);
 
 RETURN_VAL_STRUCT(CreateAndSetupDNFContextResult, DnfContext* context);
 CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, const char* repos_dir);
