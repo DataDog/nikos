@@ -130,53 +130,24 @@ func (b *DnfBackend) extractPackage(pkg, directory string) error {
 }
 
 func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey string) (*Repository, error) {
-	libdnfRepo := C.dnf_repo_new(b.dnfContext)
-
-	C.dnf_repo_set_kind(libdnfRepo, C.DNF_REPO_KIND_REMOTE)
-
-	keyFile := C.g_key_file_new()
-
 	idC := C.CString(id)
 	defer C.free(unsafe.Pointer(idC))
 
-	baseurlKeyC := C.CString("baseurl")
-	defer C.free(unsafe.Pointer(baseurlKeyC))
-
 	baseurlC := C.CString(baseurl)
 	defer C.free(unsafe.Pointer(baseurlC))
-	C.g_key_file_set_string(keyFile, idC, baseurlKeyC, baseurlC)
 
-	if gpgKey != "" {
-		gpgkeyC := C.CString("gpgkey")
-		defer C.free(unsafe.Pointer(gpgkeyC))
+	gpgKeyC := C.CString(gpgKey)
+	defer C.free(unsafe.Pointer(gpgKeyC))
 
-		gpgkeyPathC := C.CString(gpgKey)
-		defer C.free(unsafe.Pointer(gpgkeyPathC))
+	result := C.AddRepository(b.dnfContext, idC, baseurlC, C.bool(enabled), gpgKeyC)
 
-		C.dnf_repo_set_gpgcheck(libdnfRepo, C.gboolean(1))
-		C.g_key_file_set_string(keyFile, idC, gpgkeyC, gpgkeyC)
+	if result.err_msg != nil {
+		defer C.free(unsafe.Pointer(result.err_msg))
+		return nil, errors.New("failed to setup repository " + id + ": " + C.GoString(result.err_msg))
 	}
-
-	C.dnf_repo_set_keyfile(libdnfRepo, keyFile)
-
-	C.dnf_repo_set_enabled(libdnfRepo, C.DNF_REPO_ENABLED_PACKAGES)
-
-	C.dnf_repo_set_id(libdnfRepo, idC)
-
-	filenameC := C.CString("/tmp/" + id + ".repo")
-	defer C.free(unsafe.Pointer(filenameC))
-	C.dnf_repo_set_filename(libdnfRepo, filenameC)
-
-	var gerr *C.struct__GError
-	if C.dnf_repo_setup(libdnfRepo, &gerr) == 0 {
-		return nil, wrapGError(gerr, "failed to setup repository '%d'", id)
-	}
-
-	C.g_ptr_array_add(C.dnf_context_get_repos(b.dnfContext), C.gpointer(libdnfRepo))
-
 	return &Repository{
 		Id:         id,
-		libdnfRepo: libdnfRepo,
+		libdnfRepo: result.libdnf_repo,
 		enabled:    enabled,
 	}, nil
 }

@@ -112,6 +112,45 @@ DownloadPackageResult DownloadPackage(DnfContext* context, DnfState* dnf_state, 
     return result;
 }
 
+AddRepositoryResult AddRepository(DnfContext* context, const char* id, const char* baseurl, bool enabled, const char* gpgkey) {
+    AddRepositoryResult result = {0};
+    try {
+        DnfRepo* libdnf_repo = dnf_repo_new(context);
+        dnf_repo_set_kind(libdnf_repo, DNF_REPO_KIND_REMOTE);
+
+        g_autoptr(GKeyFile) key_file = g_key_file_new();
+        g_key_file_set_string(key_file, id, "baseurl", baseurl);
+
+        if (strlen(gpgkey) != 0) {
+            dnf_repo_set_gpgcheck(libdnf_repo, gboolean(1));
+            g_key_file_set_string(key_file, id, "gpgkey", gpgkey); 
+        }
+
+        dnf_repo_set_keyfile(libdnf_repo, key_file);
+        dnf_repo_set_id(libdnf_repo, id);
+        if (enabled)
+            dnf_repo_set_enabled(libdnf_repo, DNF_REPO_ENABLED_PACKAGES);
+        else
+            dnf_repo_set_enabled(libdnf_repo, DNF_REPO_ENABLED_NONE);
+
+        const char* filename = std::string("/tmp/" + std::string(id) + ".repo").c_str();
+        dnf_repo_set_filename(libdnf_repo, filename);
+
+        GError* gerr = nullptr;
+        if (dnf_repo_setup(libdnf_repo, &gerr) == 0) {
+            result.err_msg = getErrorMessage(gerr);
+            return result;
+        }
+
+        g_ptr_array_add(dnf_context_get_repos(context), gpointer(libdnf_repo));
+        result.libdnf_repo = libdnf_repo;
+    } catch(std::exception &e) {
+        result.err_msg = strdup(e.what());
+    }
+
+    return result;
+}
+
 CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, const char* repos_dir) {
     CreateAndSetupDNFContextResult result = {0};
     try {
