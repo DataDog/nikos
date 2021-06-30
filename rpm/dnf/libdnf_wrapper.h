@@ -47,6 +47,19 @@ const char* EnableRepository(DnfContext* context, DnfRepo* libdnf_repo);
 
 const char* DisableRepository(DnfContext* context, DnfRepo* libdnf_repo);
 
+int GetNumRepositories(DnfContext* context);
+
+/*
+GetRepositories populates the repos_out array with pointers to all the repos which have been added to the given context.
+It returns true upon success and false otherwise.
+
+Note: According to the rules of CGo, Go code may pass a Go pointer to C provided the Go memory to which it points
+does not contain any Go pointers. This means that when GetRepositories is called, repos_out must point to a DnfRepo* array 
+of size repos_out_size containing only nil values.
+See https://golang.org/cmd/cgo/#hdr-Passing_pointers for more information.
+*/
+bool GetRepositories(DnfContext* context, DnfRepo** repos_out, int repos_out_size);
+
 RETURN_VAL_STRUCT(CreateAndSetupDNFContextResult, DnfContext* context);
 CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, const char* repos_dir);
 

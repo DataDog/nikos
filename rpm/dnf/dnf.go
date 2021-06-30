@@ -177,14 +177,21 @@ func (b *DnfBackend) Close() {
 }
 
 func (b *DnfBackend) GetRepositories() (repos []*Repository) {
-	repositories := C.dnf_context_get_repos(b.dnfContext)
-	for i := 0; i < int(repositories.len); i++ {
-		repository := getRepository(repositories, i)
-		repos = append(repos, &Repository{
-			Id:         C.GoString(C.dnf_repo_get_id(repository)),
-			libdnfRepo: repository,
-			enabled:    C.dnf_repo_get_enabled(repository) != 0,
-		})
+	numRepos := C.GetNumRepositories(b.dnfContext)
+	if numRepos == 0 {
+		return
+	}
+
+	dnfRepos := make([]*C.DnfRepo, numRepos)
+	if C.GetRepositories(b.dnfContext, &dnfRepos[0], C.int(len(dnfRepos))) {
+		for _, dnfRepo := range dnfRepos {
+			// Note: the libdnf functions below are safe to call here (they shouldn't throw exceptions)
+			repos = append(repos, &Repository{
+				Id:         C.GoString(C.dnf_repo_get_id(dnfRepo)),
+				libdnfRepo: dnfRepo,
+				enabled:    C.dnf_repo_get_enabled(dnfRepo) != 0,
+			})
+		}
 	}
 	return
 }

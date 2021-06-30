@@ -175,6 +175,34 @@ const char* DisableRepository(DnfContext* context, DnfRepo* libdnf_repo) {
     return nullptr;
 }
 
+int GetNumRepositories(DnfContext* context) {
+    try {
+        GPtrArray* repos = dnf_context_get_repos(context);
+        if (repos)
+            return repos->len;
+    } catch(std::exception &e) {
+        g_log(NULL, G_LOG_LEVEL_INFO, "error fetching number of repositories: %s", e.what());
+    }
+    return 0;
+}
+
+bool GetRepositories(DnfContext* context, DnfRepo** repos_out, int repos_out_size) {
+    try {
+        GPtrArray* repos = dnf_context_get_repos(context);
+
+        if (!repos || repos->len != repos_out_size)
+            return false;
+
+        for (int i=0; i<repos->len; i++) {
+            repos_out[i] = (DnfRepo*) g_object_ref(g_ptr_array_index(repos, i));
+        }
+    } catch(std::exception &e) {
+        g_log(NULL, G_LOG_LEVEL_INFO, "error fetching repositories: %s", e.what());
+        return false;
+    }
+    return true;
+}
+
 CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, const char* repos_dir) {
     CreateAndSetupDNFContextResult result = {0};
     try {
