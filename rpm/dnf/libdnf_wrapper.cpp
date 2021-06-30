@@ -151,6 +151,30 @@ AddRepositoryResult AddRepository(DnfContext* context, const char* id, const cha
     return result;
 }
 
+const char* EnableRepository(DnfContext* context, DnfRepo* libdnf_repo) {
+    try {
+        GError* gerr = nullptr;
+        if (dnf_context_repo_enable(context, dnf_repo_get_id(libdnf_repo), &gerr) == 0) {
+            return getErrorMessage(gerr);
+        }
+    } catch(std::exception &e) {
+        return strdup(e.what());
+    }
+    return nullptr;
+}
+
+const char* DisableRepository(DnfContext* context, DnfRepo* libdnf_repo) {
+    try {
+        GError* gerr = nullptr;
+        if (dnf_context_repo_disable(context, dnf_repo_get_id(libdnf_repo), &gerr) == 0) {
+            return getErrorMessage(gerr);
+        }
+    } catch(std::exception &e) {
+        return strdup(e.what());
+    }
+    return nullptr;
+}
+
 CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, const char* repos_dir) {
     CreateAndSetupDNFContextResult result = {0};
     try {

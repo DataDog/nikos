@@ -152,6 +152,24 @@ func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey stri
 	}, nil
 }
 
+func (b *DnfBackend) EnableRepository(repo *Repository) error {
+	err := C.EnableRepository(b.dnfContext, repo.libdnfRepo)
+	if err != nil {
+		defer C.free(unsafe.Pointer(err))
+		return fmt.Errorf("failed to enable repository '%s': %s", repo.Id, err)
+	}
+	return nil
+}
+
+func (b *DnfBackend) DisableRepository(repo *Repository) error {
+	err := C.DisableRepository(b.dnfContext, repo.libdnfRepo)
+	if err != nil {
+		defer C.free(unsafe.Pointer(err))
+		return fmt.Errorf("failed to disable repository '%s': %s", repo.Id, err)
+	}
+	return nil
+}
+
 func (b *DnfBackend) Close() {
 	if b.dnfContext != nil {
 		C.g_object_unref(C.gpointer(b.dnfContext))
@@ -178,18 +196,6 @@ func (b *DnfBackend) GetEnabledRepositories() (repos []*Repository) {
 		}
 	}
 	return
-}
-
-func (b *DnfBackend) DisableRepository(repo *Repository) error {
-	var gerr *C.struct__GError
-	C.dnf_context_repo_disable(b.dnfContext, C.dnf_repo_get_id(repo.libdnfRepo), &gerr)
-	return wrapGError(gerr, "failed to setup dnf context")
-}
-
-func (b *DnfBackend) EnableRepository(repo *Repository) error {
-	var gerr *C.struct__GError
-	C.dnf_context_repo_enable(b.dnfContext, C.dnf_repo_get_id(repo.libdnfRepo), &gerr)
-	return wrapGError(gerr, "failed to enable repository '%s'", repo.Id)
 }
 
 func NewDnfBackend(release string, reposDir string, l types.Logger) (*DnfBackend, error) {

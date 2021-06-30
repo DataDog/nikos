@@ -43,6 +43,10 @@ DownloadPackageResult DownloadPackage(DnfContext* context, DnfState* dnf_state, 
 RETURN_VAL_STRUCT(AddRepositoryResult, DnfRepo* libdnf_repo);
 AddRepositoryResult AddRepository(DnfContext* context, const char* id, const char* baseurl, bool enabled, const char* gpgkey);
 
+const char* EnableRepository(DnfContext* context, DnfRepo* libdnf_repo);
+
+const char* DisableRepository(DnfContext* context, DnfRepo* libdnf_repo);
+
 RETURN_VAL_STRUCT(CreateAndSetupDNFContextResult, DnfContext* context);
 CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, const char* repos_dir);
 
