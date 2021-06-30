@@ -248,52 +248,22 @@ func (b *DnfBackend) EnableRepository(repo *Repository) error {
 }
 
 func NewDnfBackend(release string, reposDir string, l types.Logger) (*DnfBackend, error) {
-	backend := &DnfBackend{
-		dnfContext: C.dnf_context_new(),
-	}
 	logger = l
-
 	C.dnf_set_default_handler()
 
-	tmpDir := "/tmp"
-	cacheDir := "/tmp/nikos-cache"
-	solvDir := "/tmp/nikos-solv"
+	releaseC := C.CString(release)
+	defer C.free(unsafe.Pointer(releaseC))
 
-	tmpDirC := C.CString(tmpDir)
-	defer C.free(unsafe.Pointer(tmpDirC))
+	reposDirC := C.CString(reposDir)
+	defer C.free(unsafe.Pointer(reposDirC))
 
-	lock := C.dnf_lock_new()
-	C.dnf_lock_set_lock_dir(lock, C.CString(tmpDir))
-
-	solvDirC := C.CString(solvDir)
-	defer C.free(unsafe.Pointer(solvDirC))
-	C.dnf_context_set_solv_dir(backend.dnfContext, solvDirC)
-
-	cacheDirC := C.CString(cacheDir)
-	defer C.free(unsafe.Pointer(cacheDirC))
-	C.dnf_context_set_cache_dir(backend.dnfContext, cacheDirC)
-
-	if reposDir != "" {
-		reposDirC := C.CString(reposDir)
-		C.dnf_context_set_repo_dir(backend.dnfContext, reposDirC)
-		C.free(unsafe.Pointer(reposDirC))
+	result := C.CreateAndSetupDNFContext(releaseC, reposDirC)
+	if result.err_msg != nil {
+		defer C.free(unsafe.Pointer(result.err_msg))
+		return nil, errors.New("error creating new dnf context: " + C.GoString(result.err_msg))
 	}
 
-	if solvDirC := C.dnf_context_get_solv_dir(backend.dnfContext); solvDirC != nil {
-		logger.Infof("Solv directory: %s\n", C.GoString(solvDirC))
-	}
-
-	releaseVerC := C.CString(release)
-	defer C.free(unsafe.Pointer(releaseVerC))
-	C.dnf_context_set_release_ver(backend.dnfContext, releaseVerC)
-
-	var gerr *C.struct__GError
-	C.dnf_context_setup(backend.dnfContext, nil, &gerr)
-	if gerr != nil {
-		return nil, wrapGError(gerr, "failed to setup dnf context")
-	}
-
-	C.dnf_context_set_write_history(backend.dnfContext, 0)
-
-	return backend, nil
+	return &DnfBackend{
+		dnfContext: result.context,
+	}, nil
 }

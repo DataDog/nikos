@@ -31,6 +31,10 @@ typedef struct {                                    \
     const char* err_msg;                            \
 } struct_name
 
+
+RETURN_VAL_STRUCT(CreateAndSetupDNFContextResult, DnfContext* context);
+CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, const char* repos_dir);
+
 #ifdef __cplusplus
 }
 #endif
