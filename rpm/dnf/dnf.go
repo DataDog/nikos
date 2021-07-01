@@ -4,13 +4,16 @@ package dnf
 
 // #cgo pkg-config: gio-2.0
 // #cgo pkg-config: libdnf
+//
+// #cgo LDFLAGS: -Wl,--wrap=__secure_getenv -Wl,--wrap=glob64 -Wl,--wrap=glob -Wl,--wrap=log -Wl,--wrap=pow
+// #include "glib_wrapper.h"
 // #include "libdnf_wrapper.h"
-// #include <libdnf/libdnf.h>
 //
 // typedef const gchar cgchar_t;
-// extern void download_percentage_changed_cb(DnfState* dnfState, guint value, gpointer data);
-// extern void dnf_set_default_handler();
-// void dnf_state_set_percentage_changed_cb(DnfState* dnfState);
+// extern void go_log_handler(cgchar_t *log_domain, GLogLevelFlags log_level, cgchar_t *message, gpointer data);
+// void dnf_set_default_handler() {
+//      g_log_set_default_handler(go_log_handler, NULL);
+// }
 import "C"
 
 import (
@@ -21,23 +24,11 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sassoftware/go-rpmutils"
-	"github.com/vbauerster/mpb/v5"
 
 	"github.com/DataDog/nikos/types"
 )
 
-var (
-	bar    *mpb.Bar
-	logger types.Logger
-)
-
-func wrapGError(err *C.struct__GError, format string, a ...interface{}) error {
-	if err == nil {
-		return nil
-	}
-	defer C.g_error_free(err)
-	return fmt.Errorf("%s: %s", fmt.Sprintf(format, a...), C.GoString(err.message))
-}
+var logger types.Logger
 
 type Repository struct {
 	Id         string
@@ -48,26 +39,6 @@ type Repository struct {
 type DnfBackend struct {
 	target     *types.Target
 	dnfContext *C.struct__DnfContext
-	isSuse     bool
-}
-
-//export download_percentage_changed_cb
-func download_percentage_changed_cb(state *C.struct__DnfState, value C.guint, data C.gpointer) {
-	bar.SetCurrent(int64(value))
-}
-
-//export go_log_handler
-func go_log_handler(log_domain *C.cgchar_t, log_level C.GLogLevelFlags, message *C.cgchar_t, data C.gpointer) {
-	switch log_level {
-	case C.G_LOG_LEVEL_DEBUG:
-		logger.Debug(C.GoString(message))
-	case C.G_LOG_LEVEL_INFO:
-		logger.Info(C.GoString(message))
-	case C.G_LOG_LEVEL_WARNING:
-		logger.Warn(C.GoString(message))
-	case C.G_LOG_LEVEL_ERROR, C.G_LOG_LEVEL_CRITICAL:
-		logger.Error(C.GoString(message))
-	}
 }
 
 func (b *DnfBackend) GetKernelHeaders(pkgNevra, directory string) error {

@@ -5,8 +5,6 @@
 #include <string>
 #include <string.h>
 
-#include <libdnf/libdnf.h>
-
 const char* newCString(std::string s) {
     char* msg = new char[s.size()+1];
     strcpy(msg, s.c_str());
@@ -92,12 +90,7 @@ DownloadPackageResult DownloadPackage(DnfContext* context, DnfState* dnf_state, 
             return result;
         }
 
-        // C.dnf_state_set_percentage_changed_cb(result.dnf_state)
-
         g_log(NULL, G_LOG_LEVEL_INFO, "Downloading package");
-
-        // p := mpb.New()
-        // bar = p.AddBar(int64(100), mpb.AppendDecorators(decor.Percentage()))
 
         dnf_package_download(pkg, output_dir, dnf_state, &gerr);
         if (gerr != nullptr) {
