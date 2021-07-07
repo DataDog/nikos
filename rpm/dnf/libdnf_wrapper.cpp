@@ -6,7 +6,7 @@
 #include <string.h>
 
 const char* newCString(std::string s) {
-    char* msg = new char[s.size()+1];
+    char* msg = (char*) malloc(s.size()+1);
     strcpy(msg, s.c_str());
     return msg;
 }
@@ -24,12 +24,7 @@ const char* getErrorMessage(std::string prefix, GError* gerr) {
     if (gerr == nullptr)
         return newCString(prefix + "unknown error");
 
-    size_t prefix_size = prefix.size();
-    char* msg = new char[prefix_size + strlen(gerr->message) + 1];
-
-    strcpy(msg, prefix.c_str());
-    strcpy(msg + prefix_size, gerr->message);
-
+    const char* msg = newCString(prefix + std::string(gerr->message));
     g_error_free(gerr);
     return msg;
 }
@@ -187,7 +182,7 @@ bool GetRepositories(DnfContext* context, DnfRepo** repos_out, int repos_out_siz
             return false;
 
         for (int i=0; i<repos->len; i++) {
-            repos_out[i] = (DnfRepo*) g_object_ref(g_ptr_array_index(repos, i));
+            repos_out[i] = (DnfRepo*) g_ptr_array_index(repos, i);
         }
     } catch(std::exception &e) {
         g_log(NULL, G_LOG_LEVEL_INFO, "error fetching repositories: %s", e.what());
