@@ -12,8 +12,9 @@ const char* newCString(std::string s) {
 }
 
 const char* getErrorMessage(GError* gerr) {
-    if (gerr == nullptr)
+    if (gerr == nullptr) {
         return newCString("unknown error");
+    }
 
     const char* msg = strdup(gerr->message);
     g_error_free(gerr);
@@ -21,8 +22,9 @@ const char* getErrorMessage(GError* gerr) {
 }
 
 const char* getErrorMessage(std::string prefix, GError* gerr) {
-    if (gerr == nullptr)
+    if (gerr == nullptr) {
         return newCString(prefix + "unknown error");
+    }
 
     const char* msg = newCString(prefix + std::string(gerr->message));
     g_error_free(gerr);
@@ -55,16 +57,18 @@ LookupPackageResult LookupPackage(DnfContext* context, int filter, int compariso
         hy_query_filter(query, filter, comparison, value);
         GPtrArray* pkglist = hy_query_run(query);
 
-        if (!pkglist || pkglist->len == 0)
+        if (pkglist == nullptr || pkglist->len == 0) {
             result.err_msg = newCString("failed to find package");
-        else
+        } else {
             result.pkg = (DnfPackage*) g_object_ref(g_ptr_array_index(pkglist, 0));
+        }
     } catch(std::exception &e) {
         result.err_msg = strdup(e.what());
     }
 
-    if (query != nullptr)
+    if (query != nullptr) {
         hy_query_free(query);
+    }
 
     return result;
 }
@@ -116,10 +120,11 @@ AddRepositoryResult AddRepository(DnfContext* context, const char* id, const cha
 
         dnf_repo_set_keyfile(libdnf_repo, key_file);
         dnf_repo_set_id(libdnf_repo, id);
-        if (enabled)
+        if (enabled) {
             dnf_repo_set_enabled(libdnf_repo, DNF_REPO_ENABLED_PACKAGES);
-        else
+        } else {
             dnf_repo_set_enabled(libdnf_repo, DNF_REPO_ENABLED_NONE);
+        }
 
         const char* filename = std::string("/tmp/" + std::string(id) + ".repo").c_str();
         dnf_repo_set_filename(libdnf_repo, filename);
@@ -166,8 +171,9 @@ const char* DisableRepository(DnfContext* context, DnfRepo* libdnf_repo) {
 int GetNumRepositories(DnfContext* context) {
     try {
         GPtrArray* repos = dnf_context_get_repos(context);
-        if (repos)
+        if (repos != nullptr) {
             return repos->len;
+        }
     } catch(std::exception &e) {
         g_log(NULL, G_LOG_LEVEL_INFO, "error fetching number of repositories: %s", e.what());
     }
@@ -178,8 +184,9 @@ bool GetRepositories(DnfContext* context, DnfRepo** repos_out, int repos_out_siz
     try {
         GPtrArray* repos = dnf_context_get_repos(context);
 
-        if (!repos || repos->len != repos_out_size)
+        if (repos == nullptr || repos->len != repos_out_size) {
             return false;
+        }
 
         for (int i=0; i<repos->len; i++) {
             repos_out[i] = (DnfRepo*) g_ptr_array_index(repos, i);
@@ -205,14 +212,16 @@ CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, con
 
         dnf_context_set_solv_dir(context, solv_dir);
         dnf_context_set_cache_dir(context, cache_dir);
-        if (strlen(repos_dir) != 0)
+        if (strlen(repos_dir) != 0) {
             dnf_context_set_repo_dir(context, repos_dir);
+        }
 
         dnf_context_set_release_ver(context, release);
 
         const char* actual_solv_dir = dnf_context_get_solv_dir(context);
-        if (solv_dir)
+        if (actual_solv_dir != nullptr) {
             g_log(NULL, G_LOG_LEVEL_INFO, "Solv directory: %s", actual_solv_dir);
+        }
 
         GError* gerr = nullptr;
         if (dnf_context_setup(context, nullptr, &gerr) == 0) {
