@@ -12,7 +12,7 @@ In order to keep memory management as straightforward as possible, the functions
 1) it is the caller's responsibility to free all dynamically allocated pointer parameters
 2) if an error message is returned, it is the caller's responsibility to free that memory
 3) the caller is not expected to free any other pointer return values (or output parameters)
-    - the exception to this rule is CreateAndSetupDNFContext, which returns a dynamically allocated DnfContext*
+    - the exceptions to this rule are CreateAndSetupDNFContext & LookupPackage, which both return a value
       which the caller must eventually free with a call to g_object_unref
 */
 

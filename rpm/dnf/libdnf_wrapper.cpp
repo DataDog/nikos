@@ -47,17 +47,18 @@ const char* SetupDNFSack(DnfContext* context) {
 
 LookupPackageResult LookupPackage(DnfContext* context, int filter, int comparison, const char* value) {
     LookupPackageResult result = {0};
-    HyQuery query;
+    HyQuery query = nullptr;
+    GPtrArray* pkglist = nullptr;
     try {
         DnfSack* sack = dnf_context_get_sack(context);
         query = hy_query_create(sack);
         hy_query_filter(query, filter, comparison, value);
-        GPtrArray* pkglist = hy_query_run(query);
+        pkglist = hy_query_run(query);
 
         if (pkglist == nullptr || pkglist->len == 0) {
             result.err_msg = newCString("failed to find package");
         } else {
-            result.pkg = (DnfPackage*) g_object_ref(g_ptr_array_index(pkglist, 0));
+            result.pkg = static_cast<DnfPackage*>(g_object_ref(g_ptr_array_index(pkglist, 0)));
         }
     } catch(std::exception &e) {
         result.err_msg = strdup(e.what());
@@ -65,6 +66,9 @@ LookupPackageResult LookupPackage(DnfContext* context, int filter, int compariso
 
     if (query != nullptr) {
         hy_query_free(query);
+    }
+    if (pkglist != nullptr) {
+        g_ptr_array_unref(pkglist);
     }
 
     return result;
