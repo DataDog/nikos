@@ -42,10 +42,10 @@ type DnfBackend struct {
 }
 
 func (b *DnfBackend) GetKernelHeaders(pkgNevra, directory string) error {
-	result := C.SetupDNFSack(b.dnfContext)
-	if result.err_msg != nil {
-		defer C.free(unsafe.Pointer(result.err_msg))
-		return errors.New("failed to setup dnf sack: " + C.GoString(result.err_msg))
+	err := C.SetupDNFSack(b.dnfContext)
+	if err != nil {
+		defer C.free(unsafe.Pointer(err))
+		return errors.New("failed to setup dnf sack: " + C.GoString(err))
 	}
 
 	logger.Infof("Looking for package %s", pkgNevra)
@@ -60,13 +60,13 @@ func (b *DnfBackend) GetKernelHeaders(pkgNevra, directory string) error {
 	outputDirectoryC := C.CString(directory)
 	defer C.free(unsafe.Pointer(outputDirectoryC))
 
-	dwnldResult := C.DownloadPackage(b.dnfContext, result.dnf_state, pkg, outputDirectoryC)
-	if dwnldResult.err_msg != nil {
-		defer C.free(unsafe.Pointer(dwnldResult.err_msg))
-		return errors.New("failed to download package: " + C.GoString(dwnldResult.err_msg))
+	result := C.DownloadPackage(b.dnfContext, pkg, outputDirectoryC)
+	if result.err_msg != nil {
+		defer C.free(unsafe.Pointer(result.err_msg))
+		return errors.New("failed to download package: " + C.GoString(result.err_msg))
 	}
 
-	return b.extractPackage(filepath.Join(directory, filepath.Base(C.GoString(dwnldResult.filename))), directory)
+	return b.extractPackage(filepath.Join(directory, filepath.Base(C.GoString(result.filename))), directory)
 }
 
 func (b *DnfBackend) lookupPackage(filter, comparison int, value string) (*C.DnfPackage, error) {

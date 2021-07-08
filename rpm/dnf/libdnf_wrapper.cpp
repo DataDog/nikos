@@ -31,21 +31,18 @@ const char* getErrorMessage(std::string prefix, GError* gerr) {
     return msg;
 }
 
-SetupDNFSackResult SetupDNFSack(DnfContext* context) {
-    SetupDNFSackResult result = {0};
+const char* SetupDNFSack(DnfContext* context) {
     try {
-        result.dnf_state = dnf_state_new();
+        DnfState* state = dnf_context_get_state(context);
 
         GError* gerr = nullptr;
-        if (dnf_context_setup_sack(context, result.dnf_state, &gerr) == 0) {
-            result.err_msg = getErrorMessage(gerr);
-            return result;
+        if (dnf_context_setup_sack(context, state, &gerr) == 0) {
+            return getErrorMessage(gerr);
         }
     } catch(std::exception &e) {
-        result.err_msg = strdup(e.what());
+        return strdup(e.what());
     }
-
-    return result;
+    return nullptr;
 }
 
 LookupPackageResult LookupPackage(DnfContext* context, int filter, int comparison, const char* value) {
@@ -73,7 +70,7 @@ LookupPackageResult LookupPackage(DnfContext* context, int filter, int compariso
     return result;
 }
 
-DownloadPackageResult DownloadPackage(DnfContext* context, DnfState* dnf_state, DnfPackage* pkg, const char* output_dir) {
+DownloadPackageResult DownloadPackage(DnfContext* context, DnfPackage* pkg, const char* output_dir) {
     DownloadPackageResult result = {0};
     try {
         DnfTransaction* transaction = dnf_context_get_transaction(context);
@@ -91,7 +88,8 @@ DownloadPackageResult DownloadPackage(DnfContext* context, DnfState* dnf_state, 
 
         g_log(NULL, G_LOG_LEVEL_INFO, "Downloading package");
 
-        dnf_package_download(pkg, output_dir, dnf_state, &gerr);
+        DnfState* state = dnf_context_get_state(context);
+        dnf_package_download(pkg, output_dir, state, &gerr);
         if (gerr != nullptr) {
             result.err_msg = getErrorMessage("failed to download package: ", gerr);
             return result;
