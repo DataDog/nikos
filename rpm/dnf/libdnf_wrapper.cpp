@@ -6,8 +6,9 @@
 #include <string.h>
 
 const char* newCString(std::string s) {
-    char* msg = (char*) malloc(s.size()+1);
-    strcpy(msg, s.c_str());
+    size_t len = s.size()+1;
+    char* msg = (char*) malloc(len);
+    strncpy(msg, s.c_str(), len);
     return msg;
 }
 
