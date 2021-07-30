@@ -30,6 +30,6 @@ require (
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 
-replace github.com/aptly-dev/aptly => github.com/lebauce/aptly v0.7.2-0.20201005164315-09522984a976
+replace github.com/aptly-dev/aptly => github.com/lebauce/aptly v0.7.2-0.20210723103859-345a32860f4d
 
 replace github.com/wille/osutil => github.com/lebauce/osutil v0.0.0-20201027170515-5409e8e42a87
