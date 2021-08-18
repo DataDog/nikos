@@ -57,4 +57,20 @@ int __wrap_glob(GLOB_ARGS) {
   return __glob_prior_glibc(pattern, flags, errfunc, pglob);
 }
 
+int __log_prior_glibc(double x);
+
+asm(".symver __log_prior_glibc, log@" GLIBC_VERS);
+
+double __wrap_log(double x) {
+  return __log_prior_glibc(x);
+}
+
+int __pow_prior_glibc(double x, double y);
+
+asm(".symver __pow_prior_glibc, pow@" GLIBC_VERS);
+
+double __wrap_pow(double x, double y) {
+  return __pow_prior_glibc(x, y);
+}
+
 #endif
