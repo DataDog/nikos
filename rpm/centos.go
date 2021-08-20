@@ -59,12 +59,12 @@ func (b *CentOSBackend) GetKernelHeaders(directory string) error {
 	b.logger.Infof("Trying with Vault repositories for %s", b.release)
 
 	var baseURL string
-	gpgKey := "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-"
+	gpgKey := "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-"
 	if b.version >= 8 {
-		gpgKey += "centosofficial"
+		gpgKey += "centosofficial" // gpg key name convention changed in centos8
 		baseURL = fmt.Sprintf("http://vault.centos.org/%s/BaseOS/$basearch/os/", b.release)
 	} else {
-		gpgKey += strconv.Itoa(b.version)
+		gpgKey += "CentOS-" + strconv.Itoa(b.version)
 		baseURL = fmt.Sprintf("http://vault.centos.org/%s/os/$basearch/", b.release)
 
 		updatesURL := fmt.Sprintf("http://vault.centos.org/%s/updates/$basearch/", b.release)
