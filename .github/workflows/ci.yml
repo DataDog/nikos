@@ -1,0 +1,38 @@
+---
+name: CI
+'on':
+  pull_request:
+  push:
+    branches:
+      - master
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build_no_dnf:
+    name: Build nikos [no dnf]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Build nikos (no dnf)
+        run: go build
+
+      - name: Verify build
+        run: ./nikos
+
+  build:
+    name: Build nikos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Build nikos (with dnf)
+        run: bash tests/build_install_nikos.sh . tests/nikos-libs.tar.gz
+
+      - name: Verify build
+        run: /opt/nikos/bin/nikos

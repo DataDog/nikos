@@ -1,47 +1,32 @@
 ---
 - name: Converge
   hosts: all
+  become: true
   tasks:
   - synchronize:
-      src: ../../../../opt.nikos/
-      dest: /opt/nikos
+      src: /opt/nikos
+      dest: /opt
+      archive: yes
     become: true
-
-  - name: Create a directory if it does not exist
-    file:
-      path: /opt/nikos/bin
-      state: directory
-      mode: 0755
-
-  - name: Create a directory if it does not exist
-    file:
-      path: /opt/nikos/bin
-      state: directory
-      mode: 0755
-
-  - name: Copy Nikos
-    copy:
-      src: ../../../../nikos
-      dest: /opt/nikos/bin/nikos
-      mode: 0755
 
   - name: Create a directory if it does not exist
     file:
       path: /tmp/result.docker
       state: directory
       mode: 0755
+    become: true
 
   - name: Create a debian container
     community.general.docker_container:
       name: debian
       image: debian
       volumes:
-        - /opt/nikos:/opt/nikos:ro
         - /etc/os-release:/etc/os-release:ro
         - /etc/redhat-release:/etc/redhat-release:ro
         - /etc/apt:/etc/apt:ro
         - /etc/zypp/repos.d:/etc/zypp/repos.d:ro
-        - /opt/nikos/embedded/var/lib/rpm:/var/lib/rpm:ro
+        - /etc/pki:/etc/pki:ro
+        - /opt/nikos:/opt/nikos:ro
         - /tmp/result.docker:/tmp/result.docker
       command: sleep 3600
     become: true

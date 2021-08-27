@@ -10,15 +10,15 @@
   register: nikos_result
 
 - debug:
-    var: nikos_result.stdout
-    verbosity: 2
+    var: nikos_result.stdout_lines
 
 - name: nikos ran successfully
   assert:
     that: nikos_result.rc == 0
 
-- include_tasks: verify-apt.yml
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+- include_tasks: verify-package-deb.yml
+  when: ansible_lsb.id is defined and (ansible_lsb.id == "Ubuntu" or ansible_lsb.id == "Debian")
+  
+- include_tasks: verify-package-rpm.yml
+  when: ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'openSUSE Leap')
 
-- include_tasks: verify-rpm.yml
-  when: ansible_distribution == 'CentOS'

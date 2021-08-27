@@ -1,0 +1,10 @@
+---
+- name: list download packages
+  find:
+    paths: "{{ output_path }}"
+    patterns: "linux-headers*.deb"
+  register: files_found
+
+- name: check kernel headers were successfully downloaded
+  assert:
+    that: files_found.matched > 0
