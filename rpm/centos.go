@@ -91,7 +91,7 @@ func NewCentOSBackend(target *types.Target, reposDir string, logger types.Logger
 	}
 
 	version, _ := strconv.Atoi(strings.SplitN(release, ".", 2)[0])
-	dnfBackend, err := dnf.NewDnfBackend(fmt.Sprintf("%d", version), reposDir, logger)
+	dnfBackend, err := dnf.NewDnfBackend(fmt.Sprintf("%d", version), reposDir, logger, target)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}

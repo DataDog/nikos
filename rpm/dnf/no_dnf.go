@@ -17,7 +17,7 @@ type DnfBackend struct {
 
 var errUnsupported = errors.New("dnf backend not supported")
 
-func NewDnfBackend(_, _ string, logger types.Logger) (*DnfBackend, error) {
+func NewDnfBackend(_, _ string, _ types.Logger, _ *types.Target) (*DnfBackend, error) {
 	return nil, errUnsupported
 }
 

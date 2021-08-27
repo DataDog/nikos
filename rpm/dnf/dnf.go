@@ -18,13 +18,12 @@ import "C"
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"unsafe"
 
 	"github.com/pkg/errors"
-	"github.com/sassoftware/go-rpmutils"
 
+	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/types"
 )
 
@@ -68,7 +67,7 @@ func (b *DnfBackend) GetKernelHeaders(pkgNevra, directory string) error {
 	}
 
 	pkgPath := filepath.Join(directory, filepath.Base(C.GoString(result.filename)))
-	return b.extractPackage(pkgPath, directory)
+	return extract.ExtractRPMPackage(pkgPath, directory, b.target.Uname.Kernel, logger)
 }
 
 func (b *DnfBackend) lookupPackage(filter, comparison int, value string) (*C.DnfPackage, error) {
@@ -82,24 +81,6 @@ func (b *DnfBackend) lookupPackage(filter, comparison int, value string) (*C.Dnf
 		return nil, errors.New("error looking up package " + value + ": " + C.GoString(result.err_msg))
 	}
 	return result.pkg, nil
-}
-
-func (b *DnfBackend) extractPackage(pkg, directory string) error {
-	pkgFile, err := os.Open(pkg)
-	if err != nil {
-		return errors.Wrapf(err, "failed to open download package %s", pkg)
-	}
-
-	rpm, err := rpmutils.ReadRpm(pkgFile)
-	if err != nil {
-		return errors.Wrapf(err, "failed to parse RPM package %s", pkg)
-	}
-
-	if err := rpm.ExpandPayload(directory); err != nil {
-		return errors.Wrapf(err, "failed to extract RPM package %s", pkg)
-	}
-
-	return nil
 }
 
 func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey string) (*Repository, error) {
@@ -178,7 +159,7 @@ func (b *DnfBackend) GetEnabledRepositories() (repos []*Repository) {
 	return
 }
 
-func NewDnfBackend(release string, reposDir string, l types.Logger) (*DnfBackend, error) {
+func NewDnfBackend(release string, reposDir string, l types.Logger, target *types.Target) (*DnfBackend, error) {
 	logger = l
 	C.dnf_set_default_handler()
 
@@ -195,6 +176,7 @@ func NewDnfBackend(release string, reposDir string, l types.Logger) (*DnfBackend
 	}
 
 	return &DnfBackend{
+		target:     target,
 		dnfContext: result.context,
 	}, nil
 }

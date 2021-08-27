@@ -22,7 +22,7 @@ func (b *RedHatBackend) Close() {
 }
 
 func NewRedHatBackend(target *types.Target, reposDir string, logger types.Logger) (*RedHatBackend, error) {
-	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger)
+	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}
