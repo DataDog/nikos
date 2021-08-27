@@ -1,6 +1,6 @@
 // +build !dnf,!librepo
 
-package rpm
+package dnf
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 )
 
 type Repository struct {
-	id string
+	Id string
 }
 
 type DnfBackend struct {

@@ -9,13 +9,14 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/DataDog/nikos/rpm/dnf"
 	"github.com/DataDog/nikos/types"
 )
 
 type CentOSBackend struct {
 	version    int
 	release    string
-	dnfBackend *DnfBackend
+	dnfBackend *dnf.DnfBackend
 	target     *types.Target
 	logger     types.Logger
 }
@@ -42,9 +43,9 @@ func (b *CentOSBackend) GetKernelHeaders(directory string) error {
 	// This should work if the user is using the latest minor version
 	b.logger.Info("Trying with 'base' and 'updates' repositories")
 
-	var disabledRepositories []*Repository
+	var disabledRepositories []*dnf.Repository
 	for _, repo := range b.dnfBackend.GetEnabledRepositories() {
-		if repo.id != "base" && repo.id != "updates" {
+		if repo.Id != "base" && repo.Id != "updates" {
 			b.dnfBackend.DisableRepository(repo)
 		}
 		disabledRepositories = append(disabledRepositories, repo)
@@ -90,7 +91,7 @@ func NewCentOSBackend(target *types.Target, reposDir string, logger types.Logger
 	}
 
 	version, _ := strconv.Atoi(strings.SplitN(release, ".", 2)[0])
-	dnfBackend, err := NewDnfBackend(fmt.Sprintf("%d", version), reposDir, logger)
+	dnfBackend, err := dnf.NewDnfBackend(fmt.Sprintf("%d", version), reposDir, logger)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}

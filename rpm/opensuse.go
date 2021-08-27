@@ -5,13 +5,14 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/DataDog/nikos/rpm/dnf"
 	"github.com/DataDog/nikos/types"
 )
 
 type OpenSUSEBackend struct {
 	target     *types.Target
 	logger     types.Logger
-	dnfBackend *DnfBackend
+	dnfBackend *dnf.DnfBackend
 }
 
 func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
@@ -28,10 +29,10 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 	}
 	pkgNevra += "-devel-" + kernelRelease
 
-	var disabledRepositories []*Repository
+	var disabledRepositories []*dnf.Repository
 	for _, repo := range b.dnfBackend.GetEnabledRepositories() {
-		if repo.id != "repo-oss" && repo.id != "repo-update" &&
-			repo.id != "openSUSE-Leap-15.2-Oss" && repo.id != "openSUSE-Leap-15.2-Update" {
+		if repo.Id != "repo-oss" && repo.Id != "repo-update" &&
+			repo.Id != "openSUSE-Leap-15.2-Oss" && repo.Id != "openSUSE-Leap-15.2-Update" {
 			b.dnfBackend.DisableRepository(repo)
 			disabledRepositories = append(disabledRepositories, repo)
 		}
@@ -49,7 +50,7 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 }
 
 func NewOpenSUSEBackend(target *types.Target, reposDir string, logger types.Logger) (types.Backend, error) {
-	dnfBackend, err := NewDnfBackend(target.Distro.Release, reposDir, logger)
+	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}
