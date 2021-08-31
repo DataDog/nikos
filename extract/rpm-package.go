@@ -50,14 +50,14 @@ func fixKernelModulesSymlinks(directory, kernelUname string, l types.Logger) {
 			}
 
 			if err := os.Remove(symlink); err != nil {
-				l.Warnf("failed to unlink symlink at %s: %w", symlink, err)
+				l.Warnf("failed to unlink symlink at %s: %v", symlink, err)
 				continue
 			}
 
 			newDestinationPath := filepath.Join(directory, destinationPath)
 			err := os.Symlink(newDestinationPath, symlink)
 			if err != nil {
-				l.Warnf("failed to create symlink from %s to %s: %w", symlink, newDestinationPath, err)
+				l.Warnf("failed to create symlink from %s to %s: %v", symlink, newDestinationPath, err)
 				continue
 			}
 			l.Debugf("created symlink from %s to %s", symlink, newDestinationPath)
