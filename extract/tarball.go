@@ -4,7 +4,6 @@ import (
 	"archive/tar"
 	"compress/bzip2"
 	"compress/gzip"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -27,7 +26,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 	}
 
 	if err != nil {
-		return errors.Wrapf(err, "failed to read %s", filename)
+		return fmt.Errorf("failed to read %s: %w", filename, err)
 	}
 
 	tarReader := tar.NewReader(compressedTarReader)
@@ -51,11 +50,11 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 		case tar.TypeReg:
 			output, err := os.Create(path)
 			if err != nil {
-				return errors.Wrapf(err, "failed to create output file '%s'", path)
+				return fmt.Errorf("failed to create output file '%s': %w", path, err)
 			}
 
 			if _, err := io.Copy(output, tarReader); err != nil {
-				return errors.Wrapf(err, "failed to uncompress file", hdr.Name)
+				return fmt.Errorf("failed to uncompress file %s: %w", hdr.Name, err)
 
 			}
 			output.Close()
