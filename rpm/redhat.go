@@ -1,7 +1,7 @@
 package rpm
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/DataDog/nikos/rpm/dnf"
 	"github.com/DataDog/nikos/types"
@@ -24,7 +24,7 @@ func (b *RedHatBackend) Close() {
 func NewRedHatBackend(target *types.Target, reposDir string, logger types.Logger) (*RedHatBackend, error) {
 	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create DNF backend")
+		return nil, fmt.Errorf("failed to create DNF backend: %w", err)
 	}
 
 	return &RedHatBackend{

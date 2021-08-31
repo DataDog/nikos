@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/pkg/errors"
-
 	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/types"
 )
@@ -23,7 +21,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 
 	tempfile, err := ioutil.TempFile("", "wsl-headers")
 	if err != nil {
-		return errors.Wrap(err, "failed to create temporary file for kernel headers")
+		return fmt.Errorf("failed to create temporary file for kernel headers: %w", err)
 	}
 	defer os.Remove(tempfile.Name())
 

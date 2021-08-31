@@ -4,12 +4,12 @@ import (
 	"archive/tar"
 	"compress/bzip2"
 	"compress/gzip"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/DataDog/nikos/types"
-	"github.com/pkg/errors"
 	"github.com/xi2/xz"
 )
 
@@ -26,7 +26,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 	}
 
 	if err != nil {
-		return errors.Wrapf(err, "failed to read %s", filename)
+		return fmt.Errorf("failed to read %s: %w", filename, err)
 	}
 
 	tarReader := tar.NewReader(compressedTarReader)
@@ -36,7 +36,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 			break // End of archive
 		}
 		if err != nil {
-			return errors.Wrap(err, "failed to read entry from tarball")
+			return fmt.Errorf("failed to read entry from tarball: %w", err)
 		}
 
 		path := filepath.Join(directory, hdr.Name)
@@ -50,11 +50,11 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 		case tar.TypeReg:
 			output, err := os.Create(path)
 			if err != nil {
-				return errors.Wrapf(err, "failed to create output file '%s'", path)
+				return fmt.Errorf("failed to create output file '%s': %w", path, err)
 			}
 
 			if _, err := io.Copy(output, tarReader); err != nil {
-				return errors.Wrapf(err, "failed to uncompress file", hdr.Name)
+				return fmt.Errorf("failed to uncompress file %s: %w", hdr.Name, err)
 
 			}
 			output.Close()

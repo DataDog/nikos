@@ -14,14 +14,12 @@ require (
 	github.com/h2non/filetype v1.1.0 // indirect
 	github.com/jlaffaye/ftp v0.0.0-20200812143550-39e3779af0db // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
-	github.com/pkg/errors v0.9.1
-	github.com/prometheus/common v0.4.0
 	github.com/sassoftware/go-rpmutils v0.1.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.0.0
 	github.com/ugorji/go v1.1.7 // indirect
-	github.com/vbauerster/mpb/v5 v5.3.0
 	github.com/wille/osutil v0.0.0-20200805111424-0dc696c283a2
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 	github.com/xor-gate/ar v0.0.0-20170530204233-5c72ae81e2b7

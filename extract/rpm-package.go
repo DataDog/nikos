@@ -7,23 +7,22 @@ import (
 	"strings"
 
 	"github.com/DataDog/nikos/types"
-	"github.com/pkg/errors"
 	"github.com/sassoftware/go-rpmutils"
 )
 
 func ExtractRPMPackage(pkg, directory, kernelUname string, l types.Logger) error {
 	pkgFile, err := os.Open(pkg)
 	if err != nil {
-		return errors.Wrapf(err, "failed to open download package %s", pkg)
+		return fmt.Errorf("failed to open download package %s: %w", pkg, err)
 	}
 
 	rpm, err := rpmutils.ReadRpm(pkgFile)
 	if err != nil {
-		return errors.Wrapf(err, "failed to parse RPM package %s", pkg)
+		return fmt.Errorf("failed to parse RPM package %s: %w", pkg, err)
 	}
 
 	if err := rpm.ExpandPayload(directory); err != nil {
-		return errors.Wrapf(err, "failed to extract RPM package %s", pkg)
+		return fmt.Errorf("failed to extract RPM package %s: %w", pkg, err)
 	}
 
 	fixKernelModulesSymlinks(directory, kernelUname, l)

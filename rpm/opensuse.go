@@ -1,9 +1,8 @@
 package rpm
 
 import (
+	"fmt"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/DataDog/nikos/rpm/dnf"
 	"github.com/DataDog/nikos/types"
@@ -52,7 +51,7 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 func NewOpenSUSEBackend(target *types.Target, reposDir string, logger types.Logger) (types.Backend, error) {
 	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create DNF backend")
+		return nil, fmt.Errorf("failed to create DNF backend: %w", err)
 	}
 
 	return &OpenSUSEBackend{
