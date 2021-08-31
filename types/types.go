@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/cobaugh/osrelease"
-	"github.com/pkg/errors"
 	"github.com/wille/osutil"
 	"golang.org/x/sys/unix"
 )
@@ -33,7 +32,7 @@ func NewTarget() (Target, error) {
 	var err error
 	var uname unix.Utsname
 	if err := unix.Uname(&uname); err != nil {
-		return target, errors.Wrap(err, "failed to call uname syscall")
+		return target, fmt.Errorf("failed to call uname syscall: %w", err)
 	}
 
 	target.Uname.Kernel = string(uname.Release[:bytes.IndexByte(uname.Release[:], 0)])

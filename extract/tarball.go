@@ -4,12 +4,13 @@ import (
 	"archive/tar"
 	"compress/bzip2"
 	"compress/gzip"
+	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/DataDog/nikos/types"
-	"github.com/pkg/errors"
 	"github.com/xi2/xz"
 )
 
@@ -36,7 +37,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 			break // End of archive
 		}
 		if err != nil {
-			return errors.Wrap(err, "failed to read entry from tarball")
+			return fmt.Errorf("failed to read entry from tarball: %w", err)
 		}
 
 		path := filepath.Join(directory, hdr.Name)

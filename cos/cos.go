@@ -2,11 +2,12 @@ package cos
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"cloud.google.com/go/storage"
 	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/types"
-	"github.com/pkg/errors"
 	"google.golang.org/api/option"
 )
 
@@ -22,7 +23,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	objectHandle := bucketHandle.Object(b.buildID + "/" + filename)
 	reader, err := objectHandle.NewReader(context.Background())
 	if err != nil {
-		return errors.Wrap(err, "failed to download bucket object")
+		return fmt.Errorf("failed to download bucket object: %w", err)
 	}
 	defer reader.Close()
 
@@ -38,7 +39,7 @@ func NewBackend(target *types.Target, logger types.Logger) (*Backend, error) {
 
 	client, err := storage.NewClient(context.Background(), option.WithoutAuthentication())
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to creating COS backend")
+		return nil, fmt.Errorf("failed to creating COS backend: %w", err)
 	}
 
 	return &Backend{

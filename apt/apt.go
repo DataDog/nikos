@@ -2,6 +2,7 @@ package apt
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -15,7 +16,6 @@ import (
 	"github.com/aptly-dev/aptly/deb"
 	"github.com/aptly-dev/aptly/http"
 	"github.com/arduino/go-apt-client"
-	"github.com/pkg/errors"
 	"github.com/xor-gate/ar"
 
 	"github.com/DataDog/nikos/extract"
@@ -47,7 +47,7 @@ func (b *Backend) extractPackage(pkg, directory string) error {
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			return errors.Wrap(err, "failed to decompress deb")
+			return fmt.Errorf("failed to decompress deb: %w", err)
 		}
 		b.logger.Debugf("Found header: %s", header.Name)
 
@@ -146,7 +146,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	url := packageURL.String()
 	outputFile := filepath.Join(directory, filepath.Base(url))
 	if err := downloader.Download(context.Background(), url, outputFile); err != nil {
-		return errors.Wrap(err, "failed to download "+url+" to "+directory)
+		return fmt.Errorf("failed to download %s to %s: %w", url, directory, err)
 	}
 	// defer os.Remove(outputFile)
 
@@ -187,14 +187,14 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 
 	if backend.db, err = goleveldb.NewOpenDB(tmpDir); err != nil {
 		backend.Close()
-		return nil, errors.Wrap(err, "failed to create aptly database")
+		return nil, fmt.Errorf("failed to create aptly database: %w", err)
 	}
 
 	backend.repoCollection = deb.NewRemoteRepoCollection(backend.db)
 
 	repoList, err := apt.ParseAPTConfigFolder(aptConfigDir)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse APT folder")
+		return nil, fmt.Errorf("failed to parse APT folder: %w", err)
 	}
 
 	for i, repo := range repoList {
@@ -212,7 +212,7 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 
 			if err := backend.repoCollection.Add(remoteRepo); err != nil {
 				backend.Close()
-				return nil, errors.Wrap(err, "failed to add collection")
+				return nil, fmt.Errorf("failed to add collection: %w", err)
 			}
 
 			backend.logger.Debugf("Added repository '%s' %s %s %v %v", repoID, repo.URI, repo.Distribution, components, debArch)

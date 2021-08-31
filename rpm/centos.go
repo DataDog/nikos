@@ -1,13 +1,12 @@
 package rpm
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/DataDog/nikos/rpm/dnf"
 	"github.com/DataDog/nikos/types"
@@ -24,7 +23,7 @@ type CentOSBackend struct {
 func getRedhatRelease() (string, error) {
 	redhatRelease, err := ioutil.ReadFile("/etc/redhat-release")
 	if err != nil {
-		return "", errors.Wrap(err, "failed to read /etc/redhat-release")
+		return "", fmt.Errorf("failed to read /etc/redhat-release: %w", err)
 	}
 
 	re := regexp.MustCompile(`.* release ([0-9\.]*)`)
@@ -69,12 +68,12 @@ func (b *CentOSBackend) GetKernelHeaders(directory string) error {
 
 		updatesURL := fmt.Sprintf("http://vault.centos.org/%s/updates/$basearch/", b.release)
 		if _, err := b.dnfBackend.AddRepository("C"+b.release+"-updates", updatesURL, true, gpgKey); err != nil {
-			return errors.Wrap(err, "failed to add Vault updates repository")
+			return fmt.Errorf("failed to add Vault updates repository: %w", err)
 		}
 	}
 
 	if _, err := b.dnfBackend.AddRepository("C"+b.release+"-base", baseURL, true, gpgKey); err != nil {
-		return errors.Wrap(err, "failed to add Vault base repository")
+		return fmt.Errorf("failed to add Vault base repository: %w", err)
 	}
 
 	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
@@ -87,13 +86,13 @@ func (b *CentOSBackend) Close() {
 func NewCentOSBackend(target *types.Target, reposDir string, logger types.Logger) (*CentOSBackend, error) {
 	release, err := getRedhatRelease()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to detect CentOS release")
+		return nil, fmt.Errorf("failed to detect CentOS release: %w", err)
 	}
 
 	version, _ := strconv.Atoi(strings.SplitN(release, ".", 2)[0])
 	dnfBackend, err := dnf.NewDnfBackend(fmt.Sprintf("%d", version), reposDir, logger, target)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create DNF backend")
+		return nil, fmt.Errorf("failed to create DNF backend: %w", err)
 	}
 
 	return &CentOSBackend{

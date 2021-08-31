@@ -1,13 +1,13 @@
 package extract
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/DataDog/nikos/types"
-	"github.com/pkg/errors"
 	"github.com/sassoftware/go-rpmutils"
 )
 
@@ -51,14 +51,14 @@ func fixKernelModulesSymlinks(directory, kernelUname string, l types.Logger) {
 			}
 
 			if err := os.Remove(symlink); err != nil {
-				l.Warnf("failed to unlink symlink at %s: %v", symlink, err)
+				l.Warnf("failed to unlink symlink at %s: %w", symlink, err)
 				continue
 			}
 
 			newDestinationPath := filepath.Join(directory, destinationPath)
 			err := os.Symlink(newDestinationPath, symlink)
 			if err != nil {
-				l.Warnf("failed to create symlink from %s to %s: %v", symlink, newDestinationPath, err)
+				l.Warnf("failed to create symlink from %s to %s: %w", symlink, newDestinationPath, err)
 				continue
 			}
 			l.Debugf("created symlink from %s to %s", symlink, newDestinationPath)

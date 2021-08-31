@@ -17,11 +17,10 @@ package dnf
 import "C"
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"unsafe"
-
-	"github.com/pkg/errors"
 
 	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/types"
