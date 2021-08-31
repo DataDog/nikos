@@ -67,7 +67,7 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 }
 
 func NewSLESBackend(target *types.Target, reposDir string, logger types.Logger) (types.Backend, error) {
-	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger)
+	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create DNF backend")
 	}

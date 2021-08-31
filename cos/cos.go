@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"cloud.google.com/go/storage"
-	"github.com/DataDog/nikos/tarball"
+	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/types"
 	"github.com/pkg/errors"
 	"google.golang.org/api/option"
@@ -26,7 +26,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	}
 	defer reader.Close()
 
-	tarball.ExtractTarball(reader, filename, directory, b.logger)
+	extract.ExtractTarball(reader, filename, directory, b.logger)
 	return err
 }
 

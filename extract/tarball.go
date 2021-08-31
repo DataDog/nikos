@@ -1,4 +1,4 @@
-package tarball
+package extract
 
 import (
 	"archive/tar"
@@ -44,7 +44,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 
 		switch hdr.Typeflag {
 		case tar.TypeSymlink:
-			os.Symlink(hdr.Linkname, path)
+			os.Symlink(filepath.Join(directory, hdr.Linkname), path)
 		case tar.TypeDir:
 			os.MkdirAll(path, 0755)
 		case tar.TypeReg:

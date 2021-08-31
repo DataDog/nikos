@@ -18,7 +18,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/xor-gate/ar"
 
-	"github.com/DataDog/nikos/tarball"
+	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/types"
 )
 
@@ -52,7 +52,7 @@ func (b *Backend) extractPackage(pkg, directory string) error {
 		b.logger.Debugf("Found header: %s", header.Name)
 
 		if strings.HasPrefix(header.Name, "data.tar") {
-			return tarball.ExtractTarball(reader, header.Name, directory, b.logger)
+			return extract.ExtractTarball(reader, header.Name, directory, b.logger)
 		}
 	}
 

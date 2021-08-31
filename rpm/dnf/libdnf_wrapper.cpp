@@ -34,7 +34,7 @@ const char* getErrorMessage(std::string prefix, GError* gerr) {
 
 const char* SetupDNFSack(DnfContext* context) {
     try {
-        DnfState* state = dnf_context_get_state(context);
+        DnfState* state = dnf_state_new();
 
         GError* gerr = nullptr;
         if (dnf_context_setup_sack(context, state, &gerr) == 0) {
@@ -209,6 +209,7 @@ CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, con
         const char* tmp_dir = "/tmp";
         const char* solv_dir = "/tmp/nikos-solv";
         const char* cache_dir = "/tmp/nikos-cache";
+        const char* install_root = "/opt/nikos/embedded";
 
         DnfLock* lock = dnf_lock_new();
         dnf_lock_set_lock_dir(lock, tmp_dir);
@@ -218,6 +219,7 @@ CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, con
         if (strlen(repos_dir) != 0) {
             dnf_context_set_repo_dir(context, repos_dir);
         }
+        dnf_context_set_install_root(context, install_root);
 
         dnf_context_set_release_ver(context, release);
 

@@ -8,7 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/DataDog/nikos/tarball"
+	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/types"
 )
 
@@ -34,7 +34,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	}
 	defer resp.Body.Close()
 
-	return tarball.ExtractTarball(resp.Body, filename, directory, b.logger)
+	return extract.ExtractTarball(resp.Body, filename, directory, b.logger)
 }
 
 func NewBackend(target *types.Target, logger types.Logger) (*Backend, error) {
