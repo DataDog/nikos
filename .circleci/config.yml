@@ -23,7 +23,7 @@ workflows:
       - test:
           matrix:
             parameters:
-              platform: ["centos", "opensuse", "debian", "ubuntu"]
+              platform: ["fedora", "centos", "opensuse", "debian", "ubuntu"]
 
 commands:
   restore_caches:
