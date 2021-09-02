@@ -3,8 +3,10 @@ version: 2.1
 jobs:
   test:
     parameters:
-        platform:
-          type: string
+      platform:
+        type: string
+      test_type:
+        type: string
     machine:
       image: android:202102-01
     steps:
@@ -16,6 +18,7 @@ jobs:
       - set_permissions
       - molecule_test:
           platform: << parameters.platform >>
+          test_type: << parameters.test_type >>
 
 workflows:
   all-tests:
@@ -24,13 +27,14 @@ workflows:
           matrix:
             parameters:
               platform: ["fedora", "centos", "opensuse", "debian", "ubuntu"]
+              test_type: ["host", "container"]
 
 commands:
   restore_caches:
     steps:
       - restore_cache:
           keys:
-            - apt-dependencies-v2-{{ checksum "tests/apt-requirements.txt"  }}
+            - apt-dependencies-v2-{{ checksum ".circleci/apt-requirements.txt"  }}
       
       - restore_cache:
           keys:
@@ -38,7 +42,7 @@ commands:
 
       - restore_cache:
           keys:
-            - python-dependencies-v1-{{ checksum "tests/requirements.txt" }}
+            - python-dependencies-v1-{{ checksum ".circleci/requirements.txt" }}
 
   setup:
     description: "Set up build env & install all dependencies"
@@ -64,7 +68,7 @@ commands:
                 fi
                 sudo apt-get install -y --download-only -o dir::cache=`pwd`/apt-cache -o Debug::NoLocking=1 $p
               fi
-            done <tests/apt-requirements.txt
+            done <.circleci/apt-requirements.txt
             sudo chown -R $(whoami) apt-cache
 
             # Install all packages in the cache
@@ -91,14 +95,14 @@ commands:
             virtualenv -p /opt/circleci/.pyenv/shims/python3 venv
             source venv/bin/activate
             pip install --upgrade pip
-            pip install -r tests/requirements.txt
+            pip install -r .circleci/requirements.txt
 
   save_caches:
     steps:
       - save_cache:
           paths:
             - apt-cache
-          key: apt-dependencies-v2-{{ checksum "tests/apt-requirements.txt"  }}
+          key: apt-dependencies-v2-{{ checksum ".circleci/apt-requirements.txt"  }}
 
       - save_cache:
           paths:
@@ -108,13 +112,13 @@ commands:
       - save_cache:
           paths:
             - ./venv
-          key: python-dependencies-v1-{{ checksum "tests/requirements.txt" }}
+          key: python-dependencies-v1-{{ checksum ".circleci/requirements.txt" }}
 
   build_nikos:
     steps:
       - run: 
           name: Build the nikos binary
-          command: bash tests/build_install_nikos.sh . tests/nikos-libs.tar.gz
+          command: bash .ci_build/build_install_nikos.sh . .ci_build/nikos-libs.tar.gz
 
   set_permissions:
     steps:
@@ -126,10 +130,12 @@ commands:
     parameters:
       platform:
         type: string
+      test_type:
+        type: string
     steps:
       - run:
           name: Run molecule tests
           command: |
             source venv/bin/activate
             cd tests
-            molecule test -s << parameters.platform >>        
+            molecule test -s << parameters.platform >>-<< parameters.test_type >>

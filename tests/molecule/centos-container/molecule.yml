@@ -6,20 +6,26 @@ driver:
   provider:
     name: libvirt
 platforms:
-  # - name: fedora32
-  #   box: generic/fedora32
-  #   memory: 512
-  #   cpus: 1
-  - name: fedora33
-    box: generic/fedora33
+  - name: centos7.1804.02
+    box: centos/7
+    box_version: 1804.02
     memory: 512
     cpus: 1
-  - name: fedora34
-    box: generic/fedora34
+  - name: centos7.1905.1
+    box: centos/7
+    box_version: 1905.1
+    memory: 512
+    cpus: 1
+  - name: centos8.1905.1
+    box: centos/8
+    box_version: 1905.1
     memory: 512
     cpus: 1
 provisioner:
   name: ansible
+  env:
+    TEST_TYPE: 'container'
+    NIKOS_PREFIX: sudo docker exec -ti debian
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml

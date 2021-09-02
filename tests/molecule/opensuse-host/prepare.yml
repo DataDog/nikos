@@ -1,0 +1,9 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+  - name: Install rsync
+    package:
+      name: rsync
+      state: present
+    become: true

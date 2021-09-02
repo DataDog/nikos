@@ -1,7 +1,7 @@
 ---
 - name: list download packages
   find:
-    paths: "{{ output_path }}"
+    paths: /tmp/result
     patterns: "linux-headers*.deb"
   register: files_found
 

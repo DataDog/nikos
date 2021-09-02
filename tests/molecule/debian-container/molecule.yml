@@ -6,25 +6,29 @@ driver:
   provider:
     name: libvirt
 platforms:
-  - name: centos7.1804.02
-    box: centos/7
-    box_version: 1804.02
+  - name: debian8
+    box: roboxes/debian8
     memory: 512
     cpus: 1
-  - name: centos7.1905.1
-    box: centos/7
-    box_version: 1905.1
+  - name: debian9
+    box: roboxes/debian9
     memory: 512
     cpus: 1
-  - name: centos8.1905.1
-    box: centos/8
-    box_version: 1905.1
+  - name: debian10
+    box: roboxes/debian10
     memory: 512
     cpus: 1
 provisioner:
   name: ansible
+  env:
+    TEST_TYPE: 'container'
+    NIKOS_PREFIX: sudo docker exec -ti debian
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml
+  inventory:
+    host_vars:
+      debian8:
+        ansible_python_interpreter: "/usr/bin/python2.7"
 verifier:
   name: ansible
