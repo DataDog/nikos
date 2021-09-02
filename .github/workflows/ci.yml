@@ -36,3 +36,24 @@ jobs:
 
       - name: Verify build
         run: /opt/nikos/bin/nikos
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: nikos-binary
+          path: /opt/nikos/bin/nikos
+          retention-days: 1
+
+  verify-glibc:
+    name: Check GLIBC references
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the nikos artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: nikos-binary
+          path: /opt/nikos/bin
+
+      - name: Fail if there are references to GLIBC >= 2.18
+        run: objdump -p /opt/nikos/bin/nikos | egrep -zqv 'GLIBC_2\.(1[8-9]|[2-9][0-9])'
