@@ -57,3 +57,56 @@ jobs:
 
       - name: Fail if there are references to GLIBC >= 2.18
         run: objdump -p /opt/nikos/bin/nikos | egrep -zqv 'GLIBC_2\.(1[8-9]|[2-9][0-9])'
+
+  test-wsl:
+    name: Tests nikos on WSL
+    runs-on: windows-2019
+    defaults:
+      run:
+          shell: wsl-bash {0}
+    steps:
+      - name: Set up WSL
+        uses: Vampire/setup-wsl@v1
+        with:
+          use-cache: 'false'
+          wsl-shell-command: bash -leo pipefail
+          additional-packages:
+              dos2unix
+              git
+              wget
+              ca-certificates
+              build-essential
+              pkg-config
+
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Install Go 1.16
+        run: |
+          wget -q https://dl.google.com/go/go1.16.linux-amd64.tar.gz 
+          sudo tar -xf go1.16.linux-amd64.tar.gz
+          sudo mv go /usr/local
+          echo 'export GOROOT=/usr/local/go' | sudo tee -a  ~/.bashrc
+          echo 'export GOPATH=$HOME/go' | sudo tee -a  ~/.bashrc
+          echo 'export PATH=$GOPATH/bin:$GOROOT/bin:$PATH' | sudo tee -a  ~/.bashrc
+      
+      - name: Download go dependencies
+        run: go mod download
+
+      - name: Convert nikos build script to dos format
+        run: dos2unix tests/build_install_nikos.sh
+
+      - name: Build nikos (with dnf)
+        run: bash tests/build_install_nikos.sh . tests/nikos-libs.tar.gz
+
+      - name: Verify build
+        run: /opt/nikos/bin/nikos
+
+      - name: Create output directory
+        run: mkdir -p /tmp/result.host
+
+      - name: Run nikos
+        run: SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --output /tmp/result.host 2>&1 tee /tmp/result.host/logs.txt
+
+      - name: Check kernel headers were successfully downloaded
+        run: find /tmp/result.host -name *.tar.gz
