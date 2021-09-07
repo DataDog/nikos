@@ -5,7 +5,7 @@ package dnf
 // #cgo pkg-config: gio-2.0
 // #cgo pkg-config: libdnf
 //
-// #cgo LDFLAGS: -Wl,--wrap=__secure_getenv -Wl,--wrap=glob64 -Wl,--wrap=glob -Wl,--wrap=log -Wl,--wrap=pow
+// #cgo LDFLAGS: -Wl,--wrap=__secure_getenv -Wl,--wrap=glob64 -Wl,--wrap=glob
 // #include "glib_wrapper.h"
 // #include "libdnf_wrapper.h"
 //

@@ -12,6 +12,11 @@ Commands used to find symbols requiring a new version of GLIBC:
 $ objdump -p nikos
 // figure out which functions/symbols need that version
 $ nm nikos | grep GLIBC_2.27
+
+Additional glibc functions are wrapped in glib_log_pow_wrapper.h. Those functions had
+to be placed in a separate file so that they can be optionally included in the build through
+the use of the 'tests' build tag. This was necessary because they conflict with wrapper 
+functions defined in the datadog-agent source code.
 */
 
 #ifndef GLIB_WRAPPER_H
@@ -58,22 +63,6 @@ asm(".symver __glob_prior_glibc, glob@" GLIBC_VERS);
 
 int __wrap_glob(GLOB_ARGS) {
   return __glob_prior_glibc(pattern, flags, errfunc, pglob);
-}
-
-int __log_prior_glibc(double x);
-
-asm(".symver __log_prior_glibc, log@" GLIBC_VERS);
-
-double __wrap_log(double x) {
-  return __log_prior_glibc(x);
-}
-
-int __pow_prior_glibc(double x, double y);
-
-asm(".symver __pow_prior_glibc, pow@" GLIBC_VERS);
-
-double __wrap_pow(double x, double y) {
-  return __pow_prior_glibc(x, y);
 }
 
 #endif

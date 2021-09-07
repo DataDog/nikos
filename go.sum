@@ -194,8 +194,8 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/lebauce/aptly v0.7.2-0.20201005164315-09522984a976 h1:AqaR29P5INgl7Uqwmu7kdbB7GYZIv/NsgUXUdnFXECg=
-github.com/lebauce/aptly v0.7.2-0.20201005164315-09522984a976/go.mod h1:+3II479yQc6qORocqKTXZQupY2SVnKPWDC2VMA7Zk9s=
+github.com/lebauce/aptly v0.7.2-0.20210723103859-345a32860f4d h1:6k4uyp3yRFzEmzQZjnneNYhIvNvvcu9XIvFyalzuBAE=
+github.com/lebauce/aptly v0.7.2-0.20210723103859-345a32860f4d/go.mod h1:Uot/EzgnIw6okZTyEZ/Q8+er5ZXy2Bqrrabr/M6OxUE=
 github.com/lebauce/osutil v0.0.0-20201027170515-5409e8e42a87 h1:38oaxSDpYgZiCmv3/g1QI+1fB/WaVJA89RLxkO8kKKY=
 github.com/lebauce/osutil v0.0.0-20201027170515-5409e8e42a87/go.mod h1:8mynkFldwsrffW4/Bp59D5bzt37KQcBzlnBysF6kyjc=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
