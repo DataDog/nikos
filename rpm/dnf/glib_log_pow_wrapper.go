@@ -1,5 +1,5 @@
 // +build dnf
-// +build tests
+// +build molecule
 
 package dnf
 

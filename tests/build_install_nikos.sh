@@ -23,7 +23,7 @@ export PKG_CONFIG_PATH=$NIKOS_EMBEDDED_PATH/lib/pkgconfig
 export CGO_LDFLAGS="-L${NIKOS_EMBEDDED_PATH}/lib ${linker_flags} -static-libstdc++ -pthread -ldl -lm"
 
 # Build & install binary
-go build -tags "dnf tests" $SOURCE_FILES_PATH
+go build -tags "dnf molecule" $SOURCE_FILES_PATH
 
 sudo mkdir -p $NIKOS_BIN_PATH
 sudo mv nikos $NIKOS_BIN_PATH
