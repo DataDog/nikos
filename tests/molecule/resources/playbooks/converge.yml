@@ -28,6 +28,7 @@
         - /etc/redhat-release:/etc/redhat-release:ro
         - /etc/apt:/etc/apt:ro
         - /etc/zypp/repos.d:/etc/zypp/repos.d:ro
+        - /etc/yum.repos.d:/etc/yum.repos.d:ro
         - /etc/pki:/etc/pki:ro
         - /opt/nikos:/opt/nikos:ro
         - /tmp/result:/tmp/result
