@@ -22,3 +22,21 @@
 - include_tasks: verify-package-rpm.yml
   when: ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'openSUSE Leap')
 
+- name: get path to downloaded headers
+  shell: |
+    kern_version=$(uname -r)
+    header_path=lib/modules/$kern_version/build/include/generated/uapi/linux/version.h
+    echo $header_path
+  register: header_path
+
+- name: stat "{{ output_path }}/{{ header_path.stdout }}"
+  stat:
+    path: "{{ output_path }}/{{ header_path.stdout }}"
+  register: stat_result
+
+- name: check kernel headers were successfully unpacked
+  assert:
+    that: stat_result.stat.exists
+  ignore_errors: true
+  
+
