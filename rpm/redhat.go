@@ -9,11 +9,33 @@ import (
 
 type RedHatBackend struct {
 	dnfBackend *dnf.DnfBackend
+	logger     types.Logger
 	target     *types.Target
 }
 
 func (b *RedHatBackend) GetKernelHeaders(directory string) error {
+	// First, check for the correct kernel-headers package
 	pkgNevra := "kernel-headers-" + b.target.Uname.Kernel
+	err := b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
+	if err == nil {
+		return nil
+	}
+
+	// If that doesn't work, try again with the updates-archive repo
+	b.logger.Infof("Trying with updates-archive repository")
+	gpgKey := "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch"
+	baseURL := "https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/"
+	if _, err := b.dnfBackend.AddRepository("updates-archive", baseURL, true, gpgKey); err == nil {
+		err = b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
+		if err == nil {
+			return nil
+		}
+	} else {
+		b.logger.Warnf("Failed to add updates-archive repository: %w", err)
+	}
+
+	// As a last resort, check for the kernel-devel package
+	pkgNevra = "kernel-devel-" + b.target.Uname.Kernel
 	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 }
 
@@ -29,6 +51,7 @@ func NewRedHatBackend(target *types.Target, reposDir string, logger types.Logger
 
 	return &RedHatBackend{
 		target:     target,
+		logger:     logger,
 		dnfBackend: dnfBackend,
 	}, nil
 }
