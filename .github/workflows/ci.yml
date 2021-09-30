@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build nikos (with dnf)
-        run: bash tests/build_install_nikos.sh . tests/nikos-libs.tar.gz
+        run: bash .ci_build/build_install_nikos.sh . .ci_build/nikos-libs.tar.gz
 
       - name: Verify build
         run: /opt/nikos/bin/nikos
@@ -94,19 +94,19 @@ jobs:
         run: go mod download
 
       - name: Convert nikos build script to dos format
-        run: dos2unix tests/build_install_nikos.sh
+        run: dos2unix .ci_build/build_install_nikos.sh
 
       - name: Build nikos (with dnf)
-        run: bash tests/build_install_nikos.sh . tests/nikos-libs.tar.gz
+        run: bash .ci_build/build_install_nikos.sh . .ci_build/nikos-libs.tar.gz
 
       - name: Verify build
         run: /opt/nikos/bin/nikos
 
       - name: Create output directory
-        run: mkdir -p /tmp/result.host
+        run: mkdir -p /tmp/result
 
       - name: Run nikos
-        run: SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --output /tmp/result.host 2>&1 tee /tmp/result.host/logs.txt
+        run: SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --output /tmp/result 2>&1 tee /tmp/result/logs.txt
 
       - name: Check kernel headers were successfully downloaded
-        run: find /tmp/result.host -name *.tar.gz
+        run: find /tmp/result -name *.tar.gz

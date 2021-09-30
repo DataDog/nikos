@@ -1,0 +1,29 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+platforms:
+  - name: ubuntu1604
+    box: roboxes/ubuntu1604
+    memory: 512
+    cpus: 1
+  - name: ubuntu1804
+    box: roboxes/ubuntu1804
+    memory: 512
+    cpus: 1
+  - name: ubuntu2004
+    box: roboxes/ubuntu2004
+    memory: 512
+    cpus: 1
+provisioner:
+  name: ansible
+  env:
+    TEST_TYPE: 'host'
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    verify: ../resources/playbooks/verify.yml
+verifier:
+  name: ansible
