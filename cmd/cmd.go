@@ -102,12 +102,6 @@ func SetupCommands() error {
 		return fmt.Errorf("failed to retrieve target information: %s", err)
 	}
 
-	if _, err := os.Stat("/run/WSL"); err == nil {
-		target.Distro.Display = "wsl"
-	} else if id := target.OSRelease["ID"]; target.Distro.Display == "" && id != "" {
-		target.Distro.Display = id
-	}
-
 	RootCmd.PersistentFlags().StringVarP(&osReleaseFile, "os-release", "", "", "path to os-release file")
 	RootCmd.PersistentFlags().StringVarP(&target.Distro.Display, "distribution", "d", target.Distro.Display, "distribution name")
 	RootCmd.PersistentFlags().StringVarP(&target.Distro.Release, "release", "r", target.Distro.Release, "distribution release")
