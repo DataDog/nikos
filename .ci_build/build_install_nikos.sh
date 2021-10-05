@@ -28,3 +28,18 @@ go build -tags "dnf molecule" $SOURCE_FILES_PATH
 sudo mkdir -p $NIKOS_BIN_PATH
 sudo mv nikos $NIKOS_BIN_PATH
 sudo chmod -R 0755 $NIKOS_BIN_PATH
+
+# Clean up the embedded path
+sudo mkdir -p nikos_embedded_files/bin
+sudo mkdir nikos_embedded_files/lib
+
+sudo mv $NIKOS_EMBEDDED_PATH/bin/gpg                nikos_embedded_files/bin
+sudo mv $NIKOS_EMBEDDED_PATH/lib/rpm                nikos_embedded_files/lib
+sudo mv $NIKOS_EMBEDDED_PATH/lib/libreadline.s*     nikos_embedded_files/lib
+sudo mv $NIKOS_EMBEDDED_PATH/lib/libncursesw.s*     nikos_embedded_files/lib
+sudo mv $NIKOS_EMBEDDED_PATH/lib/libtinfow.s*       nikos_embedded_files/lib
+sudo mv $NIKOS_EMBEDDED_PATH/lib/libtinfo.s*        nikos_embedded_files/lib
+sudo mv $NIKOS_EMBEDDED_PATH/ssl                    nikos_embedded_files
+
+sudo rm -rf $NIKOS_EMBEDDED_PATH/*
+sudo mv nikos_embedded_files/* $NIKOS_EMBEDDED_PATH
