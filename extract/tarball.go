@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/DataDog/nikos/types"
 	"github.com/xi2/xz"
@@ -44,7 +45,13 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 
 		switch hdr.Typeflag {
 		case tar.TypeSymlink:
-			os.Symlink(filepath.Join(directory, hdr.Linkname), path)
+			// If the symlink is to an absolute path, prefix it with the download directory
+			if strings.HasPrefix(hdr.Linkname, "/") {
+				os.Symlink(filepath.Join(directory, hdr.Linkname), path)
+				continue
+			}
+			// If the symlink is to a relative path, leave it be
+			os.Symlink(hdr.Linkname, path)
 		case tar.TypeDir:
 			os.MkdirAll(path, 0755)
 		case tar.TypeReg:
