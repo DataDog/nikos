@@ -2,6 +2,8 @@
 - name: Converge
   hosts: all
   become: true
+  vars:
+    test_type: "{{ lookup('env', 'TEST_TYPE') }}"
   tasks:
   - synchronize:
       src: /opt/nikos
@@ -11,10 +13,11 @@
 
   - name: Create a directory if it does not exist
     file:
-      path: /tmp/result.docker
+      path: /tmp/result
       state: directory
       mode: 0755
     become: true
+    when: test_type == 'container'
 
   - name: Create a debian container
     community.general.docker_container:
@@ -25,8 +28,10 @@
         - /etc/redhat-release:/etc/redhat-release:ro
         - /etc/apt:/etc/apt:ro
         - /etc/zypp/repos.d:/etc/zypp/repos.d:ro
+        - /etc/yum.repos.d:/etc/yum.repos.d:ro
         - /etc/pki:/etc/pki:ro
         - /opt/nikos:/opt/nikos:ro
-        - /tmp/result.docker:/tmp/result.docker
+        - /tmp/result:/tmp/result
       command: sleep 3600
     become: true
+    when: test_type == 'container'

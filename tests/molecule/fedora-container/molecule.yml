@@ -6,20 +6,23 @@ driver:
   provider:
     name: libvirt
 platforms:
-  - name: ubuntu1604
-    box: roboxes/ubuntu1604
+  - name: fedora32
+    box: generic/fedora32
     memory: 512
     cpus: 1
-  - name: ubuntu1804
-    box: roboxes/ubuntu1804
+  - name: fedora33
+    box: generic/fedora33
     memory: 512
     cpus: 1
-  - name: ubuntu2004
-    box: roboxes/ubuntu2004
+  - name: fedora34
+    box: generic/fedora34
     memory: 512
     cpus: 1
 provisioner:
   name: ansible
+  env:
+    TEST_TYPE: 'container'
+    NIKOS_PREFIX: sudo docker exec -ti debian
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml

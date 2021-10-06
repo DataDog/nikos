@@ -1,0 +1,24 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+platforms:
+  - name: opensuse15
+    box: roboxes/opensuse15
+    memory: 512
+    cpus: 1
+    provider_options:
+      disk_bus: '"sata"'
+provisioner:
+  name: ansible
+  env:
+    TEST_TYPE: 'container'
+    NIKOS_PREFIX: sudo docker exec -ti debian
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    verify: ../resources/playbooks/verify.yml
+verifier:
+  name: ansible
