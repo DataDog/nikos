@@ -41,10 +41,10 @@ sudo mv $NIKOS_EMBEDDED_PATH/lib/libtinfow.s*       nikos_embedded_files/lib
 sudo mv $NIKOS_EMBEDDED_PATH/lib/libtinfo.s*        nikos_embedded_files/lib
 sudo mv $NIKOS_EMBEDDED_PATH/ssl                    nikos_embedded_files
 
-sudo rm  $NIKOS_EMBEDDED_PATH/lib/rpm/debugedit
-sudo rm  $NIKOS_EMBEDDED_PATH/lib/rpm/elfdeps
-sudo rm  $NIKOS_EMBEDDED_PATH/lib/rpm/rpmdeps
-sudo rm  $NIKOS_EMBEDDED_PATH/lib/rpm/sepdebugcrcfix
+sudo rm nikos_embedded_files/lib/rpm/debugedit
+sudo rm nikos_embedded_files/lib/rpm/elfdeps
+sudo rm nikos_embedded_files/lib/rpm/rpmdeps
+sudo rm nikos_embedded_files/lib/rpm/sepdebugcrcfix
 
 sudo rm -rf $NIKOS_EMBEDDED_PATH/*
 sudo mv nikos_embedded_files/* $NIKOS_EMBEDDED_PATH
