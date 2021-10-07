@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/aptly-dev/aptly/aptly"
 	"github.com/aptly-dev/aptly/database"
 	"github.com/aptly-dev/aptly/database/goleveldb"
 	"github.com/aptly-dev/aptly/deb"
@@ -59,23 +60,9 @@ func (b *Backend) extractPackage(pkg, directory string) error {
 	return errors.New("failed to decompress deb")
 }
 
-func (b *Backend) GetKernelHeaders(directory string) error {
-	downloader := http.NewDownloader(0, 1, nil)
-
-	// TODO(lebauce) fix GPG verifier
-	// gpgVerifier := pgp.NewGpgVerifier(pgp.GPGDefaultFinder())
-
-	collectionFactory := deb.NewCollectionFactory(b.db)
-
-	kernelRelease := b.target.Uname.Kernel
-	query := &deb.FieldQuery{
-		Field:    "Name",
-		Relation: deb.VersionPatternMatch,
-		Value:    "linux-headers-" + kernelRelease + "*",
-	}
-	b.logger.Infof("Looking for %s", query.Value)
-
+func (b *Backend) downloadPackage(downloader aptly.Downloader, factory *deb.CollectionFactory, query *deb.FieldQuery, directory string) (*deb.PackageDependencies, error) {
 	var packageURL *url.URL
+	var packageDeps *deb.PackageDependencies
 
 	err := b.repoCollection.ForEach(func(repo *deb.RemoteRepo) error {
 		if packageURL != nil {
@@ -90,7 +77,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 		}
 
 		b.logger.Debug("Downloading package indexes")
-		if err := repo.DownloadPackageIndexes(nil, downloader, nil, collectionFactory, false); err != nil {
+		if err := repo.DownloadPackageIndexes(nil, downloader, nil, factory, false); err != nil {
 			b.logger.Debugf("Failed to download package indexes: %s", err)
 			return err
 		}
@@ -123,10 +110,11 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 
 			packageFiles := pkg.Files()
 			if len(packageFiles) == 0 {
-				return errors.New("No package file for %s" + pkg.Name)
+				return errors.New("No package file for " + pkg.Name)
 			}
 
 			packageURL = repo.PackageURL(packageFiles[0].DownloadURL())
+			packageDeps = pkg.Deps()
 			b.logger.Infof("Package URL: %s", packageURL)
 			return nil
 		})
@@ -135,22 +123,68 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if packageURL == nil {
-		return errors.New("failed to find package linux-headers-" + kernelRelease)
+		return nil, errors.New("failed to find package " + query.Value)
 	}
 
 	b.logger.Info("Downloading package")
 	url := packageURL.String()
 	outputFile := filepath.Join(directory, filepath.Base(url))
 	if err := downloader.Download(context.Background(), url, outputFile); err != nil {
-		return fmt.Errorf("failed to download %s to %s: %w", url, directory, err)
+		return nil, fmt.Errorf("failed to download %s to %s: %w", url, directory, err)
 	}
 	// defer os.Remove(outputFile)
 
-	return b.extractPackage(outputFile, directory)
+	return packageDeps, b.extractPackage(outputFile, directory)
+}
+
+func (b *Backend) GetKernelHeaders(directory string) error {
+	downloader := http.NewDownloader(0, 1, nil)
+
+	// TODO(lebauce) fix GPG verifier
+	// gpgVerifier := pgp.NewGpgVerifier(pgp.GPGDefaultFinder())
+
+	collectionFactory := deb.NewCollectionFactory(b.db)
+
+	kernelRelease := b.target.Uname.Kernel
+	query := &deb.FieldQuery{
+		Field:    "Name",
+		Relation: deb.VersionPatternMatch,
+		Value:    "linux-headers-" + kernelRelease + "*",
+	}
+	b.logger.Infof("Looking for %s", query.Value)
+
+	dependencies, err := b.downloadPackage(downloader, collectionFactory, query, directory)
+	if err != nil {
+		return err
+	}
+
+	// Sometimes, the header package depends on other header packages
+	// If this is the case, download the dependency in addition
+	if dependencies != nil {
+		for _, dep := range dependencies.Depends {
+			if strings.HasPrefix(dep, "linux-headers") {
+
+				depName := strings.Split(dep, " ")[0]
+				b.logger.Infof("Looking for dependency %s", dep)
+				query = &deb.FieldQuery{
+					Field:    "Name",
+					Relation: deb.VersionPatternMatch,
+					Value:    depName,
+				}
+
+				_, err = b.downloadPackage(downloader, collectionFactory, query, directory)
+				if err != nil {
+					b.logger.Warnf("Failed to download dependent package %s", depName)
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) (*Backend, error) {

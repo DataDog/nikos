@@ -16,7 +16,7 @@ require (
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
-	github.com/sassoftware/go-rpmutils v0.1.1
+	github.com/sassoftware/go-rpmutils v0.2.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.0.0
 	github.com/ugorji/go v1.1.7 // indirect

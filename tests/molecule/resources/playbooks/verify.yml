@@ -31,18 +31,11 @@
   - include_tasks: verify-package-rpm.yml
     when: ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'openSUSE Leap' or ansible_distribution == 'Fedora')
 
-  - name: get path to downloaded headers
-    shell: |
-      kern_version=$(uname -r)
-      header_path=lib/modules/$kern_version/build/include/generated/uapi/linux/version.h
-      echo $header_path
-    register: header_path
+  - include_tasks: verify-headers.yml
+    when: not (ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora'))
+    
+  - include_tasks: verify-headers-centos.yml
+    when: ansible_distribution is defined and ansible_distribution == 'CentOS'
 
-  - name: stat "/tmp/result/{{ header_path.stdout }}"
-    stat:
-      path: "/tmp/result/{{ header_path.stdout }}"
-    register: stat_result
-
-  - name: check kernel headers were successfully unpacked
-    assert:
-      that: stat_result.stat.exists
+  - include_tasks: verify-headers-fedora.yml
+    when: ansible_distribution is defined and ansible_distribution == 'Fedora'
