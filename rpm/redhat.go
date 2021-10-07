@@ -7,6 +7,11 @@ import (
 	"github.com/DataDog/nikos/types"
 )
 
+const (
+	updatesRepoGPGKey  = "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch"
+	updatesRepoBaseURL = "https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/"
+)
+
 type RedHatBackend struct {
 	dnfBackend *dnf.DnfBackend
 	logger     types.Logger
@@ -23,9 +28,7 @@ func (b *RedHatBackend) GetKernelHeaders(directory string) error {
 
 	// If that doesn't work, try again with the updates-archive repo
 	b.logger.Infof("Trying with updates-archive repository")
-	gpgKey := "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch"
-	baseURL := "https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/"
-	if _, err := b.dnfBackend.AddRepository("updates-archive", baseURL, true, gpgKey); err == nil {
+	if _, err := b.dnfBackend.AddRepository("updates-archive", updatesRepoBaseURL, true, updatesRepoGPGKey); err == nil {
 		err = b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 		if err == nil {
 			return nil
