@@ -166,7 +166,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	// If this is the case, download the dependency in addition
 	if dependencies != nil {
 		for _, dep := range dependencies.Depends {
-			if strings.HasPrefix(dep, "linux-headers") {
+			if strings.Contains(dep, "linux") && strings.Contains(dep, "headers") {
 
 				depName := strings.Split(dep, " ")[0]
 				b.logger.Infof("Looking for dependency %s", dep)
