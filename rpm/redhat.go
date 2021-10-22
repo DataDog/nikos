@@ -8,7 +8,6 @@ import (
 )
 
 const (
-	updatesRepoGPGKey  = "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch"
 	updatesRepoBaseURL = "https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/"
 )
 
@@ -27,6 +26,7 @@ func (b *RedHatBackend) GetKernelHeaders(directory string) error {
 	}
 
 	// If that doesn't work, try again with the updates-archive repo
+	updatesRepoGPGKey := "file:///" + types.HostEtc("pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch")
 	b.logger.Infof("Trying with updates-archive repository")
 	if _, err := b.dnfBackend.AddRepository("updates-archive", updatesRepoBaseURL, true, updatesRepoGPGKey); err == nil {
 		err = b.dnfBackend.GetKernelHeaders(pkgNevra, directory)

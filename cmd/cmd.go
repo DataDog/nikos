@@ -46,9 +46,11 @@ var RootCmd = &cobra.Command{
 var DownloadCmd = &cobra.Command{
 	Use: "download package",
 	Run: func(c *cobra.Command, args []string) {
+		log.Infof("OS family: %s\n", target.Distro.Family)
 		log.Infof("Distribution: %s\n", target.Distro.Display)
 		log.Infof("Release: %s\n", target.Distro.Release)
 		log.Infof("Kernel: %s\n", target.Uname.Kernel)
+		log.Infof("Machine: %s\n", target.Uname.Machine)
 		log.Debugf("OSRelease: %s\n", target.OSRelease)
 
 		var (
@@ -60,23 +62,33 @@ var DownloadCmd = &cobra.Command{
 		if verbose {
 			logger.SetLevel(log.DebugLevel)
 		}
-		switch target.Distro.Display {
-		case "Fedora", "RHEL":
-			backend, err = rpm.NewRedHatBackend(&target, rpmReposDir, logger)
-		case "CentOS":
-			backend, err = rpm.NewCentOSBackend(&target, rpmReposDir, logger)
-		case "openSUSE":
-			backend, err = rpm.NewOpenSUSEBackend(&target, rpmReposDir, logger)
-		case "SLE":
-			backend, err = rpm.NewSLESBackend(&target, rpmReposDir, logger)
-		case "Debian", "Ubuntu":
+		switch target.Distro.Family {
+		case "fedora", "rhel":
+			switch target.Distro.Display {
+			case "fedora", "rhel":
+				backend, err = rpm.NewRedHatBackend(&target, rpmReposDir, logger)
+			case "centos":
+				backend, err = rpm.NewCentOSBackend(&target, rpmReposDir, logger)
+			default:
+				err = fmt.Errorf("unsupported RedHat based distribution '%s'", target.Distro.Display)
+			}
+		case "suse":
+			switch target.Distro.Display {
+			case "suse", "sles", "sled", "caasp":
+				backend, err = rpm.NewSLESBackend(&target, rpmReposDir, logger)
+			case "opensuse", "opensuse-leap", "opensuse-tumbleweed", "opensuse-tumbleweed-kubic":
+				backend, err = rpm.NewOpenSUSEBackend(&target, rpmReposDir, logger)
+			default:
+				err = fmt.Errorf("unsupported Debian based distribution '%s'", target.Distro.Display)
+			}
+		case "debian":
 			backend, err = apt.NewBackend(&target, aptConfigDir, logger)
 		case "cos":
 			backend, err = cos.NewBackend(&target, logger)
 		case "wsl":
 			backend, err = wsl.NewBackend(&target, logger)
 		default:
-			err = fmt.Errorf("Unsupported distribution '%s'", target.Distro.Display)
+			err = fmt.Errorf("unsupported distribution '%s'", target.Distro.Display)
 		}
 		if err != nil {
 			log.Fatal(err)
@@ -103,20 +115,21 @@ func SetupCommands() error {
 	}
 
 	RootCmd.PersistentFlags().StringVarP(&osReleaseFile, "os-release", "", "", "path to os-release file")
-	RootCmd.PersistentFlags().StringVarP(&target.Distro.Display, "distribution", "d", target.Distro.Display, "distribution name")
+	RootCmd.PersistentFlags().StringVarP(&target.Distro.Family, "family", "f", target.Distro.Family, "OS family")
+	RootCmd.PersistentFlags().StringVarP(&target.Distro.Display, "platform", "p", target.Distro.Display, "OS platform")
 	RootCmd.PersistentFlags().StringVarP(&target.Distro.Release, "release", "r", target.Distro.Release, "distribution release")
 	RootCmd.PersistentFlags().StringVarP(&target.Uname.Kernel, "kernel", "k", target.Uname.Kernel, "kernel version")
 	RootCmd.PersistentFlags().StringVarP(&target.Uname.Machine, "arch", "a", target.Uname.Machine, "architecture")
 	RootCmd.PersistentFlags().StringVarP(&outputDir, "output", "o", "/tmp", "output directory")
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode")
 
-	switch target.Distro.Display {
-	case "Debian", "Ubuntu":
-		RootCmd.PersistentFlags().StringVarP(&aptConfigDir, "apt-config-dir", "", "/etc/apt", "APT configuration dir")
-	case "Fedora", "RHEL", "CentOS":
-		RootCmd.PersistentFlags().StringVarP(&rpmReposDir, "yum-repos-dir", "", "/etc/yum.repos.d", "YUM configuration dir")
-	case "openSUSE", "SLE":
-		RootCmd.PersistentFlags().StringVarP(&rpmReposDir, "yum-repos-dir", "", "/etc/zypp/repos.d", "YUM configuration dir")
+	switch target.Distro.Family {
+	case "debian":
+		RootCmd.PersistentFlags().StringVarP(&aptConfigDir, "apt-config-dir", "", types.HostEtc("apt"), "APT configuration dir")
+	case "fedora", "rhel":
+		RootCmd.PersistentFlags().StringVarP(&rpmReposDir, "yum-repos-dir", "", types.HostEtc("yum.repos.d"), "YUM configuration dir")
+	case "suse":
+		RootCmd.PersistentFlags().StringVarP(&rpmReposDir, "yum-repos-dir", "", types.HostEtc("zypp", "repos.d"), "YUM configuration dir")
 	default:
 	}
 

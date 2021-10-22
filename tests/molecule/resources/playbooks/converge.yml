@@ -23,13 +23,10 @@
     community.general.docker_container:
       name: debian
       image: debian
+      env:
+        HOST_ETC: /host/etc
       volumes:
-        - /etc/os-release:/etc/os-release:ro
-        - /etc/redhat-release:/etc/redhat-release:ro
-        - /etc/apt:/etc/apt:ro
-        - /etc/zypp/repos.d:/etc/zypp/repos.d:ro
-        - /etc/yum.repos.d:/etc/yum.repos.d:ro
-        - /etc/pki:/etc/pki:ro
+        - /etc:/host/etc:ro
         - /opt/nikos:/opt/nikos:ro
         - /tmp/result:/tmp/result
       command: sleep 3600

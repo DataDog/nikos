@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/storage v1.12.0
 	github.com/AlekSi/pointer v1.1.0 // indirect
 	github.com/DisposaBoy/JsonConfigReader v0.0.0-20171218180944-5ea4d0ddac55 // indirect
+	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/aptly-dev/aptly v1.4.1-0.20211102140819-ab2f5420c617
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/awalterschulze/gographviz v2.0.1+incompatible // indirect
@@ -17,13 +18,14 @@ require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/sassoftware/go-rpmutils v0.2.0
+	github.com/shirou/gopsutil v3.21.9+incompatible
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.0.0
+	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/ugorji/go v1.1.7 // indirect
-	github.com/wille/osutil v0.0.0-20200805111424-0dc696c283a2
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 	github.com/xor-gate/ar v0.0.0-20170530204233-5c72ae81e2b7
-	golang.org/x/sys v0.0.0-20200905004654-be1d3432aa8f
+	golang.org/x/sys v0.0.0-20210816074244-15123e1e1f71
 	google.golang.org/api v0.32.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
