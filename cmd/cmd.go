@@ -65,7 +65,9 @@ var DownloadCmd = &cobra.Command{
 		switch target.Distro.Family {
 		case "fedora", "rhel":
 			switch target.Distro.Display {
-			case "fedora", "rhel":
+			case "fedora":
+				backend, err = rpm.NewFedoraBackend(&target, rpmReposDir, logger)
+			case "rhel", "redhat":
 				backend, err = rpm.NewRedHatBackend(&target, rpmReposDir, logger)
 			case "centos":
 				backend, err = rpm.NewCentOSBackend(&target, rpmReposDir, logger)

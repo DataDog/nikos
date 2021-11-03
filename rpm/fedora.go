@@ -11,15 +11,23 @@ const (
 	updatesRepoBaseURL = "https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/"
 )
 
-type RedHatBackend struct {
+type FedoraBackend struct {
 	dnfBackend *dnf.DnfBackend
 	logger     types.Logger
 	target     *types.Target
 }
 
-func (b *RedHatBackend) GetKernelHeaders(directory string) error {
+func (b *FedoraBackend) GetKernelHeaders(directory string) error {
+	for _, repo := range b.dnfBackend.GetEnabledRepositories() {
+		if repo.Id != "base" && repo.Id != "updates" {
+			b.dnfBackend.DisableRepository(repo)
+			continue
+		}
+	}
+
 	// First, check for the correct kernel-headers package
 	pkgNevra := "kernel-headers-" + b.target.Uname.Kernel
+	fmt.Printf("Repositories %+v\n", b.dnfBackend.GetEnabledRepositories())
 	err := b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 	if err == nil {
 		return nil
@@ -28,7 +36,7 @@ func (b *RedHatBackend) GetKernelHeaders(directory string) error {
 	// If that doesn't work, try again with the updates-archive repo
 	updatesRepoGPGKey := "file:///" + types.HostEtc("pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch")
 	b.logger.Infof("Trying with updates-archive repository")
-	if _, err := b.dnfBackend.AddRepository("updates-archive", updatesRepoBaseURL, true, updatesRepoGPGKey); err == nil {
+	if _, err := b.dnfBackend.AddRepository("updates-archive", updatesRepoBaseURL, true, updatesRepoGPGKey, "", "", ""); err == nil {
 		err = b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 		if err == nil {
 			return nil
@@ -42,17 +50,17 @@ func (b *RedHatBackend) GetKernelHeaders(directory string) error {
 	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 }
 
-func (b *RedHatBackend) Close() {
+func (b *FedoraBackend) Close() {
 	b.dnfBackend.Close()
 }
 
-func NewRedHatBackend(target *types.Target, reposDir string, logger types.Logger) (*RedHatBackend, error) {
+func NewFedoraBackend(target *types.Target, reposDir string, logger types.Logger) (*FedoraBackend, error) {
 	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create DNF backend: %w", err)
+		return nil, fmt.Errorf("failed to create fedora dnf backend: %w", err)
 	}
 
-	return &RedHatBackend{
+	return &FedoraBackend{
 		target:     target,
 		logger:     logger,
 		dnfBackend: dnfBackend,
