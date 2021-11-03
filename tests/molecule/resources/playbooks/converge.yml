@@ -27,6 +27,7 @@
         HOST_ETC: /host/etc
       volumes:
         - /etc:/host/etc:ro
+        - /etc/os-release:/host/etc/os-release:ro
         - /opt/nikos:/opt/nikos:ro
         - /tmp/result:/tmp/result
       command: sleep 3600
