@@ -87,7 +87,7 @@ func (b *DnfBackend) lookupPackage(filter, comparison int, value string) (*C.Dnf
 	return result.pkg, nil
 }
 
-func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey string) (*Repository, error) {
+func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey, sslCACert, sslClientCert, sslClientKey string) (*Repository, error) {
 	idC := C.CString(id)
 	defer C.free(unsafe.Pointer(idC))
 
@@ -97,7 +97,16 @@ func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey stri
 	gpgKeyC := C.CString(gpgKey)
 	defer C.free(unsafe.Pointer(gpgKeyC))
 
-	result := C.AddRepository(b.dnfContext, idC, baseurlC, C.bool(enabled), gpgKeyC)
+	sslCACertC := C.CString(sslCACert)
+	defer C.free(unsafe.Pointer(sslCACertC))
+
+	sslClientCertC := C.CString(sslClientCert)
+	defer C.free(unsafe.Pointer(sslClientCertC))
+
+	sslClientKeyC := C.CString(sslClientKey)
+	defer C.free(unsafe.Pointer(sslClientKeyC))
+
+	result := C.AddRepository(b.dnfContext, idC, baseurlC, C.bool(enabled), gpgKeyC, sslCACertC, sslClientCertC, sslClientKeyC)
 
 	if result.err_msg != nil {
 		defer C.free(unsafe.Pointer(result.err_msg))

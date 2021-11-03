@@ -39,8 +39,9 @@ LookupPackageResult LookupPackage(DnfContext* context, int filter, int compariso
 RETURN_VAL_STRUCT(DownloadPackageResult, const char* filename);
 DownloadPackageResult DownloadPackage(DnfContext* context, DnfPackage* pkg, const char* output_dir);
 
-RETURN_VAL_STRUCT(AddRepositoryResult, DnfRepo* libdnf_repo);
-AddRepositoryResult AddRepository(DnfContext* context, const char* id, const char* baseurl, bool enabled, const char* gpgkey);
+RETURN_VAL_STRUCT(AddRepositoryResult, DnfRepo* libdnf_repo; GKeyFile *key_file);
+AddRepositoryResult AddRepository(DnfContext* context, const char* id, const char* baseurl, bool enabled, const char* gpgkey,
+                                  const char *sslcacert, const char *sslclientcert, const char *sslclientkey);
 
 const char* EnableRepository(DnfContext* context, DnfRepo* libdnf_repo);
 

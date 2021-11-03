@@ -107,7 +107,11 @@ DownloadPackageResult DownloadPackage(DnfContext* context, DnfPackage* pkg, cons
     return result;
 }
 
-AddRepositoryResult AddRepository(DnfContext* context, const char* id, const char* baseurl, bool enabled, const char* gpgkey) {
+AddRepositoryResult AddRepository(
+    DnfContext* context, const char* id, const char* baseurl, bool enabled,
+    const char* gpgkey, const char *sslcacert, const char *sslclientcert,
+    const char *sslclientkey)
+{
     AddRepositoryResult result = {0};
     try {
         DnfRepo* libdnf_repo = dnf_repo_new(context);
@@ -116,9 +120,21 @@ AddRepositoryResult AddRepository(DnfContext* context, const char* id, const cha
         g_autoptr(GKeyFile) key_file = g_key_file_new();
         g_key_file_set_string(key_file, id, "baseurl", baseurl);
 
-        if (strlen(gpgkey) != 0) {
+        if (gpgkey && strlen(gpgkey) != 0) {
             dnf_repo_set_gpgcheck(libdnf_repo, gboolean(1));
             g_key_file_set_string(key_file, id, "gpgkey", gpgkey); 
+        }
+
+        if (sslcacert && strlen(sslcacert) != 0) {
+            g_key_file_set_string(key_file, id, "sslcacert", sslcacert);
+        }
+
+        if (sslclientcert && strlen(sslclientcert) != 0) {
+            g_key_file_set_string(key_file, id, "sslclientcert", sslclientcert);
+        }
+
+        if (sslclientkey && strlen(sslclientkey) != 0) {
+            g_key_file_set_string(key_file, id, "sslclientkey", sslclientkey);
         }
 
         dnf_repo_set_keyfile(libdnf_repo, key_file);

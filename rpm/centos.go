@@ -65,12 +65,12 @@ func (b *CentOSBackend) GetKernelHeaders(directory string) error {
 		baseURL = fmt.Sprintf("http://vault.centos.org/%s/os/$basearch/", b.release)
 
 		updatesURL := fmt.Sprintf("http://vault.centos.org/%s/updates/$basearch/", b.release)
-		if _, err := b.dnfBackend.AddRepository("C"+b.release+"-updates", updatesURL, true, gpgKey); err != nil {
+		if _, err := b.dnfBackend.AddRepository("C"+b.release+"-updates", updatesURL, true, gpgKey, "", "", ""); err != nil {
 			return fmt.Errorf("failed to add Vault updates repository: %w", err)
 		}
 	}
 
-	if _, err := b.dnfBackend.AddRepository("C"+b.release+"-base", baseURL, true, gpgKey); err != nil {
+	if _, err := b.dnfBackend.AddRepository("C"+b.release+"-base", baseURL, true, gpgKey, "", "", ""); err != nil {
 		return fmt.Errorf("failed to add Vault base repository: %w", err)
 	}
 
