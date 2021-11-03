@@ -25,3 +25,6 @@ test.rhel:
 
 test.ubuntu:
 	docker run --rm --name focal -e HOST_ETC=/host/etc -ti -v ./fixtures/ubuntu/focal:/host:ro -v $(pwd)/..:/nikos ubuntu:focal /nikos/nikos.sh download --kernel $(cat /nikos/fixtures/ubuntu/focal/kernel) --arch $(cat /nikos/fixtures/ubuntu/focal/arch)'
+
+test.centos:
+	docker run -e HOST_ETC=/host/etc -v /opt:/opt:ro -v $$(pwd)/centos/7:/host:ro -v $$(dirname $$(pwd)):/nikos -ti fedora bash -c '/nikos/nikos -v download --kernel $$(cat /nikos/fixtures/centos/7/kernel) --arch $$(cat /nikos/fixtures/centos/7/arch)'
