@@ -12,6 +12,7 @@ require (
 	github.com/awalterschulze/gographviz v2.0.1+incompatible // indirect
 	github.com/cheggaaa/pb v1.0.29 // indirect
 	github.com/cobaugh/osrelease v0.0.0-20181218015638-a93a0a55a249
+	github.com/go-ini/ini v1.63.2
 	github.com/h2non/filetype v1.1.0 // indirect
 	github.com/jlaffaye/ftp v0.0.0-20200812143550-39e3779af0db // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect

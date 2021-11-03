@@ -42,12 +42,10 @@ func (b *CentOSBackend) GetKernelHeaders(directory string) error {
 	// This should work if the user is using the latest minor version
 	b.logger.Info("Trying with 'base' and 'updates' repositories")
 
-	var disabledRepositories []*dnf.Repository
 	for _, repo := range b.dnfBackend.GetEnabledRepositories() {
 		if repo.Id != "base" && repo.Id != "updates" {
 			b.dnfBackend.DisableRepository(repo)
 		}
-		disabledRepositories = append(disabledRepositories, repo)
 	}
 
 	if b.dnfBackend.GetKernelHeaders(pkgNevra, directory) == nil {
