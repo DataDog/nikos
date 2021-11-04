@@ -2,15 +2,14 @@ package types
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/DataDog/gopsutil/host"
 	"github.com/cobaugh/osrelease"
-	"github.com/shirou/gopsutil/host"
 	"golang.org/x/sys/unix"
 )
 
@@ -35,7 +34,7 @@ type Target struct {
 }
 
 func NewTarget() (Target, error) {
-	platform, family, version, err := host.PlatformInformationWithContext(context.Background())
+	platform, family, version, err := host.PlatformInformation()
 	if err != nil {
 		return Target{}, err
 	}

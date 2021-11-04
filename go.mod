@@ -5,6 +5,7 @@ go 1.14
 require (
 	cloud.google.com/go/storage v1.12.0
 	github.com/AlekSi/pointer v1.1.0 // indirect
+	github.com/DataDog/gopsutil v0.0.0-20210930103100-d4e8ef640507
 	github.com/DisposaBoy/JsonConfigReader v0.0.0-20171218180944-5ea4d0ddac55 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/aptly-dev/aptly v1.4.1-0.20211102140819-ab2f5420c617
@@ -19,16 +20,14 @@ require (
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/sassoftware/go-rpmutils v0.2.0
-	github.com/shirou/gopsutil v3.21.9+incompatible
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.0.0
-	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/ugorji/go v1.1.7 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 	github.com/xor-gate/ar v0.0.0-20170530204233-5c72ae81e2b7
-	golang.org/x/sys v0.0.0-20210816074244-15123e1e1f71
+	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf
 	google.golang.org/api v0.32.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 
-replace github.com/wille/osutil => github.com/lebauce/osutil v0.0.0-20201027170515-5409e8e42a87
+replace github.com/DataDog/gopsutil => github.com/lebauce/gopsutil v0.0.0-20211104132239-f6b7ea94684c
