@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/storage v1.12.0
 	github.com/AlekSi/pointer v1.1.0 // indirect
 	github.com/DisposaBoy/JsonConfigReader v0.0.0-20171218180944-5ea4d0ddac55 // indirect
-	github.com/aptly-dev/aptly v1.4.0
+	github.com/aptly-dev/aptly v1.4.1-0.20211102140819-ab2f5420c617
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/awalterschulze/gographviz v2.0.1+incompatible // indirect
 	github.com/cheggaaa/pb v1.0.29 // indirect
@@ -27,7 +27,5 @@ require (
 	google.golang.org/api v0.32.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
-
-replace github.com/aptly-dev/aptly => github.com/lebauce/aptly v0.7.2-0.20210927125351-710eda859941
 
 replace github.com/wille/osutil => github.com/lebauce/osutil v0.0.0-20201027170515-5409e8e42a87
