@@ -26,7 +26,11 @@
       env:
         HOST_ETC: /host/etc
       volumes:
-        - /etc:/host/etc:ro
+        - /etc/apt:/host/etc/apt:ro
+        - /etc/zypp/repos.d:/host/etc/zypp/repos.d:ro
+        - /etc/yum.repos.d:/host/etc/yum.repos.d:ro
+        - /etc/pki:/host/etc/pki:ro
+        - /etc/redhat-release:/etc/redhat-release:ro
         - /etc/os-release:/host/etc/os-release:ro
         - /etc/fedora-release:/host/etc/fedora-release:ro
         - /opt/nikos:/opt/nikos:ro
