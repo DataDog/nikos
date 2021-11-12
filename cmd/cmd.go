@@ -62,18 +62,28 @@ var DownloadCmd = &cobra.Command{
 		if verbose {
 			logger.SetLevel(log.DebugLevel)
 		}
-		switch target.Distro.Display {
-		case "fedora":
-			backend, err = rpm.NewFedoraBackend(&target, rpmReposDir, logger)
-		case "rhel", "redhat":
-			backend, err = rpm.NewRedHatBackend(&target, rpmReposDir, logger)
-		case "centos":
-			backend, err = rpm.NewCentOSBackend(&target, rpmReposDir, logger)
-		case "suse", "sles", "sled", "caasp":
-			backend, err = rpm.NewSLESBackend(&target, rpmReposDir, logger)
-		case "opensuse", "opensuse-leap", "opensuse-tumbleweed", "opensuse-tumbleweed-kubic":
-			backend, err = rpm.NewOpenSUSEBackend(&target, rpmReposDir, logger)
-		case "debian", "ubuntu":
+		switch target.Distro.Family {
+		case "fedora", "rhel":
+			switch target.Distro.Display {
+			case "fedora":
+				backend, err = rpm.NewFedoraBackend(&target, rpmReposDir, logger)
+			case "rhel", "redhat":
+				backend, err = rpm.NewRedHatBackend(&target, rpmReposDir, logger)
+			case "centos":
+				backend, err = rpm.NewCentOSBackend(&target, rpmReposDir, logger)
+			default:
+				err = fmt.Errorf("unsupported RedHat based distribution '%s'", target.Distro.Display)
+			}
+		case "suse":
+			switch target.Distro.Display {
+			case "suse", "sles", "sled", "caasp":
+				backend, err = rpm.NewSLESBackend(&target, rpmReposDir, logger)
+			case "opensuse", "opensuse-leap", "opensuse-tumbleweed", "opensuse-tumbleweed-kubic":
+				backend, err = rpm.NewOpenSUSEBackend(&target, rpmReposDir, logger)
+			default:
+				err = fmt.Errorf("unsupported Debian based distribution '%s'", target.Distro.Display)
+			}
+		case "debian":
 			backend, err = apt.NewBackend(&target, aptConfigDir, logger)
 		case "cos":
 			backend, err = cos.NewBackend(&target, logger)
