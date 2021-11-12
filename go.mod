@@ -29,3 +29,5 @@ require (
 	google.golang.org/api v0.32.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
+
+replace github.com/DataDog/gopsutil => github.com/DataDog/gopsutil v0.0.0-20211112231309-1e2204a98d89
