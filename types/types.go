@@ -39,6 +39,8 @@ func NewTarget() (Target, error) {
 		return Target{}, err
 	}
 
+	platform = strings.Trim(platform, "\"")
+
 	target := Target{
 		Distro: Distro{
 			Display: platform,
