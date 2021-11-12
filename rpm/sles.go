@@ -42,7 +42,7 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 			gpgKey := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/repodata/repomd.xml.key")
 
 			b.logger.Infof("Using with %s repository", repoID)
-			b.dnfBackend.AddRepository(repoID, baseurl, true, gpgKey)
+			b.dnfBackend.AddRepository(repoID, baseurl, true, gpgKey, "", "", "")
 		}
 
 		addKernelRepository(version)
@@ -58,7 +58,7 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 		baseurl := fmt.Sprintf("https://download.opensuse.org/distribution/jump/%s/repo/oss/", versionID)
 
 		b.logger.Infof("Using with %s repository", repoID)
-		b.dnfBackend.AddRepository(repoID, baseurl, true, "")
+		b.dnfBackend.AddRepository(repoID, baseurl, true, "", "", "", "")
 	}
 
 	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)

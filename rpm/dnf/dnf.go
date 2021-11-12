@@ -19,8 +19,13 @@ import "C"
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
+	"strings"
 	"unsafe"
+
+	"github.com/go-ini/ini"
 
 	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/types"
@@ -82,7 +87,7 @@ func (b *DnfBackend) lookupPackage(filter, comparison int, value string) (*C.Dnf
 	return result.pkg, nil
 }
 
-func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey string) (*Repository, error) {
+func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey, sslCACert, sslClientCert, sslClientKey string) (*Repository, error) {
 	idC := C.CString(id)
 	defer C.free(unsafe.Pointer(idC))
 
@@ -92,7 +97,16 @@ func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey stri
 	gpgKeyC := C.CString(gpgKey)
 	defer C.free(unsafe.Pointer(gpgKeyC))
 
-	result := C.AddRepository(b.dnfContext, idC, baseurlC, C.bool(enabled), gpgKeyC)
+	sslCACertC := C.CString(sslCACert)
+	defer C.free(unsafe.Pointer(sslCACertC))
+
+	sslClientCertC := C.CString(sslClientCert)
+	defer C.free(unsafe.Pointer(sslClientCertC))
+
+	sslClientKeyC := C.CString(sslClientKey)
+	defer C.free(unsafe.Pointer(sslClientKeyC))
+
+	result := C.AddRepository(b.dnfContext, idC, baseurlC, C.bool(enabled), gpgKeyC, sslCACertC, sslClientCertC, sslClientKeyC)
 
 	if result.err_msg != nil {
 		defer C.free(unsafe.Pointer(result.err_msg))
@@ -158,6 +172,48 @@ func (b *DnfBackend) GetEnabledRepositories() (repos []*Repository) {
 	return
 }
 
+func hostifyRepositories(reposDir string) (string, error) {
+	tmpDir, err := ioutil.TempDir("", "repos.d")
+	if err != nil {
+		return "", err
+	}
+
+	logger.Infof("Scanning repo files in '%s'", reposDir)
+	repoFiles, err := filepath.Glob(reposDir + "/*.repo")
+	if err != nil {
+		os.RemoveAll(tmpDir)
+		return "", err
+	}
+
+	for _, repoFile := range repoFiles {
+		logger.Infof("Reading repo file '%s'", repoFile)
+		cfg, err := ini.Load(repoFile)
+		if err != nil {
+			logger.Warnf("Fail to read file '%s': %v", repoFile, err)
+		}
+
+		sections := cfg.Sections()
+		for _, section := range sections {
+			keys := section.Keys()
+			for _, key := range keys {
+				value := key.String()
+				if strings.HasPrefix(value, "/etc/") {
+					key.SetValue(types.HostEtc(strings.TrimPrefix(value, "/etc/")))
+				} else if strings.HasPrefix(value, "file:///etc/") {
+					key.SetValue("file://" + types.HostEtc(strings.TrimPrefix(value, "file:///etc/")))
+				}
+			}
+		}
+
+		filename := filepath.Join(tmpDir, filepath.Base(repoFile))
+		if err := cfg.SaveTo(filename); err != nil {
+			logger.Warnf("Fail to write file '%s': %v", filename, err)
+		}
+	}
+
+	return tmpDir, nil
+}
+
 func NewDnfBackend(release string, reposDir string, l types.Logger, target *types.Target) (*DnfBackend, error) {
 	logger = l
 	C.dnf_set_default_handler()
@@ -165,7 +221,13 @@ func NewDnfBackend(release string, reposDir string, l types.Logger, target *type
 	releaseC := C.CString(release)
 	defer C.free(unsafe.Pointer(releaseC))
 
-	reposDirC := C.CString(reposDir)
+	tmpDir, err := hostifyRepositories(reposDir)
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmpDir)
+
+	reposDirC := C.CString(tmpDir)
 	defer C.free(unsafe.Pointer(reposDirC))
 
 	result := C.CreateAndSetupDNFContext(releaseC, reposDirC)

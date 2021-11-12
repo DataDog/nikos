@@ -233,10 +233,7 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 
 	for i, repo := range repoList {
 		if repo.Enabled && !repo.SourceRepo {
-			prefix := target.Distro.Codename
-			if prefix == "" {
-				prefix = target.Distro.Display
-			}
+			prefix := target.Distro.Display
 			repoID := fmt.Sprintf("%s-%d", prefix, i)
 			components := strings.Split(repo.Components, " ")
 			remoteRepo, err := deb.NewRemoteRepo(repoID, repo.URI, repo.Distribution, components, []string{debArch}, false, false, false)

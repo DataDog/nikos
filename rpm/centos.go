@@ -1,7 +1,6 @@
 package rpm
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"regexp"
@@ -21,7 +20,8 @@ type CentOSBackend struct {
 }
 
 func getRedhatRelease() (string, error) {
-	redhatRelease, err := ioutil.ReadFile("/etc/redhat-release")
+	redhatReleasePath := types.HostEtc("redhat-release")
+	redhatRelease, err := ioutil.ReadFile(redhatReleasePath)
 	if err != nil {
 		return "", fmt.Errorf("failed to read /etc/redhat-release: %w", err)
 	}
@@ -32,7 +32,7 @@ func getRedhatRelease() (string, error) {
 		return submatches[1], nil
 	}
 
-	return "", errors.New("failed to parse release from /etc/redhat-release")
+	return "", fmt.Errorf("failed to parse release from %s", redhatReleasePath)
 }
 
 func (b *CentOSBackend) GetKernelHeaders(directory string) error {
@@ -42,12 +42,10 @@ func (b *CentOSBackend) GetKernelHeaders(directory string) error {
 	// This should work if the user is using the latest minor version
 	b.logger.Info("Trying with 'base' and 'updates' repositories")
 
-	var disabledRepositories []*dnf.Repository
 	for _, repo := range b.dnfBackend.GetEnabledRepositories() {
 		if repo.Id != "base" && repo.Id != "updates" {
 			b.dnfBackend.DisableRepository(repo)
 		}
-		disabledRepositories = append(disabledRepositories, repo)
 	}
 
 	if b.dnfBackend.GetKernelHeaders(pkgNevra, directory) == nil {
@@ -58,7 +56,7 @@ func (b *CentOSBackend) GetKernelHeaders(directory string) error {
 	b.logger.Infof("Trying with Vault repositories for %s", b.release)
 
 	var baseURL string
-	gpgKey := "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-"
+	gpgKey := "file:///" + types.HostEtc("pki/rpm-gpg/RPM-GPG-KEY-")
 	if b.version >= 8 {
 		gpgKey += "centosofficial" // gpg key name convention changed in centos8
 		baseURL = fmt.Sprintf("http://vault.centos.org/%s/BaseOS/$basearch/os/", b.release)
@@ -67,12 +65,12 @@ func (b *CentOSBackend) GetKernelHeaders(directory string) error {
 		baseURL = fmt.Sprintf("http://vault.centos.org/%s/os/$basearch/", b.release)
 
 		updatesURL := fmt.Sprintf("http://vault.centos.org/%s/updates/$basearch/", b.release)
-		if _, err := b.dnfBackend.AddRepository("C"+b.release+"-updates", updatesURL, true, gpgKey); err != nil {
+		if _, err := b.dnfBackend.AddRepository("C"+b.release+"-updates", updatesURL, true, gpgKey, "", "", ""); err != nil {
 			return fmt.Errorf("failed to add Vault updates repository: %w", err)
 		}
 	}
 
-	if _, err := b.dnfBackend.AddRepository("C"+b.release+"-base", baseURL, true, gpgKey); err != nil {
+	if _, err := b.dnfBackend.AddRepository("C"+b.release+"-base", baseURL, true, gpgKey, "", "", ""); err != nil {
 		return fmt.Errorf("failed to add Vault base repository: %w", err)
 	}
 
