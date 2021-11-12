@@ -43,6 +43,10 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/DataDog/gopsutil v0.0.0-20210930103100-d4e8ef640507/go.mod h1:glkxNt/qRu9lnpmUEQwOIAXW+COWDTBOTEAHqbgBPts=
 github.com/DataDog/gopsutil v0.0.0-20211112161121-b026dcc33056 h1:2bY0QVrpIrCmC35JIeARitmbwY2OZIRiryfiloNF7j4=
 github.com/DataDog/gopsutil v0.0.0-20211112161121-b026dcc33056/go.mod h1:glkxNt/qRu9lnpmUEQwOIAXW+COWDTBOTEAHqbgBPts=
+github.com/DataDog/gopsutil v0.0.0-20211112164333-6134561bfed5 h1:q6hT212eCGRvcQeYIeDrez/c31Dn39xNHgejajASiSc=
+github.com/DataDog/gopsutil v0.0.0-20211112164333-6134561bfed5/go.mod h1:glkxNt/qRu9lnpmUEQwOIAXW+COWDTBOTEAHqbgBPts=
+github.com/DataDog/gopsutil v0.0.0-20211112164900-8f8129f14b50 h1:+7NjyufLN/KCZRfL5kuDrsNR8j70zRgRLtSGFxeDkUo=
+github.com/DataDog/gopsutil v0.0.0-20211112164900-8f8129f14b50/go.mod h1:glkxNt/qRu9lnpmUEQwOIAXW+COWDTBOTEAHqbgBPts=
 github.com/DataDog/zstd v1.4.5 h1:EndNeuB0l9syBZhut0wns3gV1hL8zX8LIu6ZiVHWLIQ=
 github.com/DataDog/zstd v1.4.5/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
 github.com/DisposaBoy/JsonConfigReader v0.0.0-20130112093355-33a99fdf1d5e/go.mod h1:GCzqZQHydohgVLSIqRKZeTt8IGb1Y4NaFfim3H40uUI=
