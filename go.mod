@@ -5,7 +5,7 @@ go 1.14
 require (
 	cloud.google.com/go/storage v1.12.0
 	github.com/AlekSi/pointer v1.1.0 // indirect
-	github.com/DataDog/gopsutil v0.0.0-20210930103100-d4e8ef640507
+	github.com/DataDog/gopsutil v0.0.0-20211112161121-b026dcc33056
 	github.com/DisposaBoy/JsonConfigReader v0.0.0-20171218180944-5ea4d0ddac55 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/aptly-dev/aptly v1.4.1-0.20211102140819-ab2f5420c617
@@ -29,5 +29,3 @@ require (
 	google.golang.org/api v0.32.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
-
-replace github.com/DataDog/gopsutil => github.com/lebauce/gopsutil v0.0.0-20211104132239-f6b7ea94684c
