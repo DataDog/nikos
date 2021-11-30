@@ -219,9 +219,16 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 		tmpDir: tmpDir,
 	}
 
-	if backend.db, err = goleveldb.NewOpenDB(tmpDir); err != nil {
+	logger.Infof("**** Temp dir: %s", tmpDir)
+
+	if backend.db, err = goleveldb.NewDB(tmpDir); err != nil {
 		backend.Close()
-		return nil, fmt.Errorf("failed to create aptly database: %w", err)
+		return nil, fmt.Errorf("failed to make new aptly database: %w", err)
+	}
+
+	if backend.db, err = backend.db.Open(); err != nil {
+		backend.Close()
+		return nil, fmt.Errorf("failed to open aptly database: %w", err)
 	}
 
 	backend.repoCollection = deb.NewRemoteRepoCollection(backend.db)
