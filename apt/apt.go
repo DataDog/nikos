@@ -226,7 +226,7 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 		return nil, fmt.Errorf("failed to make new aptly database: %w", err)
 	}
 
-	if backend.db, err = backend.db.Open(); err != nil {
+	if err = backend.db.Open(); err != nil {
 		backend.Close()
 		return nil, fmt.Errorf("failed to open aptly database: %w", err)
 	}
