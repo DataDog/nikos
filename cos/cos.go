@@ -31,6 +31,8 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	return err
 }
 
+func (b *Backend) Close() {}
+
 func NewBackend(target *types.Target, logger types.Logger) (*Backend, error) {
 	buildID := target.OSRelease["BUILD_ID"]
 	if buildID == "" {

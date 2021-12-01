@@ -51,6 +51,10 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 }
 
+func (b *OpenSUSEBackend) Close() {
+	b.dnfBackend.Close()
+}
+
 func NewOpenSUSEBackend(target *types.Target, reposDir string, logger types.Logger) (types.Backend, error) {
 	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
 	if err != nil {

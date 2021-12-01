@@ -15,6 +15,7 @@ import (
 
 type Backend interface {
 	GetKernelHeaders(directory string) error
+	Close()
 }
 
 type Utsname struct {

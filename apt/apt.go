@@ -32,6 +32,7 @@ type Backend struct {
 }
 
 func (b *Backend) Close() {
+	b.db.Close()
 	os.RemoveAll(b.tmpDir)
 }
 
