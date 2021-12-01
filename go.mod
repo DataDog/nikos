@@ -8,11 +8,11 @@ require (
 	github.com/DataDog/gopsutil v0.0.0-20211112180027-9aa392ae181a
 	github.com/DisposaBoy/JsonConfigReader v0.0.0-20171218180944-5ea4d0ddac55 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
+	github.com/acobaugh/osrelease v0.1.0
 	github.com/aptly-dev/aptly v1.4.1-0.20211102140819-ab2f5420c617
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/awalterschulze/gographviz v2.0.1+incompatible // indirect
 	github.com/cheggaaa/pb v1.0.29 // indirect
-	github.com/cobaugh/osrelease v0.0.0-20181218015638-a93a0a55a249
 	github.com/go-ini/ini v1.63.2
 	github.com/h2non/filetype v1.1.0 // indirect
 	github.com/jlaffaye/ftp v0.0.0-20200812143550-39e3779af0db // indirect

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cobaugh/osrelease"
+	"github.com/acobaugh/osrelease"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 

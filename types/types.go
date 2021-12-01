@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/DataDog/gopsutil/host"
-	"github.com/cobaugh/osrelease"
+	"github.com/acobaugh/osrelease"
 	"golang.org/x/sys/unix"
 )
 
