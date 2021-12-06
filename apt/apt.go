@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/aptly-dev/aptly/aptly"
 	"github.com/aptly-dev/aptly/database"
@@ -17,6 +18,10 @@ import (
 	"github.com/aptly-dev/aptly/deb"
 	"github.com/aptly-dev/aptly/http"
 	"github.com/arduino/go-apt-client"
+	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/filter"
+	"github.com/syndtr/goleveldb/leveldb/opt"
+	"github.com/syndtr/goleveldb/leveldb/storage"
 	"github.com/xor-gate/ar"
 
 	"github.com/DataDog/nikos/extract"
@@ -209,7 +214,7 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 		return nil, fmt.Errorf("unsupported architecture '%s'", target.Uname.Machine)
 	}
 
-	tmpDir, err := ioutil.TempDir("", "aptly-db")
+	tmpDir, err := ioutil.TempDir("/var/tmp", "aptly-db")
 	if err != nil {
 		return nil, err
 	}
@@ -220,10 +225,74 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 		tmpDir: tmpDir,
 	}
 
-	if backend.db, err = goleveldb.NewOpenDB(tmpDir); err != nil {
+	// if backend.db, err = goleveldb.NewOpenDB(tmpDir); err != nil {
+	// 	backend.Close()
+	// 	return nil, fmt.Errorf("failed to create aptly database: %w", err)
+	// }
+
+	// Start
+	if backend.db, err = goleveldb.NewDB(tmpDir); err != nil {
 		backend.Close()
-		return nil, fmt.Errorf("failed to create aptly database: %w", err)
+		return nil, fmt.Errorf("failed to make new aptly database: %w", err)
 	}
+
+	if fi, err := os.Stat(tmpDir); err == nil {
+		if !fi.IsDir() {
+			return nil, fmt.Errorf("leveldb/storage: open %s: not a directory", tmpDir)
+		}
+	} else if os.IsNotExist(err) {
+		if err := os.MkdirAll(tmpDir, 0755); err != nil {
+			return nil, fmt.Errorf("leveldb/storage: error making directory: %w", err)
+		}
+	} else {
+		return nil, fmt.Errorf("failed to stat leveldb storage file: %w", err)
+	}
+
+	lock, err := os.OpenFile(filepath.Join(tmpDir, "LOCK"), os.O_RDWR, 0)
+	if os.IsNotExist(err) {
+		lock, err = os.OpenFile(filepath.Join(tmpDir, "LOCK"), os.O_RDWR|os.O_CREATE, 0755) //0644)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to create lock file: %w", err)
+	}
+
+	err = syscall.Flock(int(lock.Fd()), syscall.LOCK_EX|syscall.LOCK_NB)
+	if err != nil {
+		lock.Close()
+		return nil, fmt.Errorf("failed to set lock file %s: %w", filepath.Join(tmpDir, "LOCK"), err)
+	}
+
+	var logw *os.File
+	logw, err = os.OpenFile(filepath.Join(tmpDir, "LOG"), os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create log file: %w", err)
+	}
+	_, err = logw.Seek(0, os.SEEK_END)
+	if err != nil {
+		logw.Close()
+		return nil, fmt.Errorf("failed to read log file: %w", err)
+	}
+
+	logger.Info("Created storage lock & log files")
+
+	stor, err := storage.OpenFile(tmpDir, false)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open leveldb storage file: %w", err)
+	}
+
+	o := &opt.Options{
+		Filter:                 filter.NewBloomFilter(10),
+		OpenFilesCacheCapacity: 256,
+	}
+	_, err = leveldb.Open(stor, o)
+	if err != nil {
+		stor.Close()
+		return nil, fmt.Errorf("failed to create leveldb database from open storage: %w", err)
+	}
+
+	// backend.db.storage = db
+	logger.Info("Successfully opened leveldb database")
+	// End
 
 	backend.repoCollection = deb.NewRemoteRepoCollection(backend.db)
 
