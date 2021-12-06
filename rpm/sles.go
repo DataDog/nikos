@@ -64,6 +64,10 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 }
 
+func (b *SLESBackend) Close() {
+	b.dnfBackend.Close()
+}
+
 func NewSLESBackend(target *types.Target, reposDir string, logger types.Logger) (types.Backend, error) {
 	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
 	if err != nil {

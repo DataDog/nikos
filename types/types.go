@@ -15,6 +15,7 @@ import (
 
 type Backend interface {
 	GetKernelHeaders(directory string) error
+	Close()
 }
 
 type Utsname struct {
@@ -56,15 +57,12 @@ func NewTarget() (Target, error) {
 
 	target.Uname.Kernel = string(uname.Release[:bytes.IndexByte(uname.Release[:], 0)])
 	target.Uname.Machine = string(uname.Machine[:bytes.IndexByte(uname.Machine[:], 0)])
+	target.OSRelease = getOSRelease()
 
 	if isWSL(target.Uname.Kernel) {
 		target.Distro.Display, target.Distro.Family = "wsl", "wsl"
 	} else if id := target.OSRelease["ID"]; target.Distro.Display == "" && id != "" {
 		target.Distro.Display, target.Distro.Family = id, id
-	}
-
-	if target.OSRelease, err = osrelease.Read(); err != nil {
-		return target, fmt.Errorf("failed to read default os-release file: %s", err)
 	}
 
 	return target, nil
@@ -81,6 +79,31 @@ func isWSL(kernel string) bool {
 		return true
 	}
 	return false
+}
+
+func getOSRelease() map[string]string {
+	osReleasePaths := []string{
+		osrelease.EtcOsRelease,
+		osrelease.UsrLibOsRelease,
+	}
+
+	if hostEtc := os.Getenv("HOST_ETC"); hostEtc != "" {
+		osReleasePaths = append([]string{
+			filepath.Join(hostEtc, "os-release"),
+		}, osReleasePaths...)
+	}
+
+	var (
+		release map[string]string
+		err     error
+	)
+	for _, osReleasePath := range osReleasePaths {
+		release, err = osrelease.ReadFile(osReleasePath)
+		if err == nil {
+			return release
+		}
+	}
+	return make(map[string]string)
 }
 
 type Logger interface {

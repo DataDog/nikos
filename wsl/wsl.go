@@ -35,6 +35,8 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	return extract.ExtractTarball(resp.Body, filename, directory, b.logger)
 }
 
+func (b *Backend) Close() {}
+
 func NewBackend(target *types.Target, logger types.Logger) (*Backend, error) {
 	backend := &Backend{
 		target: target,
