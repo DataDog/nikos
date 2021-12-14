@@ -214,7 +214,8 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 		return nil, fmt.Errorf("unsupported architecture '%s'", target.Uname.Machine)
 	}
 
-	tmpDir, err := ioutil.TempDir("/var/tmp", "aptly-db")
+	tmpDir, err := ioutil.TempDir("", "aptly-db")
+	defer os.RemoveAll(tmpDir)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +233,6 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 
 	// Start
 	if backend.db, err = goleveldb.NewDB(tmpDir); err != nil {
-		backend.Close()
 		return nil, fmt.Errorf("failed to make new aptly database: %w", err)
 	}
 
@@ -250,7 +250,7 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 
 	lock, err := os.OpenFile(filepath.Join(tmpDir, "LOCK"), os.O_RDWR, 0)
 	if os.IsNotExist(err) {
-		lock, err = os.OpenFile(filepath.Join(tmpDir, "LOCK"), os.O_RDWR|os.O_CREATE, 0755) //0644)
+		lock, err = os.OpenFile(filepath.Join(tmpDir, "LOCK"), os.O_RDWR|os.O_CREATE, 0644)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to create lock file: %w", err)
@@ -272,8 +272,6 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 		logw.Close()
 		return nil, fmt.Errorf("failed to read log file: %w", err)
 	}
-
-	logger.Info("Created storage lock & log files")
 
 	stor, err := storage.OpenFile(tmpDir, false)
 	if err != nil {
