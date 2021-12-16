@@ -55,7 +55,12 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 	for _, repo := range disabledRepositories {
 		b.dnfBackend.EnableRepository(repo)
 	}
-	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
+	err = b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
+	if err == nil {
+	    b.logger.Infof("successfully downloaded %s", pkgNevra)
+	    return b.dnfBackend.GetKernelHeaders("kernel-devel", directory)
+	}
+	return err
 }
 
 // On newer versions of openSUSE, the repos are type yast2 instead of type yum.
