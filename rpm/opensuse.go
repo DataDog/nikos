@@ -48,14 +48,20 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 		b.logger.Infof("successfully downloaded %s", pkgNevra)
 
 		// kernel-[flavour]-devel packages require kernel-devel
-		return b.dnfBackend.GetKernelHeaders("kernel-devel", directory)
+		return b.dnfBackend.GetKernelHeaders("kernel-devel-"+kernelRelease, directory)
 	}
 
 	b.logger.Infof("Error downloading package: %s. Retrying with the full set of repositories", err)
 	for _, repo := range disabledRepositories {
 		b.dnfBackend.EnableRepository(repo)
 	}
-	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
+
+	err = b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
+	if err == nil {
+		b.logger.Infof("successfully downloaded %s", pkgNevra)
+		return b.dnfBackend.GetKernelHeaders("kernel-devel-"+kernelRelease, directory)
+	}
+	return err
 }
 
 // On newer versions of openSUSE, the repos are type yast2 instead of type yum.
