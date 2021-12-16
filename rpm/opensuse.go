@@ -138,7 +138,7 @@ func NewOpenSUSEBackend(target *types.Target, reposDir string, logger types.Logg
 		logger.Warnf("Fail to convert yast2 repos to yum repos: %v", err)
 	} else {
 		reposDir = tmpReposDir
-		//defer os.RemoveAll(tmpReposDir)
+		defer os.RemoveAll(tmpReposDir)
 	}
 
 	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
