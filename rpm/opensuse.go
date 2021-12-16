@@ -10,6 +10,7 @@ import (
 
 	"github.com/DataDog/nikos/rpm/dnf"
 	"github.com/DataDog/nikos/types"
+	"github.com/DataDog/nikos/utils"
 	"github.com/go-ini/ini"
 )
 
@@ -80,10 +81,18 @@ func yumifyRepositories(reposDir string, logger types.Logger) (string, error) {
 	}
 
 	for _, repoFile := range repoFiles {
+		destFilename := filepath.Join(tmpDir, filepath.Base(repoFile))
+
 		logger.Debugf("Reading repo file '%s'", repoFile)
 		cfg, err := ini.Load(repoFile)
 		if err != nil {
-			logger.Warnf("Fail to read file '%s': %v", repoFile, err)
+			logger.Warnf("Failed to read file '%s': %v", repoFile, err)
+
+			err = utils.CopyFile(repoFile, destFilename)
+			if err != nil {
+				logger.Warnf("Failed to copy %s to tmp dir: %v", repoFile, err)
+			}
+			continue
 		}
 
 		if isYast2(cfg) {
@@ -96,9 +105,13 @@ func yumifyRepositories(reposDir string, logger types.Logger) (string, error) {
 			}
 		}
 
-		filename := filepath.Join(tmpDir, filepath.Base(repoFile))
-		if err := cfg.SaveTo(filename); err != nil {
-			logger.Warnf("Fail to write file '%s': %v", filename, err)
+		if err := cfg.SaveTo(destFilename); err != nil {
+			logger.Warnf("Failed to write file '%s': %v", destFilename, err)
+
+			err = utils.CopyFile(repoFile, destFilename)
+			if err != nil {
+				logger.Warnf("Failed to copy %s to tmp dir: %v", repoFile, err)
+			}
 		}
 	}
 
@@ -125,7 +138,7 @@ func NewOpenSUSEBackend(target *types.Target, reposDir string, logger types.Logg
 		logger.Warnf("Fail to convert yast2 repos to yum repos: %v", err)
 	} else {
 		reposDir = tmpReposDir
-		defer os.RemoveAll(tmpReposDir)
+		//defer os.RemoveAll(tmpReposDir)
 	}
 
 	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
