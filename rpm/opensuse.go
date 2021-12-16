@@ -45,7 +45,10 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 	}
 	err := b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 	if err == nil {
-		return nil
+		b.logger.Infof("successfully downloaded %s", pkgNevra)
+
+		// kernel-[flavour]-devel packages require kernel-devel
+		return b.dnfBackend.GetKernelHeaders("kernel-devel", directory)
 	}
 
 	b.logger.Infof("Error downloading package: %s. Retrying with the full set of repositories", err)
