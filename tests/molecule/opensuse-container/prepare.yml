@@ -13,14 +13,20 @@
       name: docker
       state: present
     become: true
-    when: ansible_distribution == 'openSUSE Leap' and ansible_os_family == 'Suse'
 
   - name: Install docker-py
     package:
       name: python3-docker
       state: present
     become: true
-    when: ansible_distribution == 'openSUSE Leap' and ansible_os_family == 'Suse'
+    when: ansible_distribution_major_version == '15'
+
+  - name: Install docker-py
+    package:
+      name: python-docker-py
+      state: present
+    become: true
+    when: ansible_distribution_major_version == '42'
 
   - name: Start docker
     service:

@@ -41,6 +41,7 @@ func NewTarget() (Target, error) {
 	}
 
 	platform = strings.Trim(platform, "\"")
+	version = strings.Trim(version, "\"")
 
 	target := Target{
 		Distro: Distro{
