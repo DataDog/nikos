@@ -1,15 +1,23 @@
 package utils
 
 import (
-	"io/ioutil"
+	"io"
+	"os"
 )
 
-func CopyFile(src, dest string) error {
-	bytesRead, err := ioutil.ReadFile(src)
+func CopyFile(srcPath, destPath string) error {
+	dest, err := os.OpenFile(destPath, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}
+	defer dest.Close()
 
-	err = ioutil.WriteFile(dest, bytesRead, 0644)
+	src, err := os.Open(srcPath)
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	_, err = io.Copy(dest, src)
 	return err
 }
