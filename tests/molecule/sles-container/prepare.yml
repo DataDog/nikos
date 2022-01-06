@@ -1,0 +1,36 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+  - name: Install rsync
+    package:
+      name: rsync
+      state: present
+    become: true
+
+  - name: Install docker
+    package:
+      name: docker
+      state: present
+    become: true
+
+  - name: Install docker-py
+    package:
+      name: python3-docker
+      state: present
+    become: true
+    when: ansible_distribution_major_version == '15'
+
+  - name: Install docker-py
+    package:
+      name: python-docker-py
+      state: present
+    become: true
+    when: ansible_distribution_major_version == '42'
+
+  - name: Start docker
+    service:
+      name: docker
+      state: started
+    become: true
+

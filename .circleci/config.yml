@@ -26,7 +26,7 @@ workflows:
       - test:
           matrix:
             parameters:
-              platform: ["fedora", "centos", "opensuse", "debian", "ubuntu"]
+              platform: ["fedora", "centos", "opensuse", "debian", "ubuntu", "sles"]
               test_type: ["host", "container"]
 
 commands:
