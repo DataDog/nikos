@@ -1,11 +1,15 @@
 package rpm
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"strings"
 
 	"github.com/DataDog/nikos/rpm/dnf"
 	"github.com/DataDog/nikos/types"
+	"github.com/go-ini/ini"
 )
 
 type SLESBackend struct {
@@ -35,20 +39,21 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 	// On not registered systems, we use the repositories from
 	// https://download.opensuse.org/repositories/Kernel:
 	if version := b.target.OSRelease["VERSION"]; version != "" {
-		addKernelRepository := func(version string) {
+		tryAddKernelRepository := func(version, folder string) {
 			version = "SLE" + version
-			repoID := "Kernel_" + version
-			baseurl := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/", version)
-			gpgKey := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/repodata/repomd.xml.key", version)
-
-			b.logger.Infof("Using with %s repository", repoID)
-			b.dnfBackend.AddRepository(repoID, baseurl, true, gpgKey, "", "", "")
+			repoURL := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/%s/Kernel:%s.repo", version, folder, version)
+			if repo, err := getPotentialRepoFile(repoURL); err == nil {
+				b.logger.Infof("Using with %s repository", repo.repoID)
+				b.dnfBackend.AddRepository(repo.repoID, repo.baseURL, true, repo.gpgKey, "", "", "")
+			}
 		}
 
-		addKernelRepository(version)
-		addKernelRepository(version + "-UPDATES")
-		if flavour != "-generic" {
-			addKernelRepository(version + strings.ToUpper(flavour))
+		for _, folder := range []string{"standard", "pool"} {
+			tryAddKernelRepository(version, folder)
+			tryAddKernelRepository(version+"-UPDATES", folder)
+			if flavour != "-generic" {
+				tryAddKernelRepository(version+strings.ToUpper(flavour), folder)
+			}
 		}
 	}
 
@@ -79,4 +84,39 @@ func NewSLESBackend(target *types.Target, reposDir string, logger types.Logger) 
 		logger:     logger,
 		dnfBackend: dnfBackend,
 	}, nil
+}
+
+type repoFileContent struct {
+	repoID  string
+	baseURL string
+	gpgKey  string
+}
+
+func getPotentialRepoFile(url string) (*repoFileContent, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	repoCfg, err := ini.Load(body)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, section := range repoCfg.Sections() {
+		if section.Key("type").String() == "rpm-md" && section.HasKey("baseurl") && section.HasKey("gpgkey") {
+			return &repoFileContent{
+				repoID:  section.Name(),
+				baseURL: section.Key("baseurl").String(),
+				gpgKey:  section.Key("gpgkey").String(),
+			}, nil
+		}
+	}
+	return nil, errors.New("no valid repo found at this URL")
 }
