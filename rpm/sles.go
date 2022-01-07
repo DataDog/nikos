@@ -63,7 +63,7 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 		baseurl := fmt.Sprintf("https://download.opensuse.org/distribution/jump/%s/repo/oss/", versionID)
 
 		gpgkeyurl := baseurl + "repodata/repomd.xml.key"
-		if _, err := http.Get(gpgkeyurl); err == nil {
+		if resp, err := http.Get(gpgkeyurl); err == nil && resp.StatusCode >= 200 && resp.StatusCode < 300 {
 			b.logger.Infof("Using with %s repository", repoID)
 			b.dnfBackend.AddRepository(repoID, baseurl, true, "", "", "", "")
 		}
