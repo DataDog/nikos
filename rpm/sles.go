@@ -39,7 +39,7 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 			version = "SLE" + version
 			repoID := "Kernel_" + version
 			baseurl := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/", version)
-			gpgKey := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/repodata/repomd.xml.key")
+			gpgKey := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/repodata/repomd.xml.key", version)
 
 			b.logger.Infof("Using with %s repository", repoID)
 			b.dnfBackend.AddRepository(repoID, baseurl, true, gpgKey, "", "", "")
