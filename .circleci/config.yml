@@ -54,7 +54,7 @@ commands:
             sudo dpkg -i vagrant_2.2.18_x86_64.deb 
 
       - run:
-          name: Install libvrt & qemu
+          name: Install libvirt & qemu
           command: |
             # Download any requirements that aren't already in the cache
             sudo mkdir -p apt-cache/archives
