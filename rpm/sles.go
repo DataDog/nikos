@@ -62,8 +62,11 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 		repoID := "Jump-" + versionID
 		baseurl := fmt.Sprintf("https://download.opensuse.org/distribution/jump/%s/repo/oss/", versionID)
 
-		b.logger.Infof("Using with %s repository", repoID)
-		b.dnfBackend.AddRepository(repoID, baseurl, true, "", "", "", "")
+		gpgkeyurl := baseurl + "repodata/repomd.xml.key"
+		if _, err := http.Get(gpgkeyurl); err == nil {
+			b.logger.Infof("Using with %s repository", repoID)
+			b.dnfBackend.AddRepository(repoID, baseurl, true, "", "", "", "")
+		}
 	}
 
 	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
