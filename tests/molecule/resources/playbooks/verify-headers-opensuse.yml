@@ -2,7 +2,7 @@
 - name: get path to downloaded headers
   shell: |
     kern_version=$(uname -r)
-    header_path=usr/src/linux-headers-$kern_version/arch/x86/include/generated/uapi/asm/types.h
+    header_path=usr/src/linux-$kern_version/arch/x86/include/generated/uapi/asm/types.h
     echo $header_path
   register: header_path
 

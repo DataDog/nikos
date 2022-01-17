@@ -31,11 +31,11 @@
   - include_tasks: verify-package-rpm.yml
     when: ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'openSUSE Leap' or ansible_distribution == 'Fedora')
 
-  - include_tasks: verify-headers-module.yml
+  - include_tasks: verify-headers.yml
     when: not (ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora'))
 
-  - include_tasks: verify-headers-src.yml
-    when: not (ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora'))
+  - include_tasks: verify-headers-opensuse.yml
+    when: ansible_distribution is defined and ansible_distribution == 'openSUSE Leap'
     
   - include_tasks: verify-headers-centos.yml
     when: ansible_distribution is defined and ansible_distribution == 'CentOS'
