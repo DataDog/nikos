@@ -31,7 +31,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 	}
 
 	tarReader := tar.NewReader(compressedTarReader)
-	tempBuffer := make([]byte, 4*4096)
+	tempBuffer := make([]byte, 32*1024)
 	for {
 		hdr, err := tarReader.Next()
 		if err == io.EOF {
