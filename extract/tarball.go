@@ -55,6 +55,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 		case tar.TypeDir:
 			os.MkdirAll(path, 0755)
 		case tar.TypeReg:
+			/*
 			output, err := os.Create(path)
 			if err != nil {
 				return fmt.Errorf("failed to create output file '%s': %w", path, err)
@@ -66,6 +67,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 
 			}
 			output.Close()
+			*/
 		default:
 			logger.Warnf("Unsupported header flag '%d' for '%s'", hdr.Typeflag, hdr.Name)
 		}
