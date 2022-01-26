@@ -131,13 +131,20 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, factory *deb.Coll
 		return nil, errors.New("failed to find package " + query.Value)
 	}
 
+	/*
+	if err := repo.FinalizeDownload(factory, nil); err != nil {
+		b.logger.Debugf("Failed to finalize download: %s", err)
+		return err
+	}
+	*/
+
 	b.logger.Info("Downloading package")
 	url := packageURL.String()
 	outputFile := filepath.Join(directory, filepath.Base(url))
 	if err := downloader.Download(context.Background(), url, outputFile); err != nil {
 		return nil, fmt.Errorf("failed to download %s to %s: %w", url, directory, err)
 	}
-	// defer os.Remove(outputFile)
+	defer os.Remove(outputFile)
 
 	return packageDeps, b.extractPackage(outputFile, directory)
 }

@@ -61,6 +61,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 			}
 
 			if _, err := io.Copy(output, tarReader); err != nil {
+				output.Close()
 				return fmt.Errorf("failed to uncompress file %s: %w", hdr.Name, err)
 
 			}
