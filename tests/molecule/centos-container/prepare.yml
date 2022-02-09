@@ -29,10 +29,6 @@
     register: repos
     when: ansible_distribution_major_version > '7'
 
-  - name: Debug repos
-    debug:
-      var: repos
-
   - name: Comment out mirrorlists
     replace:
       path: "{{ item.path }}"
