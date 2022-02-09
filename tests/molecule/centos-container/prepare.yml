@@ -21,6 +21,36 @@
     become: true
     when: ansible_distribution_major_version > '7'
 
+  - name: Find all repo files
+    find:
+      paths: /etc/yum.repos.d/
+      patterns: "CentOS*.repo"
+    become: true
+    register: repos
+    when: ansible_distribution_major_version > '7'
+
+  - name: Debug repos
+    debug:
+      var: repos
+
+  - name: Comment out mirrorlists
+    replace:
+      path: "{{ item.path }}"
+      regexp: 'mirrorlist'
+      replace: '#mirrorlist'
+    become: true
+    with_items: "{{ repos.files }}"
+    when: ansible_distribution_major_version > '7'
+
+  - name: Use vault instead of mirror
+    replace:
+      path: "{{ item.path }}"
+      regexp: '#baseurl=http://mirror.centos.org'
+      replace: 'baseurl=http://vault.centos.org'
+    become: true
+    with_items: "{{ repos.files }}"
+    when: ansible_distribution_major_version > '7'
+
   - name: Install Docker
     package:
       name: "{{ item }}"
