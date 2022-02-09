@@ -55,7 +55,10 @@ func (b *DnfBackend) GetKernelHeaders(pkgNevra, directory string) error {
 	logger.Infof("Looking for package %s", pkgNevra)
 	pkg, err := b.lookupPackage(C.HY_PKG_NEVRA, C.HY_EQ, pkgNevra)
 	if err != nil {
-		if pkg, err = b.lookupPackage(C.HY_PKG_NEVRA, C.HY_GLOB, pkgNevra+"*"); err != nil {
+		machine := b.target.Uname.Machine
+		pkgNevraStar := fmt.Sprintf("%s*%s", pkgNevra, machine)
+		logger.Infof("Looking for package %s", pkgNevraStar)
+		if pkg, err = b.lookupPackage(C.HY_PKG_NEVRA, C.HY_GLOB, pkgNevraStar); err != nil {
 			return err
 		}
 	}
