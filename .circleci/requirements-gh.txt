@@ -1,0 +1,4 @@
+ansible
+molecule
+molecule-vagrant
+python-vagrant

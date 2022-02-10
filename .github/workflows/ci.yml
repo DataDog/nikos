@@ -46,8 +46,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: nikos-binary
-          path: /opt/nikos/bin/nikos
+          name: nikos-archive
+          path: /opt/nikos
           retention-days: 1
 
   verify-glibc:
@@ -58,8 +58,27 @@ jobs:
       - name: Download the nikos artifact
         uses: actions/download-artifact@v2
         with:
-          name: nikos-binary
-          path: /opt/nikos/bin
+          name: nikos-archive
+          path: /opt/nikos
 
       - name: Fail if there are references to GLIBC >= 2.18
         run: objdump -p /opt/nikos/bin/nikos | egrep -zqv 'GLIBC_2\.(1[8-9]|[2-9][0-9])'
+
+  molecule-tests:
+    name: Molecule tests
+    needs: build
+    runs-on: macos-10.15
+    steps:
+      - name: Download the nikos artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: nikos-archive
+          path: /opt/nikos
+
+      - name: Install pip dependencies
+        run: pip install -r .circleci/requirements-gh.txt
+
+      - name: Run molecule test
+        working-directory: tests
+        run: molecule test -s debian-host-gh
+
