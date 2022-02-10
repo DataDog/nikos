@@ -3,8 +3,6 @@ dependency:
   name: galaxy
 driver:
   name: vagrant
-  provider:
-    name: libvirt
 platforms:
   - name: debian9
     box: roboxes/debian9
@@ -22,9 +20,5 @@ provisioner:
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml
-  inventory:
-    host_vars:
-      debian8:
-        ansible_python_interpreter: "/usr/bin/python2.7"
 verifier:
   name: ansible
