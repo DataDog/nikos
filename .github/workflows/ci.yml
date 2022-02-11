@@ -89,9 +89,9 @@ jobs:
     needs: build
     runs-on: macos-10.15
     strategy:
-    matrix:
-      platform: ["fedora", "centos", "opensuse", "debian", "ubuntu"]
-      test_type: ["host", "container"]
+      matrix:
+        platform: ["fedora", "centos", "opensuse", "debian", "ubuntu"]
+        test_type: ["host", "container"]
     steps:
       - name: Checkout source code
         uses: actions/checkout@v2
