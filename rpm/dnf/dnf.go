@@ -52,12 +52,15 @@ func (b *DnfBackend) GetKernelHeaders(pkgNevra, directory string) error {
 		return errors.New("failed to setup dnf sack: " + C.GoString(cErr))
 	}
 
-	logger.Infof("Looking for package %s", pkgNevra)
-	pkg, err := b.lookupPackage(C.HY_PKG_NEVRA, C.HY_EQ, pkgNevra)
+	pkgDescriptions := []lookupPkgDescription{
+		{pkgNevra, C.HY_EQ},
+		{fmt.Sprintf("%s*%s", pkgNevra, b.target.Uname.Machine), C.HY_GLOB},
+		{fmt.Sprintf("%s*noarch", pkgNevra), C.HY_GLOB},
+	}
+
+	pkg, err := b.lookupPackages(C.HY_PKG_NEVRA, pkgDescriptions)
 	if err != nil {
-		if pkg, err = b.lookupPackage(C.HY_PKG_NEVRA, C.HY_GLOB, pkgNevra+"*"); err != nil {
-			return err
-		}
+		return err
 	}
 	defer C.g_object_unref(C.gpointer(pkg))
 	logger.Infof("Found package %s", C.GoString(C.dnf_package_get_nevra(pkg)))
@@ -86,6 +89,26 @@ func (b *DnfBackend) lookupPackage(filter, comparison int, value string) (*C.Dnf
 		return nil, errors.New("error looking up package " + value + ": " + C.GoString(result.err_msg))
 	}
 	return result.pkg, nil
+}
+
+type lookupPkgDescription struct {
+	value      string
+	comparison int
+}
+
+func (b *DnfBackend) lookupPackages(filter int, descriptions []lookupPkgDescription) (*C.DnfPackage, error) {
+	var (
+		pkg *C.DnfPackage
+		err error
+	)
+	for _, desc := range descriptions {
+		logger.Infof("Looking for package %s", desc.value)
+		pkg, err = b.lookupPackage(C.HY_PKG_NEVRA, desc.comparison, desc.value)
+		if err == nil {
+			return pkg, nil
+		}
+	}
+	return nil, err
 }
 
 func (b *DnfBackend) AddRepository(id, baseurl string, enabled bool, gpgKey, sslCACert, sslClientCert, sslClientKey string) (*Repository, error) {
