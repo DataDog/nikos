@@ -108,7 +108,7 @@ jobs:
 
       - name: Debug step
         run: |
-          ls tests/molecule/resources/playbooks/nikos-archive
+          ls tests/nikos-archive
 
       - name: Run molecule test
         working-directory: tests
