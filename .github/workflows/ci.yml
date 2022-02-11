@@ -19,6 +19,16 @@ jobs:
         with:
           go-version: '1.17'
 
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
       - name: Build nikos (no dnf)
         run: go build
 
@@ -36,6 +46,16 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.17'
+
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Build nikos (with dnf)
         run: bash .ci_build/build_install_nikos.sh . .ci_build/nikos-libs.tar.gz
