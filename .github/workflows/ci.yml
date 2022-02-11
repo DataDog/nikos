@@ -104,7 +104,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: nikos-archive
-          path: tests/molecule/resources/playbooks/nikos-archive
+          path: tests/nikos-archive
 
       - name: Debug step
         run: |
