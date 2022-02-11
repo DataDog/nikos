@@ -106,9 +106,9 @@ jobs:
           name: nikos-archive
           path: tests/molecule/resources/playbooks/nikos-archive
 
-      - name: Debug step
+      - name: Set nikos binary executable
         run: |
-          ls tests/molecule/resources/playbooks/nikos-archive
+          chmod +x tests/molecule/resources/playbooks/nikos-archive/bin/nikos
 
       - name: Run molecule test
         working-directory: tests
