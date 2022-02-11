@@ -7,7 +7,7 @@
   tasks:
   - synchronize:
       src: nikos-archive
-      dest: /opt
+      dest: /opt/nikos
       archive: yes
     become: true
 
