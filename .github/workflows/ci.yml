@@ -63,19 +63,15 @@ jobs:
     needs: build
     runs-on: macos-10.15
     steps:
-      - name: Create nikos directory
-        run: mkdir -p /opt/nikos
-
       - name: Download the nikos artifact
         uses: actions/download-artifact@v2
         with:
           name: nikos-archive
-          path: /opt/nikos
+          path: nikos-archive
 
       - name: Install pip dependencies
         run: pip install -r .circleci/requirements-gh.txt
 
       - name: Run molecule test
-        working-directory: tests
-        run: molecule test -s debian-host-gh
+        run: molecule test -s tests/debian-host-gh
 
