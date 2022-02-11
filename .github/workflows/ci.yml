@@ -92,6 +92,10 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v2
 
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
       - name: Download the nikos artifact
         uses: actions/download-artifact@v2
         with:
