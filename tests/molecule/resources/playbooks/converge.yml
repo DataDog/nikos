@@ -6,7 +6,7 @@
     test_type: "{{ lookup('env', 'TEST_TYPE') }}"
   tasks:
   - synchronize:
-      src: nikos-archive
+      src: nikos-archive/
       dest: /opt/nikos
       archive: yes
     become: true

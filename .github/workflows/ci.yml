@@ -110,11 +110,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: nikos-archive
-          path: tests/nikos-archive
+          path: tests/molecule/resources/playbooks/nikos-archive
 
       - name: Debug step
         run: |
-          ls tests/nikos-archive
+          ls tests/molecule/resources/playbooks/nikos-archive
 
       - name: Run molecule test
         working-directory: tests
