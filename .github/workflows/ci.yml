@@ -89,6 +89,7 @@ jobs:
     needs: build
     runs-on: macos-10.15
     strategy:
+      fail-fast: false
       matrix:
         platform: ["fedora", "centos", "opensuse", "debian", "ubuntu"]
         test_type: ["host", "container"]
