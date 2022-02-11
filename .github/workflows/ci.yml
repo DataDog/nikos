@@ -103,14 +103,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      - name: Install pip dependencies
+        run: pip install -r .circleci/requirements-gh.txt
+
       - name: Download the nikos artifact
         uses: actions/download-artifact@v2
         with:
           name: nikos-archive
           path: tests/molecule/resources/playbooks/nikos-archive
 
-      - name: Install pip dependencies
-        run: pip install -r .circleci/requirements-gh.txt
+      - name: Debug step
+        run: |
+          ls tests/molecule/resources/playbooks/nikos-archive
 
       - name: Run molecule test
         working-directory: tests
