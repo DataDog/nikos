@@ -107,5 +107,6 @@ jobs:
         run: pip install -r .circleci/requirements-gh.txt
 
       - name: Run molecule test
-        run: molecule test -s tests/debian-host-gh
+        working-directory: tests
+        run: molecule test -s debian-host-gh
 
