@@ -34,8 +34,5 @@
   - include_tasks: verify-headers.yml
     when: not (ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora'))
     
-  - include_tasks: verify-headers-centos.yml
-    when: ansible_distribution is defined and ansible_distribution == 'CentOS'
-
-  - include_tasks: verify-headers-fedora.yml
-    when: ansible_distribution is defined and ansible_distribution == 'Fedora'
+  - include_tasks: verify-headers-fedora-centos.yml
+    when: ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora')
