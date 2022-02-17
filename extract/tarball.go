@@ -15,6 +15,7 @@ import (
 )
 
 func ExtractTarball(reader io.Reader, filename, directory string, logger types.Logger) error {
+    logger.Debugf("Extracting file %s", filename)
 	var compressedTarReader io.Reader
 	var err error
 	switch filepath.Ext(filename) {
