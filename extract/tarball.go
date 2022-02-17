@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/DataDog/nikos/types"
+	"github.com/DataDog/zstd"
 	"github.com/xi2/xz"
 )
 
@@ -24,6 +25,10 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 		compressedTarReader, err = gzip.NewReader(reader)
 	case ".bz2":
 		compressedTarReader = bzip2.NewReader(reader)
+	case ".zst":
+		zstdReader := zstd.NewReader(reader)
+		defer zstdReader.Close()
+		compressedTarReader = zstdReader
 	default:
 		return fmt.Errorf("failed to extract %s", filename)
 	}
