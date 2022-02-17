@@ -36,7 +36,7 @@ func getRedhatRelease() (string, error) {
 }
 
 func (b *CentOSBackend) GetKernelHeaders(directory string) error {
-	pkgNevra := "kernel-headers-" + b.target.Uname.Kernel
+	pkgNevra := "kernel-devel-" + b.target.Uname.Kernel
 
 	// First try with the 'base' and 'updates' repositories.
 	// This should work if the user is using the latest minor version
