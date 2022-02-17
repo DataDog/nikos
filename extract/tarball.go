@@ -24,8 +24,8 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 		compressedTarReader, err = gzip.NewReader(reader)
 	case ".bz2":
 		compressedTarReader = bzip2.NewReader(reader)
-    default:
-        return fmt.Errorf("failed to extract %s", filename)
+	default:
+		return fmt.Errorf("failed to extract %s", filename)
 	}
 
 	if err != nil {
