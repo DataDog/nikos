@@ -14,15 +14,7 @@ type RedHatBackend struct {
 }
 
 func (b *RedHatBackend) GetKernelHeaders(directory string) error {
-	// First, check for the correct kernel-headers package
-	pkgNevra := "kernel-headers-" + b.target.Uname.Kernel
-	err := b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
-	if err == nil {
-		return nil
-	}
-
-	// As a last resort, check for the kernel-devel package
-	pkgNevra = "kernel-devel-" + b.target.Uname.Kernel
+	pkgNevra := "kernel-devel-" + b.target.Uname.Kernel
 	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 }
 
