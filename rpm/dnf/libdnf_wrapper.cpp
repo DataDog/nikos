@@ -137,6 +137,8 @@ AddRepositoryResult AddRepository(
             g_key_file_set_string(key_file, id, "sslclientkey", sslclientkey);
         }
 
+        g_key_file_set_string(key_file, id, "name", "Amazon Linux 2 core $pouetpouet");
+
         dnf_repo_set_keyfile(libdnf_repo, key_file);
         dnf_repo_set_id(libdnf_repo, id);
         if (enabled) {
@@ -153,6 +155,9 @@ AddRepositoryResult AddRepository(
             result.err_msg = getErrorMessage(gerr);
             return result;
         }
+
+	const char* description = dnf_repo_get_description(libdnf_repo);
+	g_log(NULL, G_LOG_LEVEL_INFO, "Repo description: %s", description);
 
         g_ptr_array_add(dnf_context_get_repos(context), gpointer(libdnf_repo));
         result.libdnf_repo = libdnf_repo;
@@ -238,6 +243,9 @@ CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, con
         dnf_context_set_install_root(context, install_root);
 
         dnf_context_set_release_ver(context, release);
+
+        const char* vars_dir[] = { "/etc/yum/vars", NULL };
+        dnf_context_set_vars_dir(context, vars_dir);
 
         const char* actual_solv_dir = dnf_context_get_solv_dir(context);
         if (actual_solv_dir != nullptr) {
