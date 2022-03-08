@@ -1,3 +1,5 @@
+set -euxo pipefail
+
 SOURCE_FILES_PATH=$1
 NIKOS_LIBS_PATH=$2
 
