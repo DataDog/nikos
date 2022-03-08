@@ -196,6 +196,27 @@ func (b *DnfBackend) GetEnabledRepositories() (repos []*Repository) {
 	return
 }
 
+func replacerFromVars() *strings.Replacer {
+	var oldnew []string
+
+	loadVarsFromDir := func(dir string) {
+		files, err := os.ReadDir(dir)
+		if err == nil {
+			for _, file := range files {
+				filename := file.Name()
+				if content, err := os.ReadFile(filepath.Join(dir, filename)); err == nil {
+					oldnew = append(oldnew, "$"+filename, strings.TrimSpace(string(content)))
+				}
+			}
+		}
+	}
+
+	loadVarsFromDir(types.HostEtc("yum/vars"))
+	loadVarsFromDir(types.HostEtc("dnf/vars"))
+
+	return strings.NewReplacer(oldnew...)
+}
+
 func hostifyRepositories(reposDir string) (string, error) {
 	tmpDir, err := ioutil.TempDir("", "repos.d")
 	if err != nil {
@@ -224,11 +245,19 @@ func hostifyRepositories(reposDir string) (string, error) {
 			continue
 		}
 
+		replacer := replacerFromVars()
 		sections := cfg.Sections()
 		for _, section := range sections {
 			keys := section.Keys()
 			for _, key := range keys {
 				value := key.String()
+
+				switch key.Name() {
+				case "baseurl", "mirrorlist", "name":
+					value = replacer.Replace(value)
+					key.SetValue(value)
+				}
+
 				if strings.HasPrefix(value, "/etc/") {
 					key.SetValue(types.HostEtc(strings.TrimPrefix(value, "/etc/")))
 				} else if strings.HasPrefix(value, "file:///etc/") {
