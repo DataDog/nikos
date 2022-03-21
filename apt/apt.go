@@ -65,6 +65,8 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, factory *deb.Coll
 	var packageURL *url.URL
 	var packageDeps *deb.PackageDependencies
 
+	stanza := make(deb.BufferedStanza, 32)
+
 	err := b.repoCollection.ForEach(func(repo *deb.RemoteRepo) error {
 		if packageURL != nil {
 			return nil
@@ -72,7 +74,10 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, factory *deb.Coll
 
 		b.logger.Debugf("Fetching repository: name=%s, distribution=%s, components=%v, arch=%v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
 		repo.SkipComponentCheck = true
-		if err := repo.Fetch(downloader, nil); err != nil {
+
+		stanza.Clear()
+		var err error
+		if stanza, err = repo.FetchBuffered(stanza, downloader, nil); err != nil {
 			b.logger.Debugf("Error fetching repo: %s", err)
 			return err
 		}
@@ -83,7 +88,7 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, factory *deb.Coll
 			return err
 		}
 
-		_, _, err := repo.ApplyFilter(-1, query, nil)
+		_, _, err = repo.ApplyFilter(-1, query, nil)
 		if err != nil {
 			b.logger.Debugf("Failed to apply filter: %s", err)
 			return err
