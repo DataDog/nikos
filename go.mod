@@ -8,9 +8,9 @@ require (
 	github.com/DataDog/gopsutil v0.0.0-20211112180027-9aa392ae181a
 	github.com/DataDog/zstd v1.5.0
 	github.com/DisposaBoy/JsonConfigReader v0.0.0-20171218180944-5ea4d0ddac55 // indirect
+	github.com/ISauve/aptly v1.4.1-0.20220321154847-b72d63328223
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/acobaugh/osrelease v0.1.0
-	github.com/aptly-dev/aptly v1.4.1-0.20211102140819-ab2f5420c617
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/awalterschulze/gographviz v2.0.1+incompatible // indirect
 	github.com/cheggaaa/pb v1.0.29 // indirect
