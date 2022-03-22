@@ -77,6 +77,10 @@ github.com/ISauve/aptly v1.4.1-0.20220322194153-c35c3906053b h1:3Gk5xiexg2NUC69S
 github.com/ISauve/aptly v1.4.1-0.20220322194153-c35c3906053b/go.mod h1:6WqBWUJBM0A5M1JjZT8TjVXC4S2qxxN3O6mY7J/BZq8=
 github.com/ISauve/aptly v1.4.1-0.20220322195010-b1ed41d9d4f6 h1:/xcenj55RS8oFR62pVp3U8oaO/wQ8O9iIDEYQdHeoSw=
 github.com/ISauve/aptly v1.4.1-0.20220322195010-b1ed41d9d4f6/go.mod h1:6WqBWUJBM0A5M1JjZT8TjVXC4S2qxxN3O6mY7J/BZq8=
+github.com/ISauve/aptly v1.4.1-0.20220322201539-436b8b72861c h1:7ldA0GoMmRa/puSGH0TPRAvLCThRUVC0YhlAWR58yPk=
+github.com/ISauve/aptly v1.4.1-0.20220322201539-436b8b72861c/go.mod h1:6WqBWUJBM0A5M1JjZT8TjVXC4S2qxxN3O6mY7J/BZq8=
+github.com/ISauve/aptly v1.4.1-0.20220322202543-6b958901bc05 h1:pli7s5geY16GV7I/OVHvFK7jO2CBeNGrfgxgUBYBL9Q=
+github.com/ISauve/aptly v1.4.1-0.20220322202543-6b958901bc05/go.mod h1:6WqBWUJBM0A5M1JjZT8TjVXC4S2qxxN3O6mY7J/BZq8=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/StackExchange/wmi v0.0.0-20181212234831-e0a55b97c705/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
 github.com/StackExchange/wmi v1.2.1 h1:VIkavFPXSjcnS+O8yTq7NI32k0R5Aj+v39y29VYDOSA=

@@ -79,6 +79,7 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, factory *deb.Coll
 		var err error
 		if stanza, err = repo.FetchBuffered(stanza, downloader, nil); err != nil {
 			b.logger.Debugf("Error fetching repo: %s", err)
+			stanza.Print()
 			return err
 		}
 
