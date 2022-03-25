@@ -61,6 +61,16 @@ github.com/ISauve/aptly v1.4.1-0.20220325175959-1507bf67700f h1:Lo4UI/pk3R7hRVnI
 github.com/ISauve/aptly v1.4.1-0.20220325175959-1507bf67700f/go.mod h1:6WqBWUJBM0A5M1JjZT8TjVXC4S2qxxN3O6mY7J/BZq8=
 github.com/ISauve/aptly v1.4.1-0.20220325210944-9aae77dcb1a7 h1:7p8qp2ykBaXHfz3q75AR7i1OlKoseD5hC6ExqGHrIvg=
 github.com/ISauve/aptly v1.4.1-0.20220325210944-9aae77dcb1a7/go.mod h1:6WqBWUJBM0A5M1JjZT8TjVXC4S2qxxN3O6mY7J/BZq8=
+github.com/ISauve/aptly v1.4.1-0.20220325212342-6c19522425e0 h1:DudfOCV8dHlMgZ8zaoNRWsOnJAvC9RmZtofmxr+kRHA=
+github.com/ISauve/aptly v1.4.1-0.20220325212342-6c19522425e0/go.mod h1:6WqBWUJBM0A5M1JjZT8TjVXC4S2qxxN3O6mY7J/BZq8=
+github.com/ISauve/aptly v1.4.1-0.20220325214404-610e8fcbb04e h1:Ka2iya48b8coO2fMvU6wAXtCpl/UbsFwUXz0VR2TZlU=
+github.com/ISauve/aptly v1.4.1-0.20220325214404-610e8fcbb04e/go.mod h1:6WqBWUJBM0A5M1JjZT8TjVXC4S2qxxN3O6mY7J/BZq8=
+github.com/ISauve/aptly v1.4.1-0.20220325215528-7041df98ab68 h1:GpsJ+NrGjoqk/TqKMUxmGCKu57bYTT5rPTsYVpSw6Bc=
+github.com/ISauve/aptly v1.4.1-0.20220325215528-7041df98ab68/go.mod h1:6WqBWUJBM0A5M1JjZT8TjVXC4S2qxxN3O6mY7J/BZq8=
+github.com/ISauve/aptly v1.4.1-0.20220325220438-2ca0acc7713a h1:R+FCviHnl13Gm+qCbh9r7VlHYctasOIfiHenx2WrplM=
+github.com/ISauve/aptly v1.4.1-0.20220325220438-2ca0acc7713a/go.mod h1:6WqBWUJBM0A5M1JjZT8TjVXC4S2qxxN3O6mY7J/BZq8=
+github.com/ISauve/aptly v1.4.1-0.20220325221001-4d97daedc91b h1:GzxjV/Zp8MtJe9cE9w56m5OvlkAZF1rJz5pI6zvmPqw=
+github.com/ISauve/aptly v1.4.1-0.20220325221001-4d97daedc91b/go.mod h1:6WqBWUJBM0A5M1JjZT8TjVXC4S2qxxN3O6mY7J/BZq8=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/StackExchange/wmi v0.0.0-20181212234831-e0a55b97c705/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
 github.com/StackExchange/wmi v1.2.1 h1:VIkavFPXSjcnS+O8yTq7NI32k0R5Aj+v39y29VYDOSA=
