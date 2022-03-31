@@ -154,7 +154,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	query := &deb.FieldQuery{
 		Field:    "Name",
 		Relation: deb.VersionPatternMatch,
-		Value:    "linux-headers-" + kernelRelease + "*",
+		Value:    fmt.Sprintf("linux-headers-%s", kernelRelease),
 	}
 	b.logger.Infof("Looking for %s", query.Value)
 
