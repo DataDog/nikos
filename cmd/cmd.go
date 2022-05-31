@@ -70,6 +70,8 @@ var DownloadCmd = &cobra.Command{
 				backend, err = rpm.NewRedHatBackend(&target, rpmReposDir, logger)
 			case "centos":
 				backend, err = rpm.NewCentOSBackend(&target, rpmReposDir, logger)
+			case "amazon":
+				backend, err = rpm.NewAmazonLinux2Backend(&target, rpmReposDir, logger)
 			default:
 				err = fmt.Errorf("unsupported RedHat based distribution '%s'", target.Distro.Display)
 			}
