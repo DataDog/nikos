@@ -13,11 +13,7 @@
       mode: 0777
 
   - name: run bpftrace
-    shell: "bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log & pgrep bpftrace > /tmp/pid && pgrep bpftrace"
-    register: bpftrace_result
-
-  - debug:
-      var: bpftrace_result.stdout_lines
+    shell: "bash -c \"bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log & echo $! > /tmp/rss.pid\""
 
   - name: run nikos
     shell: "{{ prefix | default('', True) }} bash -c 'SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --verbose --output /tmp/result 2>&1 tee /tmp/result/logs.txt'"
