@@ -19,11 +19,11 @@ In order to keep memory management as straightforward as possible, the functions
 #ifndef LIBDNF_WRAPPER_H
 #define LIBDNF_WRAPPER_H
 
+#include <libdnf/libdnf.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <libdnf/libdnf.h>
 
 #define RETURN_VAL_STRUCT(struct_name, return_val)  \
 typedef struct {                                    \
