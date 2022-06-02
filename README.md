@@ -43,7 +43,7 @@ Both `APT` and `Container Optimized OS` use pure Golang implementationns.
 
 To support RPM based distributions, you need [libdnf](https://github.com/rpm-software-management/libdnf).
 On Fedora, simply use `dnf install libdnf-devel`. To target machines that do not have `libdnf`, an
-[omnibus](https://github.com/chef/omnibus) project is available [here](https://github.com/lebauce/omnibus-nikos).
+[omnibus](https://github.com/chef/omnibus) project is available [here](https://github.com/DataDog/omnibus-nikos).
 
 ### Compilation
 
