@@ -13,14 +13,7 @@
       mode: 0777
 
   - name: run bpftrace
-    shell: "bash -c bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log & echo $! > /tmp/rss.pid"
-
-  - name: print pid file
-    shell: "cat /tmp/rss.pid"
-    register: pid_file
-
-  - debug:
-      var: pid_file.stdout_lines
+    shell: "bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log"
 
   - name: run nikos
     shell: "{{ prefix | default('', True) }} bash -c 'SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --verbose --output /tmp/result 2>&1 tee /tmp/result/logs.txt'"
@@ -32,7 +25,7 @@
       var: nikos_result.stdout_lines
 
   - name: terminate bpftrace
-    shell: "cat /tmp/rss.pid && stat /proc/$(cat /tmp/rss.pid | tr -d '\n\t\r') && kill -2 $(cat /tmp/rss.pid)"
+    shell: "kill -2 $(pgrep bpftrace | tr -d '\n\t\r')"
 
   - name: print max rss
     shell: "cat /tmp/rss.log"
