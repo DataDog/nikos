@@ -4,3 +4,4 @@ libvirt-clients
 qemu
 qemu-utils
 qemu-kvm
+bpftrace
