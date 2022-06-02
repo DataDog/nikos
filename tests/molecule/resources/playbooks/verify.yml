@@ -13,7 +13,7 @@
       mode: 0777
 
   - name: run bpftrace
-    shell: "bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log & echo $! > /tmp/rss.pidi && ps axf | grep bpftrace"
+    shell: "bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log & echo $! > /tmp/rss.pid && ps axf | grep bpftrace"
     register: bpftrace_result
 
   - debug:
