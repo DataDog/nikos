@@ -13,18 +13,23 @@
       mode: 0777
 
   - name: run bpftrace
-    shell: "bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log & echo $! > /tmp/rss.pid"
+    shell: "bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log & echo $! > /tmp/rss.pidi && ps axf | grep bpftrace | cut -d ' ' -f 3"
+    register: bpftrace_result
+
+  - debug:
+      var: bpftrace_result.stdout_lines
 
   - name: run nikos
-    shell: "bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log & echo $! > /tmp/rss.pid"
     shell: "{{ prefix | default('', True) }} bash -c 'SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --verbose --output /tmp/result 2>&1 tee /tmp/result/logs.txt'"
-    shell: "cat /tmp/rss.pid && stat /proc/$(cat /tmp/rss.pid | tr -d '\n\t\r') && kill -2 $(cat /tmp/rss.pid)"
     register: nikos_result
     # ignore errors here so that we can pretty-print the nikos output before checking if it was successful
     ignore_errors: true 
 
   - debug:
       var: nikos_result.stdout_lines
+
+  - name: terminate bpftrace
+    shell: "cat /tmp/rss.pid && stat /proc/$(cat /tmp/rss.pid | tr -d '\n\t\r') && kill -2 $(cat /tmp/rss.pid)"
 
   - name: print max rss
     shell: "cat /tmp/rss.log"
