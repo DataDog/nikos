@@ -37,6 +37,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 		return fmt.Errorf("failed to read %s: %w", filename, err)
 	}
 
+	buf := make([]byte, 50)
 	tarReader := tar.NewReader(compressedTarReader)
 	for {
 		hdr, err := tarReader.Next()
@@ -67,7 +68,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 				return fmt.Errorf("failed to create output file '%s': %w", path, err)
 			}
 
-			if _, err := io.Copy(output, tarReader); err != nil {
+			if _, err := io.CopyBuffer(output, tarReader, buf); err != nil {
 				return fmt.Errorf("failed to uncompress file %s: %w", hdr.Name, err)
 
 			}
