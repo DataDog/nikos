@@ -14,7 +14,6 @@
     - apt-transport-https
     - curl
     - gnupg-agent
-    - bpftrace
     become: true
 
   - name: Add docker official key

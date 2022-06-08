@@ -30,11 +30,6 @@
     shell: 'pip3 install docker'
     become: true
 
-  - name: Install bpftrace
-    package:
-      name: bpftrace
-    become: true
-
   - name: Start docker
     service:
       name: docker
