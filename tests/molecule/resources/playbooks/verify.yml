@@ -13,7 +13,7 @@
       mode: 0777
 
   - name: install bpftrace
-    shell: "mkdir /output && docker pull quay.io/iovisor/bpftrace:master-vanilla_llvm_clang_glibc2.23 && docker run -v /output quay.io/iovisor/bpftrace:master-vanilla_llvm_clang_glibc2.23 /bin/bash -c \"cp /usr/bin/bpftrace /output\" && cp /output/bpftrace /usr/bin && chmod +x /usr/bin/bpftrace && bpftrace --version"
+    shell: "docker pull quay.io/iovisor/bpftrace:master-vanilla_llvm_clang_glibc2.23 && docker run -v $(pwd):/output quay.io/iovisor/bpftrace:master-vanilla_llvm_clang_glibc2.23 /bin/bash -c \"cp /usr/bin/bpftrace /output\" && cp ./bpftrace /usr/bin && chmod +x /usr/bin/bpftrace && bpftrace --version"
     register: bpftrace_install
 
   - debug:
