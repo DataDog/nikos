@@ -72,7 +72,12 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 			// 	return fmt.Errorf("failed to uncompress file %s: %w", hdr.Name, err)
 
 			// }
-			if _, err := customCopy(output, tarReader, buf, logger); err != nil {
+
+			type onlyWriter struct {
+				io.Writer
+			}
+
+			if _, err := customCopy(onlyWriter{output}, tarReader, buf, logger); err != nil {
 				return fmt.Errorf("failed to uncompress file %s: %w", hdr.Name, err)
 
 			}
