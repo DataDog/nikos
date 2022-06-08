@@ -68,7 +68,11 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 				return fmt.Errorf("failed to create output file '%s': %w", path, err)
 			}
 
-			if _, err := io.CopyBuffer(output, tarReader, buf); err != nil {
+			// if _, err := io.CopyBuffer(output, tarReader, buf); err != nil {
+			// 	return fmt.Errorf("failed to uncompress file %s: %w", hdr.Name, err)
+
+			// }
+			if _, err := customCopy(output, tarReader, buf, logger); err != nil {
 				return fmt.Errorf("failed to uncompress file %s: %w", hdr.Name, err)
 
 			}
@@ -79,4 +83,17 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 	}
 
 	return nil
+}
+
+func customCopy(dst io.Writer, src io.Reader, buf []byte, logger types.Logger) (written int64, err error) {
+	if wt, ok := src.(WriterTo); ok {
+		logger.Infof("tarReader is problem")
+		return wt.WriteTo(dst)
+	}
+	if rt, ok := dst.(ReaderFrom); ok {
+		logger.Infof("output is problem")
+		return rt.ReadFrom(src)
+	}
+	logger.Infof("CopyBuffer is problem ????")
+	return io.CopyBuffer(dst, src, buf)
 }
