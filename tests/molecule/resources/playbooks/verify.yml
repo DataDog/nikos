@@ -22,6 +22,20 @@
   - name: run bpftrace
     shell: "bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log &"
 
+  - name: display running processes
+    shell: "ps -aux"
+    register: procs
+
+  - debug:
+      var: procs.stdout_lines
+
+  - name: show rss.log
+    shell: "cat /tmp/rss.log"
+    register: rss_log
+
+  - debug:
+      var: rss_log.stdout_lines
+
   - name: run nikos
     shell: "{{ prefix | default('', True) }} bash -c 'SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --verbose --output /tmp/result 2>&1 tee /tmp/result/logs.txt'"
     register: nikos_result
