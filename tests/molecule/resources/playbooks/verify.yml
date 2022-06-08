@@ -12,9 +12,15 @@
       state: directory
       mode: 0777
 
+  - name: install bpftrace
+    shell: "mkdir -p /home/bpftrace.d && docker pull quay.io/iovisor/bpftrace:master-vanilla_llvm_clang_glibc2.23 && docker run -v /home/bpftrace.d quay.io/iovisor/bpftrace:master-vanilla_llvm_clang_glibc2.23 /bin/bash -c \"cp /usr/bin/bpftrace /home/bpftrace.d\""
+    register: bpftrace_install
+
+  - debug:
+      var: bpftrace_install.stdout_lines
 
   - name: run bpftrace
-    shell: "bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log"
+    shell: "/home/bpftrace.d/bpftrace -e 'BEGIN { @start = nsecs; } tracepoint:kmem:rss_stat /args->member == 1 && comm == \"nikos\"/ { @[nsecs - @start] = args->size; } END { print(@, 1); clear(@) }' > /tmp/rss.log &"
 
   - name: run nikos
     shell: "{{ prefix | default('', True) }} bash -c 'SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --verbose --output /tmp/result 2>&1 tee /tmp/result/logs.txt'"
