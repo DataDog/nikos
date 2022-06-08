@@ -15,6 +15,10 @@ import (
 	"github.com/xi2/xz"
 )
 
+type onlyWriter struct {
+	io.Writer
+}
+
 func ExtractTarball(reader io.Reader, filename, directory string, logger types.Logger) error {
 	var compressedTarReader io.Reader
 	var err error
@@ -37,6 +41,7 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 		return fmt.Errorf("failed to read %s: %w", filename, err)
 	}
 
+	buf := make([]byte, 50)
 	tarReader := tar.NewReader(compressedTarReader)
 	for {
 		hdr, err := tarReader.Next()
@@ -67,7 +72,13 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 				return fmt.Errorf("failed to create output file '%s': %w", path, err)
 			}
 
-			if _, err := io.Copy(output, tarReader); err != nil {
+			// By default, an os.File implements the io.ReaderFrom interface.
+			// As a result, CopyBuffer will attempt to use the output.ReadFrom method to perform
+			// the requested copy, which ends up calling the unbuffered io.Copy function & performing
+			// a large number of allocations.
+			// In order to force CopyBuffer to actually utilize the given buffer, we have to ensure
+			// output does not implement the io.ReaderFrom interface.
+			if _, err := io.CopyBuffer(onlyWriter{output}, tarReader, buf); err != nil {
 				return fmt.Errorf("failed to uncompress file %s: %w", hdr.Name, err)
 
 			}
