@@ -86,11 +86,11 @@ func ExtractTarball(reader io.Reader, filename, directory string, logger types.L
 }
 
 func customCopy(dst io.Writer, src io.Reader, buf []byte, logger types.Logger) (written int64, err error) {
-	if wt, ok := src.(WriterTo); ok {
+	if wt, ok := src.(io.WriterTo); ok {
 		logger.Infof("tarReader is problem")
 		return wt.WriteTo(dst)
 	}
-	if rt, ok := dst.(ReaderFrom); ok {
+	if rt, ok := dst.(io.ReaderFrom); ok {
 		logger.Infof("output is problem")
 		return rt.ReadFrom(src)
 	}
