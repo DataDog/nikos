@@ -11,11 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/aptly-dev/aptly/aptly"
-	"github.com/aptly-dev/aptly/database"
-	"github.com/aptly-dev/aptly/database/goleveldb"
-	"github.com/aptly-dev/aptly/deb"
-	"github.com/aptly-dev/aptly/http"
+	"github.com/DataDog/aptly/aptly"
+	"github.com/DataDog/aptly/database"
+	"github.com/DataDog/aptly/database/goleveldb"
+	"github.com/DataDog/aptly/deb"
+	"github.com/DataDog/aptly/http"
 	"github.com/arduino/go-apt-client"
 	"github.com/xor-gate/ar"
 
