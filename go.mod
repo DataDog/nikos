@@ -5,7 +5,7 @@ go 1.14
 require (
 	cloud.google.com/go/storage v1.12.0
 	github.com/AlekSi/pointer v1.1.0 // indirect
-	github.com/DataDog/aptly v1.4.1-0.20220609213321-7c4fee152453
+	github.com/DataDog/aptly v1.4.1-0.20220613144114-d7b44726574d
 	github.com/DataDog/gopsutil v0.0.0-20211112180027-9aa392ae181a
 	github.com/DataDog/zstd v1.5.0
 	github.com/DisposaBoy/JsonConfigReader v0.0.0-20171218180944-5ea4d0ddac55 // indirect
