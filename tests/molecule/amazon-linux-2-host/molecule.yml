@@ -1,0 +1,33 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+platforms:
+  - name: amazon-linux-2
+    box: cloudnatives/amazon-linux-2 
+    memory: 512
+    cpus: 1
+  - name: amazon-linux-2
+    box: cloudnatives/amazon-linux-2
+    memory: 512
+    cpus: 1
+  - name: amazon-linux-2
+    box: cloudnatives/amazon-linux-2
+    memory: 512
+    cpus: 1
+provisioner:
+  name: ansible
+  env:
+    TEST_TYPE: 'host'
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    verify: ../resources/playbooks/verify.yml
+  inventory:
+    host_vars:
+      debian8:
+        ansible_python_interpreter: "/usr/bin/python2.7"
+verifier:
+  name: ansible
