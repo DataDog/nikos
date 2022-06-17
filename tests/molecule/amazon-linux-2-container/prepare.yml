@@ -1,0 +1,28 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+  - name: Install Docker
+    package:
+      name: "{{ item }}"
+      state: latest
+    with_items:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    become: true
+
+  - name: Install pip
+    package:
+      name: python3-pip
+    become: true
+
+  - name: Install docker-py
+    shell: 'pip3 install docker'
+    become: true
+
+  - name: Start docker
+    service:
+      name: docker
+      state: started
+    become: true
