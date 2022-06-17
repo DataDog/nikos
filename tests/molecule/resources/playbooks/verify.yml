@@ -32,7 +32,7 @@
     when: ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'openSUSE Leap' or ansible_distribution == 'Fedora' or ansible_distribution == 'Amazon')
 
   - include_tasks: verify-headers.yml
-    when: not (ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora'))
+    when: not (ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora' or ansible_distribution == 'Amazon'))
     
   - include_tasks: verify-headers-fedora-centos.yml
-    when: ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora')
+    when: ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora' or ansible_distribution == 'Amazon')
