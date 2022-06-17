@@ -8,8 +8,6 @@
       state: latest
     with_items:
     - docker
-    - python-requests
-    - python-docker
     become: true
 
   - name: Install pip
