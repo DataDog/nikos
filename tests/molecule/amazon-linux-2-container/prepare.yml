@@ -2,6 +2,10 @@
 - name: Prepare
   hosts: all
   tasks:
+  - name: Enable Repos
+    shell: 'yum-config-manager --enable amzn2extra-docker && yum-config-manager --enable amzn2-core'
+    become: true
+
   - name: Install Docker
     package:
       name: "{{ item }}"
