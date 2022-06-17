@@ -7,9 +7,9 @@
       name: "{{ item }}"
       state: latest
     with_items:
-    - docker-ce
-    - docker-ce-cli
-    - containerd.io
+    - docker
+    - python-requests
+    - python-docker
     become: true
 
   - name: Install pip
