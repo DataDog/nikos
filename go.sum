@@ -85,6 +85,8 @@ github.com/DataDog/aptly v1.4.1-0.20220617102900-af38d7d9d7d3 h1:Ycw3DjxDROV2/X9
 github.com/DataDog/aptly v1.4.1-0.20220617102900-af38d7d9d7d3/go.mod h1:KVyvkYXGcFugxadGFZ+u5Fc3M6q/EfzFZyeTD9HVbkY=
 github.com/DataDog/aptly v1.4.1-0.20220621144226-030aa88abeb2 h1:t5cQL060zKh8hmantMz8rVLVZNy6Gk9EuxFiMwBW/c0=
 github.com/DataDog/aptly v1.4.1-0.20220621144226-030aa88abeb2/go.mod h1:KVyvkYXGcFugxadGFZ+u5Fc3M6q/EfzFZyeTD9HVbkY=
+github.com/DataDog/aptly v1.4.1-0.20220622143205-1ab17c4c55f4 h1:wg+Qxft7C9LAP4gyyNECr+2vMlWuEaqFmFlihH4glN8=
+github.com/DataDog/aptly v1.4.1-0.20220622143205-1ab17c4c55f4/go.mod h1:KVyvkYXGcFugxadGFZ+u5Fc3M6q/EfzFZyeTD9HVbkY=
 github.com/DataDog/gopsutil v0.0.0-20211112231309-1e2204a98d89 h1:WiMz6zKlbUzQkEjivJ07djBdvuhHqga1UtSr0JA4dbU=
 github.com/DataDog/gopsutil v0.0.0-20211112231309-1e2204a98d89/go.mod h1:glkxNt/qRu9lnpmUEQwOIAXW+COWDTBOTEAHqbgBPts=
 github.com/DataDog/zstd v1.4.5/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
