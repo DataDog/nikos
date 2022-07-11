@@ -14,6 +14,7 @@ jobs:
       - restore_caches
       - setup
       - save_caches
+      - build_rss
       - build_nikos
       - set_permissions
       - molecule_test:
