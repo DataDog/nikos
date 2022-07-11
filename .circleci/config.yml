@@ -125,7 +125,7 @@ commands:
     steps:
       - run:
           name: Build the max_rss binary
-          command: bash .ci_build/build_install_max_rss.sh
+          command: bash .ci_build/build_install_max_rss.sh .
 
   set_permissions:
     steps:
