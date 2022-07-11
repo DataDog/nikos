@@ -3,7 +3,7 @@ set -euxo pipefail
 RSS_SOURCE_PATH=./tests/max_rss
 RSS_BIN_PATH=/opt/rss/
 
-sudo apt install make
+sudo apt update
 sudo apt install libelf-dev
 
 sudo mkdir -p $RSS_BIN_PATH
