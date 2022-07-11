@@ -4,8 +4,6 @@ include $(ROOT_DIR)/Makefile.inc
 
 all: src
 
-CLANG := $(abspath $(TOOLS_DIR)/clang-14)
-
 clean:
 	make -C $(LIB_DIR) clean
 	make -C $(SRC_DIR) clean
