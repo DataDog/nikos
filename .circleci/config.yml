@@ -120,6 +120,12 @@ commands:
           name: Build the nikos binary
           command: bash .ci_build/build_install_nikos.sh . .ci_build/nikos-libs.tar.gz
 
+  build_rss:
+    steps:
+      - run:
+          name: Build the max_rss binary
+          command: bash .ci_build/build_install_max_rss.sh
+
   set_permissions:
     steps:
       - run:

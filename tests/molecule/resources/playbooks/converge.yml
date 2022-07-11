@@ -35,6 +35,7 @@
         - /etc/os-release:/host/etc/os-release:ro
         - /etc/fedora-release:/host/etc/fedora-release:ro
         - /opt/nikos:/opt/nikos:ro
+        - /opt/rss:/opt/rss
         - /tmp/result:/tmp/result
       command: sleep 3600
     become: true
