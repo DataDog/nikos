@@ -1,6 +1,6 @@
 set -euxo pipefail
 
-RSS_SOURCE_PATH="${1}/tests/max_rss"
+RSS_SOURCE_PATH="${1}/tests/max-rss"
 RSS_BIN_PATH=/opt/rss/
 
 sudo apt update
