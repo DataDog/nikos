@@ -13,7 +13,15 @@
       mode: 0777
 
   - name: run max_rss
-    shell: "/opt/rss/max_rss &"
+    shell: "/opt/rss/max_rss"
+    register: rss_test
+
+  - debug:
+      var: rss_test.stdout_lines
+
+  - debug:
+      var: rss_test.stderr_lines
+
 
   - name: run nikos
     shell: "{{ prefix | default('', True) }} bash -c 'SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --verbose --output /tmp/result 2>&1 tee /tmp/result/logs.txt'"
