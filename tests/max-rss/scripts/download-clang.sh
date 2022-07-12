@@ -1,5 +1,6 @@
 #!/bin/bash
 
+declare -A arch_mapping
 arch_mapping=( ["aarch64"]="arm64" ["arm64"]="arm64" ["x86_64"]="amd64" ["amd64"]="amd64" ["x64"]="amd64" )
 
 MACHINE=$(uname -m)
