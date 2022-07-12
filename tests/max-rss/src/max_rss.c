@@ -19,7 +19,7 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format, va
 
 static int write_pid_file() {
 	int fd, err;
-	char pid_str[5] = {0};
+	char pid_str[16] = {0};
 	pid_t pid = getpid();
 
 	sprintf(pid_str, "%d", pid);
