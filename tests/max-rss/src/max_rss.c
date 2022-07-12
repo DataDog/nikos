@@ -7,8 +7,8 @@
 #include <signal.h>
 #include "max_rss.skel.h"
 
-#define PID_FILE "/tmp/max_rss.pid"
-#define LOG_FILE "/tmp/max_rss.log"
+#define PID_FILE "/tmp/result/max_rss.pid"
+#define LOG_FILE "/tmp/result/max_rss.log"
 
 typedef void (*sighandler_t)(int);
 

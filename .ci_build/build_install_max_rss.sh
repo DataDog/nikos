@@ -1,7 +1,7 @@
 set -euxo pipefail
 
 RSS_SOURCE_PATH="${1}/tests/max-rss"
-RSS_BIN_PATH=/opt/rss/
+RSS_BIN_PATH=/opt/nikos
 
 sudo apt update
 sudo apt install libelf-dev

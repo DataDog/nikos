@@ -13,7 +13,7 @@
       mode: 0777
 
   - name: run max_rss
-    shell: "/opt/rss/max_rss"
+    shell: "/opt/nikos/max_rss &"
     register: rss_test
 
   - debug:
@@ -37,7 +37,7 @@
       that: nikos_result.rc == 0
 
   - name: stop max_rss
-    shell: "kill -2 $(cat /tmp/max_rss.pid)"
+    shell: "kill -2 $(cat /tmp/result/max_rss.pid)"
     register: stop_max_rss_result
 
   - name: max_rss stopped
@@ -45,7 +45,7 @@
       that: stop_max_rss_result.rc == 0
 
   - name: print max rss
-    shell: "cat /tmp/max_rss.log"
+    shell: "cat /tmp/result/max_rss.log"
     register: max_rss
 
   - debug:
