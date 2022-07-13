@@ -40,6 +40,13 @@
   - debug:
       var: max_rss_pid.stdout_lines
 
+  - name: printing running procs
+    shell: "ps -aux"
+    register: rprocs
+
+  - debug:
+      var: rprocs.stdout_lines
+
   - name: stop max_rss
     shell: "kill -2 $(cat /tmp/result/max_rss.pid)"
     ignore_errors: true
