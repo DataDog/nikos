@@ -24,7 +24,7 @@ static int write_pid_file() {
 	if (fd < 0)
 		return fd;
 
-	fprintf(fd, "%d", getpid());
+	dprintf(fd, "%d", getpid());
 
 	return close(fd);
 }
