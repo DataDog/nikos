@@ -58,12 +58,9 @@ int main(int argc, char **argv)
 	char max_str[10] = {0};
 	long max;
 
-	err = write_pid_file();
-	if (err < 0) {
-		fprintf(stderr, "Failed to write pid file\n");
-		return -1;
-	}
-
+	/* remove pid if exists */
+	unlink(PID_FILE);
+	
 	err = setup_signal(SIGINT, handler);
 	if (err < 0) {
 		fprintf(stderr, "Failed to setup signal handler\n");
@@ -93,6 +90,13 @@ int main(int argc, char **argv)
 	if (err) {
 		fprintf(stderr, "Failed to attach BPF skeleton\n");
 		goto cleanup;
+	}
+
+	/* write pid file only if successfully attached */
+	err = write_pid_file();
+	if (err < 0) {
+		fprintf(stderr, "Failed to write pid file\n");
+		return -1;
 	}
 
 	pause();
