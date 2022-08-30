@@ -38,7 +38,7 @@ static __always_inline __u32 get_obj_id(void *ent, enum bpf_obj_type type)
 	}
 }
 
-struct bpf_perf_link {
+struct my_bpf_perf_link {
 	struct bpf_link link;
 	struct file *perf_file;
 };
@@ -50,10 +50,10 @@ struct my_perf_event {
 /* could be used only with BPF_LINK_TYPE_PERF_EVENT links */
 static __u64 get_bpf_cookie(struct bpf_link *link)
 {
-	struct bpf_perf_link *perf_link;
+	struct my_bpf_perf_link *perf_link;
 	struct my_perf_event *event;
 
-	perf_link = container_of(link, struct bpf_perf_link, link);
+	perf_link = container_of(link, struct my_bpf_perf_link, link);
 	event = BPF_CORE_READ(perf_link, perf_file, private_data);
 	return BPF_CORE_READ(event, bpf_cookie);
 }

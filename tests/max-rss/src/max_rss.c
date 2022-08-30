@@ -1,47 +1,15 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <sys/resource.h>
 #include <bpf/libbpf.h>
 #include <bpf/bpf.h>
 #include <fcntl.h>
-#include <signal.h>
 #include "max_rss.skel.h"
-
-#define PID_FILE "/tmp/result/max_rss.pid"
-#define LOG_FILE "/tmp/result/max_rss.log"
-
-typedef void (*sighandler_t)(int);
 
 static int libbpf_print_fn(enum libbpf_print_level level, const char *format, va_list args)
 {
 	return vfprintf(stderr, format, args);
-}
-
-static int write_pid_file() {
-	int fd, err;
-
-	fd = open(PID_FILE, O_WRONLY | O_CREAT);
-	if (fd < 0)
-		return fd;
-
-	dprintf(fd, "%d", getpid());
-
-	return close(fd);
-}
-
-static void handler(int sig) {
-	return;	
-}
-
-static int setup_signal(int sig, sighandler_t handler) {
-	struct sigaction new;
-
-	new.sa_handler = handler;
-	sigemptyset(&new.sa_mask);
-	
-	new.sa_flags = SA_RESTART;
-
-	return sigaction(sig, &new, NULL);
 }
 
 int main(int argc, char **argv)
@@ -52,14 +20,14 @@ int main(int argc, char **argv)
 	char max_str[10] = {0};
 	long max;
 
-	/* remove pid if exists */
-	unlink(PID_FILE);
-	
-	err = setup_signal(SIGINT, handler);
-	if (err < 0) {
-		fprintf(stderr, "Failed to setup signal handler\n");
-		return -1;
-	}
+    if (argc <= 1) {
+        fprintf(stderr, "not enough arguments passed to 'max_rss'\n");
+        exit(1);
+    }
+    if ((argv+sizeof(char *)) == NULL) {
+        fprintf(stderr, "invalid argument passed to 'max_rss'\n");
+        exit(1);
+    }
 
 	libbpf_set_strict_mode(LIBBPF_STRICT_ALL);
 	/* Set up libbpf errors and debug info callback */
@@ -86,15 +54,9 @@ int main(int argc, char **argv)
 		goto cleanup;
 	}
 
-	/* write pid file only if successfully attached */
-	err = write_pid_file();
-	if (err < 0) {
-		fprintf(stderr, "Failed to write pid file\n");
-		return -1;
-	}
-
-	pause();
-
+    printf("%s\n", argv[1]);
+    system(argv[1]);
+    
 	obj = skel->obj;
 	fd = bpf_object__find_map_fd_by_name(obj, "max_rss");
 	if (fd < 0)
@@ -105,17 +67,7 @@ int main(int argc, char **argv)
 	if (err < 0)
 		goto cleanup;
 
-
-	sprintf(max_str, "%ld\n", max);
-	fd = open(LOG_FILE, O_WRONLY | O_CREAT);
-	if (fd < 0)
-		goto cleanup;
-
-	err = write(fd, max_str, 9);
-	if (err < 0)
-		goto cleanup;
-
-	close(fd);
+    printf("%lu\n", max);
 
 cleanup:
 	max_rss_bpf__destroy(skel);

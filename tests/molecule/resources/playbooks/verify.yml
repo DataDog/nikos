@@ -13,7 +13,7 @@
       mode: 0777
 
   - name: run max_rss
-    shell: "strace /opt/nikos/max_rss &"
+    shell: "/opt/nikos/max_rss {{ prefix | default('', True) }} bash -c 'SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --verbose --output /tmp/result 2>&1 tee /tmp/result/logs.txt'"
     register: rss_test
 
   - debug:
@@ -22,44 +22,9 @@
   - debug:
       var: rss_test.stderr_lines
     
-  - name: run nikos
-    shell: "{{ prefix | default('', True) }} bash -c 'SSL_CERT_DIR=/opt/nikos/embedded/ssl/ PATH=$PATH:/opt/nikos/embedded/bin /opt/nikos/bin/nikos download --verbose --output /tmp/result 2>&1 tee /tmp/result/logs.txt'"
-    register: nikos_result
-    # ignore errors here so that we can pretty-print the nikos output before checking if it was successful
-    ignore_errors: true 
-
-  - debug:
-      var: nikos_result.stdout_lines
-
   - name: nikos ran successfully
     assert:
       that: nikos_result.rc == 0
-
-  - name: max_rss pid
-    shell: "cat /tmp/result/max_rss.pid"
-    register: max_rss_pid
-
-  - debug:
-      var: max_rss_pid.stdout_lines
-
-  - name: printing running procs
-    shell: "ps -aux"
-    register: rprocs
-
-  - debug:
-      var: rprocs.stdout_lines
-
-  - name: stop max_rss
-    shell: "kill -2 $(cat /tmp/result/max_rss.pid)"
-    ignore_errors: true
-
-  - name: print max rss
-    shell: "cat /tmp/result/max_rss.log"
-    register: max_rss
-    ignore_errors: true
-
-  - debug:
-      var: max_rss.stdout_lines
 
   - include_tasks: verify-package-deb.yml
     when: ansible_lsb.id is defined and (ansible_lsb.id == 'Ubuntu' or ansible_lsb.id == 'Debian')
