@@ -7,21 +7,27 @@ import (
 	"github.com/DataDog/nikos/types"
 )
 
-const (
-	updatesRepoBaseURL = "https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/"
-)
+type RepoInfo struct {
+	repoName          string
+	disableOtherRepos bool
+	baseURL           string
+	gpgKeyHostEtcPath string
+}
 
 type FedoraBackend struct {
-	dnfBackend *dnf.DnfBackend
-	logger     types.Logger
-	target     *types.Target
+	extraRepoInfo *RepoInfo
+	dnfBackend    *dnf.DnfBackend
+	logger        types.Logger
+	target        *types.Target
 }
 
 func (b *FedoraBackend) GetKernelHeaders(directory string) error {
-	for _, repo := range b.dnfBackend.GetEnabledRepositories() {
-		if repo.Id != "base" && repo.Id != "updates" {
-			b.dnfBackend.DisableRepository(repo)
-			continue
+	if b.extraRepoInfo.disableOtherRepos {
+		for _, repo := range b.dnfBackend.GetEnabledRepositories() {
+			if repo.Id != "base" && repo.Id != "updates" {
+				b.dnfBackend.DisableRepository(repo)
+				continue
+			}
 		}
 	}
 
@@ -34,15 +40,15 @@ func (b *FedoraBackend) GetKernelHeaders(directory string) error {
 	}
 
 	// If that doesn't work, try again with the updates-archive repo
-	updatesRepoGPGKey := "file:///" + types.HostEtc("pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch")
-	b.logger.Infof("Trying with updates-archive repository")
-	if _, err := b.dnfBackend.AddRepository("updates-archive", updatesRepoBaseURL, true, updatesRepoGPGKey, "", "", ""); err == nil {
+	updatesRepoGPGKey := "file:///" + types.HostEtc(b.extraRepoInfo.gpgKeyHostEtcPath)
+	b.logger.Infof("Trying with %s repository", b.extraRepoInfo.repoName)
+	if _, err := b.dnfBackend.AddRepository("updates-archive", b.extraRepoInfo.baseURL, true, updatesRepoGPGKey, "", "", ""); err == nil {
 		err = b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 		if err == nil {
 			return nil
 		}
 	} else {
-		b.logger.Warnf("Failed to add updates-archive repository: %w", err)
+		b.logger.Warnf("Failed to add %s repository: %w", b.extraRepoInfo.repoName, err)
 	}
 
 	// As a last resort, check for the kernel-devel package
@@ -54,15 +60,36 @@ func (b *FedoraBackend) Close() {
 	b.dnfBackend.Close()
 }
 
-func NewFedoraBackend(target *types.Target, reposDir string, logger types.Logger) (*FedoraBackend, error) {
+func newRawFedoraBackend(target *types.Target, extraRepoInfo *RepoInfo, reposDir string, logger types.Logger) (*FedoraBackend, error) {
 	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create fedora dnf backend: %w", err)
 	}
 
 	return &FedoraBackend{
-		target:     target,
-		logger:     logger,
-		dnfBackend: dnfBackend,
+		extraRepoInfo: extraRepoInfo,
+		target:        target,
+		logger:        logger,
+		dnfBackend:    dnfBackend,
 	}, nil
+}
+
+func NewFedoraBackend(target *types.Target, reposDir string, logger types.Logger) (*FedoraBackend, error) {
+	updatesArchiveRepoInfo := RepoInfo{
+		repoName:          "updates-archive",
+		disableOtherRepos: true,
+		baseURL:           "https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/",
+		gpgKeyHostEtcPath: "pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch",
+	}
+	return newRawFedoraBackend(target, &updatesArchiveRepoInfo, reposDir, logger)
+}
+
+func NewAmazonLinux2022Backend(target *types.Target, reposDir string, logger types.Logger) (*FedoraBackend, error) {
+	updatesArchiveRepoInfo := RepoInfo{
+		repoName:          "amazonlinux",
+		disableOtherRepos: false,
+		baseURL:           "https://al2022-repos-$awsregion-9761ab97.s3.dualstack.$awsregion.$awsdomain/core/mirrors/$releasever/$basearch/mirror.list",
+		gpgKeyHostEtcPath: "pki/rpm-gpg/RPM-GPG-KEY-amazon-linux-2022",
+	}
+	return newRawFedoraBackend(target, &updatesArchiveRepoInfo, reposDir, logger)
 }
