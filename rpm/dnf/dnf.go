@@ -1,3 +1,4 @@
+//go:build dnf
 // +build dnf
 
 package dnf
@@ -295,7 +296,9 @@ func NewDnfBackend(release string, reposDir string, l types.Logger, target *type
 	reposDirC := C.CString(tmpDir)
 	defer C.free(unsafe.Pointer(reposDirC))
 
-	result := C.CreateAndSetupDNFContext(releaseC, reposDirC)
+	varsDirC := C.CString()
+
+	result := C.CreateAndSetupDNFContext(releaseC, reposDirC, varsDirC)
 	if result.err_msg != nil {
 		defer C.free(unsafe.Pointer(result.err_msg))
 		return nil, errors.New("error creating new dnf context: " + C.GoString(result.err_msg))
