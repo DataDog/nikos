@@ -9,7 +9,6 @@ import (
 
 type RepoInfo struct {
 	repoName          string
-	disableOtherRepos bool
 	baseURL           string
 	gpgKeyHostEtcPath string
 }
@@ -22,12 +21,10 @@ type FedoraBackend struct {
 }
 
 func (b *FedoraBackend) GetKernelHeaders(directory string) error {
-	if b.extraRepoInfo.disableOtherRepos {
-		for _, repo := range b.dnfBackend.GetEnabledRepositories() {
-			if repo.Id != "base" && repo.Id != "updates" {
-				b.dnfBackend.DisableRepository(repo)
-				continue
-			}
+	for _, repo := range b.dnfBackend.GetEnabledRepositories() {
+		if repo.Id != "base" && repo.Id != "updates" {
+			b.dnfBackend.DisableRepository(repo)
+			continue
 		}
 	}
 
@@ -42,7 +39,7 @@ func (b *FedoraBackend) GetKernelHeaders(directory string) error {
 	// If that doesn't work, try again with the updates-archive repo
 	updatesRepoGPGKey := "file:///" + types.HostEtc(b.extraRepoInfo.gpgKeyHostEtcPath)
 	b.logger.Infof("Trying with %s repository", b.extraRepoInfo.repoName)
-	if _, err := b.dnfBackend.AddRepository("updates-archive", b.extraRepoInfo.baseURL, true, updatesRepoGPGKey, "", "", ""); err == nil {
+	if _, err := b.dnfBackend.AddRepository(b.extraRepoInfo.repoName, b.extraRepoInfo.baseURL, true, updatesRepoGPGKey, "", "", ""); err == nil {
 		err = b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
 		if err == nil {
 			return nil
@@ -77,7 +74,6 @@ func newRawFedoraBackend(target *types.Target, extraRepoInfo *RepoInfo, reposDir
 func NewFedoraBackend(target *types.Target, reposDir string, logger types.Logger) (*FedoraBackend, error) {
 	updatesArchiveRepoInfo := RepoInfo{
 		repoName:          "updates-archive",
-		disableOtherRepos: true,
 		baseURL:           "https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/",
 		gpgKeyHostEtcPath: "pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch",
 	}
@@ -85,11 +81,10 @@ func NewFedoraBackend(target *types.Target, reposDir string, logger types.Logger
 }
 
 func NewAmazonLinux2022Backend(target *types.Target, reposDir string, logger types.Logger) (*FedoraBackend, error) {
-	updatesArchiveRepoInfo := RepoInfo{
+	amazonLinuxRepoInfo := RepoInfo{
 		repoName:          "amazonlinux",
-		disableOtherRepos: false,
 		baseURL:           "https://al2022-repos-$awsregion-9761ab97.s3.dualstack.$awsregion.$awsdomain/core/mirrors/$releasever/$basearch/mirror.list",
 		gpgKeyHostEtcPath: "pki/rpm-gpg/RPM-GPG-KEY-amazon-linux-2022",
 	}
-	return newRawFedoraBackend(target, &updatesArchiveRepoInfo, reposDir, logger)
+	return newRawFedoraBackend(target, &amazonLinuxRepoInfo, reposDir, logger)
 }
