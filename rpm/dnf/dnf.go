@@ -228,6 +228,14 @@ func (s *ReplacerState) loadVarsFromDir(dir string) {
 	}
 }
 
+func (s *ReplacerState) stringReplacer() {
+	replacements := make([]string, 0, len(s.pairs) * 2)
+	for _, pair := s.pairs {
+		replacements = append(replacements, "$" + pair.varName, pair.value)
+	}
+	return strings.NewReplacer(replacements...)
+}
+
 func hostifyRepositories(reposDir string) (string, string, error) {
 	tmpDir, err := ioutil.TempDir("", "repos.d")
 	if err != nil {
@@ -247,6 +255,8 @@ func hostifyRepositories(reposDir string) (string, string, error) {
 	}
 
 	replacerState := NewReplacerState()
+	replacer := replacerState.stringReplacer()
+
 	for _, pair := range replacerState.pairs {
 		destFilename := filepath.Join(varsDir, pair.varName)
 		if err := os.WriteFile(destFilename, []byte(pair.value), 0o644); err != nil {
@@ -274,6 +284,12 @@ func hostifyRepositories(reposDir string) (string, string, error) {
 			keys := section.Keys()
 			for _, key := range keys {
 				value := key.String()
+
+				switch key.Name() {
+				case "baseurl", "mirrorlist", "name":
+					value = replacer.Replace(value)
+					key.SetValue(value)
+				}
 
 				if strings.HasPrefix(value, "/etc/") {
 					key.SetValue(types.HostEtc(strings.TrimPrefix(value, "/etc/")))
