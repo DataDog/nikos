@@ -87,7 +87,7 @@ jobs:
   molecule-tests:
     name: Molecule tests
     needs: build
-    runs-on: macos-10.15
+    runs-on: macos-12
     strategy:
       fail-fast: false
       matrix:
