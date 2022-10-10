@@ -199,7 +199,7 @@ func (b *DnfBackend) GetEnabledRepositories() (repos []*Repository) {
 
 type ReplacerPair struct {
 	varName string
-	value string
+	value   string
 }
 
 type ReplacerState struct {
@@ -221,7 +221,7 @@ func (s *ReplacerState) loadVarsFromDir(dir string) {
 			if content, err := os.ReadFile(filepath.Join(dir, filename)); err == nil {
 				s.pairs = append(s.pairs, ReplacerPair{
 					varName: filename,
-					value: strings.TrimSpace(string(content))
+					value:   strings.TrimSpace(string(content)),
 				})
 			}
 		}
@@ -231,19 +231,19 @@ func (s *ReplacerState) loadVarsFromDir(dir string) {
 func hostifyRepositories(reposDir string) (string, string, error) {
 	tmpDir, err := ioutil.TempDir("", "repos.d")
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	varsDir, err := ioutil.TempDir("", "vars")
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	logger.Infof("Scanning repo files in '%s'", reposDir)
 	repoFiles, err := filepath.Glob(reposDir + "/*.repo")
 	if err != nil {
 		os.RemoveAll(tmpDir)
-		return "", err
+		return "", "", err
 	}
 
 	replacerState := NewReplacerState()
