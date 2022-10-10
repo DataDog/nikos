@@ -239,7 +239,7 @@ CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, con
 
         if (strlen(vars_dir) != 0) {
             std::array<const char*, 2> vars_dir_array = {vars_dir, nullptr};
-            dnf_context_set_vars_dir(context, vars_dir_array);
+            dnf_context_set_vars_dir(context, vars_dir_array.data());
         }
         dnf_context_set_install_root(context, install_root);
 
