@@ -6,7 +6,7 @@
     test_type: "{{ lookup('env', 'TEST_TYPE') }}"
   tasks:
   - name: Install gnupg
-    ansible.builtin.package:
+    package:
       name: gnupg
       state: present
 
