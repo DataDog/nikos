@@ -228,16 +228,13 @@ func (s *ReplacerState) loadVarsFromDir(dir string) {
 	}
 }
 
-func (s *ReplacerState) stringReplacer() {
-	replacements := make([]string, 0, len(s.pairs) * 2)
-	for _, pair := s.pairs {
-		replacements = append(replacements, "$" + pair.varName, pair.value)
-	}
-	return strings.NewReplacer(replacements...)
-}
-
-func hostifyRepositories(reposDir string) (string, error) {
+func hostifyRepositories(reposDir string) (string, string, error) {
 	tmpDir, err := ioutil.TempDir("", "repos.d")
+	if err != nil {
+		return "", err
+	}
+
+	varsDir, err := ioutil.TempDir("", "vars")
 	if err != nil {
 		return "", err
 	}
@@ -250,7 +247,12 @@ func hostifyRepositories(reposDir string) (string, error) {
 	}
 
 	replacerState := NewReplacerState()
-	replacer := replacerState.stringReplacer()
+	for _, pair := range replacerState.pairs {
+		destFilename := filepath.Join(varsDir, pair.varName)
+		if err := os.WriteFile(destFilename, []byte(pair.value), 0o644); err != nil {
+			logger.Warnf("Failed to write var file (`%s`)", pair.varName)
+		}
+	}
 
 	for _, repoFile := range repoFiles {
 		destFilename := filepath.Join(tmpDir, filepath.Base(repoFile))
@@ -273,12 +275,6 @@ func hostifyRepositories(reposDir string) (string, error) {
 			for _, key := range keys {
 				value := key.String()
 
-				switch key.Name() {
-				case "baseurl", "mirrorlist", "name":
-					value = replacer.Replace(value)
-					key.SetValue(value)
-				}
-
 				if strings.HasPrefix(value, "/etc/") {
 					key.SetValue(types.HostEtc(strings.TrimPrefix(value, "/etc/")))
 				} else if strings.HasPrefix(value, "file:///etc/") {
@@ -297,7 +293,7 @@ func hostifyRepositories(reposDir string) (string, error) {
 		}
 	}
 
-	return tmpDir, nil
+	return tmpDir, varsDir, nil
 }
 
 func NewDnfBackend(release string, reposDir string, l types.Logger, target *types.Target) (*DnfBackend, error) {
@@ -307,7 +303,7 @@ func NewDnfBackend(release string, reposDir string, l types.Logger, target *type
 	releaseC := C.CString(release)
 	defer C.free(unsafe.Pointer(releaseC))
 
-	tmpDir, err := hostifyRepositories(reposDir)
+	tmpDir, varsDir, err := hostifyRepositories(reposDir)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +312,8 @@ func NewDnfBackend(release string, reposDir string, l types.Logger, target *type
 	reposDirC := C.CString(tmpDir)
 	defer C.free(unsafe.Pointer(reposDirC))
 
-	varsDirC := C.CString()
+	varsDirC := C.CString(varsDir)
+	defer C.free(unsafe.Pointer(varsDirC))
 
 	result := C.CreateAndSetupDNFContext(releaseC, reposDirC, varsDirC)
 	if result.err_msg != nil {
