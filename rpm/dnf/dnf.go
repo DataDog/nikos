@@ -197,25 +197,43 @@ func (b *DnfBackend) GetEnabledRepositories() (repos []*Repository) {
 	return
 }
 
-func replacerFromVars() *strings.Replacer {
-	var oldnew []string
+type ReplacerPair {
+	varName string
+	value string
+}
 
-	loadVarsFromDir := func(dir string) {
-		files, err := os.ReadDir(dir)
-		if err == nil {
-			for _, file := range files {
-				filename := file.Name()
-				if content, err := os.ReadFile(filepath.Join(dir, filename)); err == nil {
-					oldnew = append(oldnew, "$"+filename, strings.TrimSpace(string(content)))
-				}
+type ReplacerState struct {
+	pairs: ReplacerPair
+}
+
+func NewReplacerState() *ReplacerState {
+	s := &ReplacerState{}
+	s.loadVarsFromDir(types.HostEtc("yum/vars"))
+	s.loadVarsFromDir(types.HostEtc("dnf/vars"))
+	return s
+}
+
+func (s *ReplacerState) loadVarsFromDir(dir string) {
+	files, err := os.ReadDir(dir)
+	if err == nil {
+		for _, file := range files {
+			filename := file.Name()
+			if content, err := os.ReadFile(filepath.Join(dir, filename)); err == nil {
+				s.pairs = append(s.pairs, ReplacerPair{
+					varName: filename,
+					value: strings.TrimSpace(string(content))
+				})
 			}
 		}
 	}
+}
 
-	loadVarsFromDir(types.HostEtc("yum/vars"))
-	loadVarsFromDir(types.HostEtc("dnf/vars"))
-
-	return strings.NewReplacer(oldnew...)
+func (s *ReplacerState) stringReplacer() {
+	replacements := make([]string, 0, len(s.pairs) * 2)
+	for _, pair := s.pairs {
+		replacements = append(replacements, "$" + pair.varName, pair.value)
+	}
+	return strings.NewReplacer(replacements...)
 }
 
 func hostifyRepositories(reposDir string) (string, error) {
@@ -230,6 +248,9 @@ func hostifyRepositories(reposDir string) (string, error) {
 		os.RemoveAll(tmpDir)
 		return "", err
 	}
+
+	replacerState := NewReplacerState()
+	replacer := replacerState.stringReplacer()
 
 	for _, repoFile := range repoFiles {
 		destFilename := filepath.Join(tmpDir, filepath.Base(repoFile))
@@ -246,7 +267,6 @@ func hostifyRepositories(reposDir string) (string, error) {
 			continue
 		}
 
-		replacer := replacerFromVars()
 		sections := cfg.Sections()
 		for _, section := range sections {
 			keys := section.Keys()
