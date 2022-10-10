@@ -2,14 +2,9 @@
 - name: Converge
   hosts: all
   become: true
-  gather_facts: true
   vars:
     test_type: "{{ lookup('env', 'TEST_TYPE') }}"
   tasks:
-  - name: Install gnupg
-    package:
-      name: gnupg
-      state: present
 
   - synchronize:
       src: nikos-archive/
