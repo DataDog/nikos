@@ -1,6 +1,0 @@
-libvirt-daemon-system
-libvirt-dev
-libvirt-clients
-qemu
-qemu-utils
-qemu-kvm
