@@ -4,6 +4,7 @@
 #include <exception>
 #include <string>
 #include <string.h>
+#include <array>
 
 const char* newCString(std::string s) {
     size_t len = s.size()+1;
@@ -237,7 +238,7 @@ CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, con
         }
 
         if (strlen(vars_dir) != 0) {
-            const char*[1] vars_dir_array = {vars_dir, nullptr};
+            std::array<const char*, 2> vars_dir_array = {vars_dir, nullptr};
             dnf_context_set_vars_dir(context, vars_dir_array);
         }
         dnf_context_set_install_root(context, install_root);
