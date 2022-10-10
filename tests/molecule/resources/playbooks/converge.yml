@@ -13,7 +13,7 @@
     become: true
 
   - name: Debug files
-    shell: 'pwd; ls -alh'
+    shell: 'pwd; ls -alh; echo "\n"; ls -alh /opt/nikos'
     register: dbg_output
   
   - debug:
