@@ -228,10 +228,10 @@ func (s *ReplacerState) loadVarsFromDir(dir string) {
 	}
 }
 
-func (s *ReplacerState) stringReplacer() {
-	replacements := make([]string, 0, len(s.pairs) * 2)
-	for _, pair := s.pairs {
-		replacements = append(replacements, "$" + pair.varName, pair.value)
+func (s *ReplacerState) stringReplacer() *strings.Replacer {
+	replacements := make([]string, 0, len(s.pairs)*2)
+	for _, pair := range s.pairs {
+		replacements = append(replacements, "$"+pair.varName, pair.value)
 	}
 	return strings.NewReplacer(replacements...)
 }
