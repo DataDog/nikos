@@ -61,7 +61,7 @@ See https://golang.org/cmd/cgo/#hdr-Passing_pointers for more information.
 bool GetRepositories(DnfContext* context, DnfRepo** repos_out, int repos_out_size);
 
 RETURN_VAL_STRUCT(CreateAndSetupDNFContextResult, DnfContext* context);
-CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, const char* repos_dir);
+CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, const char* repos_dir, const char* vars_dir);
 
 #ifdef __cplusplus
 }

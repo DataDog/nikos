@@ -4,6 +4,7 @@
 #include <exception>
 #include <string>
 #include <string.h>
+#include <array>
 
 const char* newCString(std::string s) {
     size_t len = s.size()+1;
@@ -217,7 +218,7 @@ bool GetRepositories(DnfContext* context, DnfRepo** repos_out, int repos_out_siz
     return true;
 }
 
-CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, const char* repos_dir) {
+CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, const char* repos_dir, const char* vars_dir) {
     CreateAndSetupDNFContextResult result = {0};
     try {
         DnfContext* context = dnf_context_new();
@@ -234,6 +235,11 @@ CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, con
         dnf_context_set_cache_dir(context, cache_dir);
         if (strlen(repos_dir) != 0) {
             dnf_context_set_repo_dir(context, repos_dir);
+        }
+
+        if (strlen(vars_dir) != 0) {
+            std::array<const char*, 2> vars_dir_array = {vars_dir, nullptr};
+            dnf_context_set_vars_dir(context, vars_dir_array.data());
         }
         dnf_context_set_install_root(context, install_root);
 
