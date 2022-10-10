@@ -197,7 +197,7 @@ func (b *DnfBackend) GetEnabledRepositories() (repos []*Repository) {
 	return
 }
 
-type ReplacerPair {
+type ReplacerPair struct {
 	varName string
 	value string
 }
