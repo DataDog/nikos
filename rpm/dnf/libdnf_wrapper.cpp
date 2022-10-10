@@ -235,8 +235,10 @@ CreateAndSetupDNFContextResult CreateAndSetupDNFContext(const char* release, con
         if (strlen(repos_dir) != 0) {
             dnf_context_set_repo_dir(context, repos_dir);
         }
+
         if (strlen(vars_dir) != 0) {
-            dnf_context_set_vars_dir(context, vars_dir);
+            const char*[1] vars_dir_array = {vars_dir, 0};
+            dnf_context_set_vars_dir(context, vars_dir_array);
         }
         dnf_context_set_install_root(context, install_root);
 
