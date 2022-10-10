@@ -91,7 +91,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ["fedora", "centos", "opensuse", "debian", "ubuntu"]
+        #platform: ["fedora", "centos", "opensuse", "debian", "ubuntu"]
+        # test_type: ["host", "container"]
+        platform: ["fedora"]
         test_type: ["host", "container"]
     steps:
       - name: Checkout source code
