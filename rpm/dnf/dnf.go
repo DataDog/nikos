@@ -203,7 +203,7 @@ type ReplacerPair struct {
 }
 
 type ReplacerState struct {
-	pairs: ReplacerPair
+	pairs []ReplacerPair
 }
 
 func NewReplacerState() *ReplacerState {
