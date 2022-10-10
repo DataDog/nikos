@@ -5,9 +5,9 @@
   vars:
     test_type: "{{ lookup('env', 'TEST_TYPE') }}"
   tasks:
-  - name: Install openpgp
+  - name: Install gnupg
     ansible.builtin.package:
-      name: openpgp
+      name: gnupg
       state: present
 
   - synchronize:
