@@ -60,3 +60,7 @@ func (b *AmazonLinux2022Backend) GetKernelHeaders(directory string) error {
 
 	return fmt.Errorf("failed to find package %s", targetPackageName)
 }
+
+func (b *AmazonLinux2022Backend) Close() {
+	// do nothing
+}
