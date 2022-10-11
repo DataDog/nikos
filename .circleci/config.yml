@@ -79,10 +79,10 @@ commands:
           command: vagrant plugin install vagrant-libvirt
       
       - run:
-          name: Install Go 1.16
+          name: Install Go 1.18
           command: |
-            eval "$(curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme | GIMME_GO_VERSION=1.16 bash)"
-            echo 'export GOROOT=/home/circleci/.gimme/versions/go1.16.linux.amd64' >> $BASH_ENV
+            eval "$(curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme | GIMME_GO_VERSION=1.18 bash)"
+            echo 'export GOROOT=/home/circleci/.gimme/versions/go1.18.linux.amd64' >> $BASH_ENV
             echo 'export PATH=$GOROOT/bin:$PATH' >> $BASH_ENV
         
       - run:
