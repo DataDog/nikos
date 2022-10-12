@@ -17,8 +17,7 @@ type AmazonLinux2022Backend struct {
 }
 
 func NewAmazonLinux2022Backend(target *types.Target, reposDir string, logger types.Logger) (*AmazonLinux2022Backend, error) {
-	logger.Errorf("al2022 release: %s", target.Distro.Release)
-	builtinVars, err := backend.ComputeBuiltinVariables(target.Distro.Release)
+	builtinVars, err := backend.ComputeBuiltinVariables("")
 	if err != nil {
 		return nil, err
 	}
