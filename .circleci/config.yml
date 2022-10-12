@@ -50,8 +50,8 @@ commands:
       - run: 
           name: Install vagrant
           command: |
-            sudo wget -nv https://releases.hashicorp.com/vagrant/2.2.18/vagrant_2.2.18_x86_64.deb
-            sudo dpkg -i vagrant_2.2.18_x86_64.deb 
+            sudo wget -nv https://releases.hashicorp.com/vagrant/2.3.1/vagrant_2.3.1-1_amd64.deb
+            sudo dpkg -i vagrant_2.3.1-1_amd64.deb
 
       - run:
           name: Install libvirt & qemu
