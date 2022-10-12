@@ -20,7 +20,7 @@ require (
 	github.com/klauspost/compress v1.15.11 // indirect
 	github.com/lufia/plan9stats v0.0.0-20220913051719-115f729f3c8c // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
-	github.com/paulcacheux/did-not-finish v0.0.0-20221011202253-0fb2171cc616
+	github.com/paulcacheux/did-not-finish v0.0.0-20221012074329-c35e4c752868
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20220216144756-c35f1ee13d7c // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20220927061507-ef77025ab5aa // indirect
