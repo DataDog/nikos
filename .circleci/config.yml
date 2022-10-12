@@ -92,8 +92,8 @@ commands:
       - run:
           name: Install python dependencies
           command: |
-            virtualenv -p $(which python3) venv || true
-            source venv/bin/activate
+            python3 -m venv venv
+            . venv/bin/activate
             pip install --upgrade pip
             pip install -r .circleci/requirements.txt
 
