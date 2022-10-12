@@ -135,6 +135,7 @@ commands:
     steps:
       - run:
           name: Run molecule tests
+          no_output_timeout: 30m
           command: |
             source venv/bin/activate
             cd tests
