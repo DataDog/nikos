@@ -42,7 +42,7 @@ commands:
 
       - restore_cache:
           keys:
-            - python-dependencies-v1-{{ checksum ".circleci/requirements.txt" }}
+            - python-dependencies-v2-{{ checksum ".circleci/requirements.txt" }}
 
   setup:
     description: "Set up build env & install all dependencies"
@@ -112,7 +112,7 @@ commands:
       - save_cache:
           paths:
             - ./venv
-          key: python-dependencies-v1-{{ checksum ".circleci/requirements.txt" }}
+          key: python-dependencies-v2-{{ checksum ".circleci/requirements.txt" }}
 
   build_nikos:
     steps:
@@ -137,6 +137,6 @@ commands:
           name: Run molecule tests
           no_output_timeout: 30m
           command: |
-            source venv/bin/activate
+            . venv/bin/activate
             cd tests
             molecule test -s << parameters.platform >>-<< parameters.test_type >>
