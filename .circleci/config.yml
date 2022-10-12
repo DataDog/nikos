@@ -8,7 +8,7 @@ jobs:
       test_type:
         type: string
     machine:
-      image: android:202102-01
+      image: android:2022.09.1
     steps:
       - checkout
       - restore_caches
@@ -42,7 +42,7 @@ commands:
 
       - restore_cache:
           keys:
-            - python-dependencies-v1-{{ checksum ".circleci/requirements.txt" }}
+            - python-dependencies-v2-{{ checksum ".circleci/requirements.txt" }}
 
   setup:
     description: "Set up build env & install all dependencies"
@@ -50,8 +50,8 @@ commands:
       - run: 
           name: Install vagrant
           command: |
-            sudo wget -nv https://releases.hashicorp.com/vagrant/2.2.18/vagrant_2.2.18_x86_64.deb
-            sudo dpkg -i vagrant_2.2.18_x86_64.deb 
+            sudo wget -nv https://releases.hashicorp.com/vagrant/2.3.1/vagrant_2.3.1-1_amd64.deb
+            sudo dpkg -i vagrant_2.3.1-1_amd64.deb
 
       - run:
           name: Install libvirt & qemu
@@ -92,8 +92,8 @@ commands:
       - run:
           name: Install python dependencies
           command: |
-            virtualenv -p /opt/circleci/.pyenv/shims/python3 venv
-            source venv/bin/activate
+            python3 -m venv venv
+            . venv/bin/activate
             pip install --upgrade pip
             pip install -r .circleci/requirements.txt
 
@@ -112,7 +112,7 @@ commands:
       - save_cache:
           paths:
             - ./venv
-          key: python-dependencies-v1-{{ checksum ".circleci/requirements.txt" }}
+          key: python-dependencies-v2-{{ checksum ".circleci/requirements.txt" }}
 
   build_nikos:
     steps:
@@ -137,6 +137,6 @@ commands:
           name: Run molecule tests
           no_output_timeout: 30m
           command: |
-            source venv/bin/activate
+            . venv/bin/activate
             cd tests
             molecule test -s << parameters.platform >>-<< parameters.test_type >>
