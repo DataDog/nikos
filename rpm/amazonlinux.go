@@ -37,7 +37,8 @@ func NewAmazonLinux2022Backend(target *types.Target, reposDir string, logger typ
 
 func (b *AmazonLinux2022Backend) GetKernelHeaders(directory string) error {
 	pkgMatcher := func(pkg *dnfTypes.Package) bool {
-		return pkg.Name == "kernel-header" && b.target.Uname.Machine == pkg.Version.Ver+pkg.Version.Rel
+		pkgKernel := pkg.Version.Ver + pkg.Version.Rel + pkg.Arch
+		return pkg.Name == "kernel-header" && b.target.Uname.Kernel == pkgKernel
 	}
 
 	targetPackageName := "kernel-headers"
