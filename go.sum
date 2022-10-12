@@ -324,6 +324,8 @@ github.com/paulcacheux/did-not-finish v0.0.0-20221012110738-4346c7b0162b h1:BfxQ
 github.com/paulcacheux/did-not-finish v0.0.0-20221012110738-4346c7b0162b/go.mod h1:D2HizlbHp0emQNVNw5Ga1Xh1CO5POJhQg60ruxaZVP8=
 github.com/paulcacheux/did-not-finish v0.0.0-20221012113243-3a9d4217ab02 h1:Jz6A53aMmqwYtudUxhcIH6HmOcbaXvC426MZTL3qslo=
 github.com/paulcacheux/did-not-finish v0.0.0-20221012113243-3a9d4217ab02/go.mod h1:D2HizlbHp0emQNVNw5Ga1Xh1CO5POJhQg60ruxaZVP8=
+github.com/paulcacheux/did-not-finish v0.0.0-20221012125347-e95cc012e54f h1:G7Gxv4ncUk83Yr7kWLVJ3rpls7WfjOYIU3DUP7xHAE4=
+github.com/paulcacheux/did-not-finish v0.0.0-20221012125347-e95cc012e54f/go.mod h1:D2HizlbHp0emQNVNw5Ga1Xh1CO5POJhQg60ruxaZVP8=
 github.com/pborman/uuid v0.0.0-20180122190007-c65b2f87fee3/go.mod h1:VyrYX9gd7irzKovcSS6BIIEwPRkP2Wm2m9ufcdFSJ34=
 github.com/pborman/uuid v1.2.1 h1:+ZZIw58t/ozdjRaXh/3awHfmWRbzYxJoAdNJxe/3pvw=
 github.com/pborman/uuid v1.2.1/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
