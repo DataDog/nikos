@@ -92,7 +92,7 @@ commands:
       - run:
           name: Install python dependencies
           command: |
-            virtualenv -p python3 venv
+            virtualenv -p python3 venv || true
             source venv/bin/activate
             pip install --upgrade pip
             pip install -r .circleci/requirements.txt
