@@ -45,12 +45,12 @@ var RootCmd = &cobra.Command{
 var DownloadCmd = &cobra.Command{
 	Use: "download package",
 	Run: func(c *cobra.Command, args []string) {
-		log.Infof("OS family: %s\n", target.Distro.Family)
-		log.Infof("Distribution: %s\n", target.Distro.Display)
-		log.Infof("Release: %s\n", target.Distro.Release)
-		log.Infof("Kernel: %s\n", target.Uname.Kernel)
-		log.Infof("Machine: %s\n", target.Uname.Machine)
-		log.Debugf("OSRelease: %s\n", target.OSRelease)
+		log.Infof("OS family: '%s'\n", target.Distro.Family)
+		log.Infof("Distribution: '%s'\n", target.Distro.Display)
+		log.Infof("Release: '%s'\n", target.Distro.Release)
+		log.Infof("Kernel: '%s'\n", target.Uname.Kernel)
+		log.Infof("Machine: '%s'\n", target.Uname.Machine)
+		log.Debugf("OSRelease: '%s'\n", target.OSRelease)
 
 		var (
 			backend types.Backend
@@ -89,7 +89,7 @@ var DownloadCmd = &cobra.Command{
 		case "wsl":
 			backend, err = wsl.NewBackend(&target, logger)
 		default:
-			err = fmt.Errorf("unsupported distribution '%s'", target.Distro.Display)
+			err = fmt.Errorf("unsupported distribution family='%s', display='%s'", target.Distro.Family, target.Distro.Display)
 		}
 		if err != nil {
 			log.Fatal(err)
