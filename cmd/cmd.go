@@ -115,6 +115,8 @@ func SetupCommands() error {
 		return fmt.Errorf("failed to retrieve target information: %s", err)
 	}
 
+	log.Errorf("target: %+v", target)
+
 	RootCmd.PersistentFlags().StringVarP(&osReleaseFile, "os-release", "", "", "path to os-release file")
 	RootCmd.PersistentFlags().StringVarP(&target.Distro.Family, "family", "f", target.Distro.Family, "OS family")
 	RootCmd.PersistentFlags().StringVarP(&target.Distro.Display, "platform", "p", target.Distro.Display, "OS platform")
