@@ -14,7 +14,7 @@ require (
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/awalterschulze/gographviz v2.0.1+incompatible // indirect
 	github.com/cheggaaa/pb v1.0.29 // indirect
-	github.com/go-ini/ini v1.63.2
+	github.com/go-ini/ini v1.67.0
 	github.com/h2non/filetype v1.1.0 // indirect
 	github.com/jlaffaye/ftp v0.0.0-20200812143550-39e3779af0db // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
