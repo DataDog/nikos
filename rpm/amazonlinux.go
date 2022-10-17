@@ -10,21 +10,6 @@ import (
 	"github.com/DataDog/nikos/types"
 )
 
-type AmazonLinux2022Backend struct {
-	dnfBackend *dnf.DnfBackend
-	logger     types.Logger
-	target     *types.Target
-}
-
-func (b *AmazonLinux2022Backend) GetKernelHeaders(directory string) error {
-	pkgNevra := "kernel-devel"
-	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
-}
-
-func (b *AmazonLinux2022Backend) Close() {
-	b.dnfBackend.Close()
-}
-
 func NewAmazonLinux2022Backend(target *types.Target, reposDir string, logger types.Logger) (*RedHatBackend, error) {
 	releaseVer, err := extractReleaseVersionFromImageID()
 	if err != nil {
