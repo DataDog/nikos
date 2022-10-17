@@ -25,7 +25,7 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 	github.com/xor-gate/ar v0.0.0-20170530204233-5c72ae81e2b7
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10
-	google.golang.org/api v0.97.0
+	google.golang.org/api v0.99.0
 )
 
 replace github.com/DataDog/gopsutil => github.com/DataDog/gopsutil v0.0.0-20211112231309-1e2204a98d89
