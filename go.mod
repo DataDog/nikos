@@ -7,7 +7,7 @@ require (
 	github.com/AlekSi/pointer v1.1.0 // indirect
 	github.com/DataDog/aptly v1.5.0
 	github.com/DataDog/gopsutil v1.1.0
-	github.com/DataDog/zstd v1.5.0
+	github.com/DataDog/zstd v1.5.2
 	github.com/DisposaBoy/JsonConfigReader v0.0.0-20171218180944-5ea4d0ddac55 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/acobaugh/osrelease v0.1.0
@@ -21,7 +21,7 @@ require (
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/sassoftware/go-rpmutils v0.2.0
 	github.com/sirupsen/logrus v1.7.0
-	github.com/spf13/cobra v1.0.0
+	github.com/spf13/cobra v1.6.0
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 	github.com/xor-gate/ar v0.0.0-20170530204233-5c72ae81e2b7
 	golang.org/x/sys v0.0.0-20220405052023-b1e9470b6e64
