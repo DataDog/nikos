@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/DataDog/gopsutil/host"
 	"github.com/acobaugh/osrelease"
+	"github.com/shirou/gopsutil/v3/host"
 	"golang.org/x/sys/unix"
 )
 
@@ -118,7 +118,7 @@ type Logger interface {
 	Errorf(format string, args ...interface{})
 }
 
-//GetEnv retrieves the environment variable key. If it does not exist it returns the default.
+// GetEnv retrieves the environment variable key. If it does not exist it returns the default.
 func GetEnv(key string, dfault string, combineWith ...string) string {
 	value := os.Getenv(key)
 	if value == "" {
