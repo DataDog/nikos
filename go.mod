@@ -7,7 +7,7 @@ require (
 	github.com/AlekSi/pointer v1.1.0 // indirect
 	github.com/DataDog/aptly v1.5.0
 	github.com/DataDog/gopsutil v1.1.0
-	github.com/DataDog/zstd v1.5.0
+	github.com/DataDog/zstd v1.5.2
 	github.com/DisposaBoy/JsonConfigReader v0.0.0-20171218180944-5ea4d0ddac55 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/acobaugh/osrelease v0.1.0
