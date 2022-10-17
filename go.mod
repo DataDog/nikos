@@ -18,9 +18,10 @@ require (
 	github.com/h2non/filetype v1.1.0 // indirect
 	github.com/jlaffaye/ftp v0.0.0-20200812143550-39e3779af0db // indirect
 	github.com/klauspost/compress v1.15.11 // indirect
+	github.com/knqyf263/go-rpmdb v0.0.0-20220830120628-c11b1c45080a // indirect
 	github.com/lufia/plan9stats v0.0.0-20220913051719-115f729f3c8c // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
-	github.com/paulcacheux/did-not-finish v0.0.0-20221013092324-8974a3a7b252
+	github.com/paulcacheux/did-not-finish v0.0.0-20221017083237-cc146096e00d
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20220216144756-c35f1ee13d7c // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20220927061507-ef77025ab5aa // indirect

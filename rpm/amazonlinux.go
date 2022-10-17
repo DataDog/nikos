@@ -6,6 +6,7 @@ import (
 
 	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/types"
+	"github.com/paulcacheux/did-not-finish/al2022"
 	"github.com/paulcacheux/did-not-finish/backend"
 	dnfTypes "github.com/paulcacheux/did-not-finish/types"
 )
@@ -17,7 +18,12 @@ type AmazonLinux2022Backend struct {
 }
 
 func NewAmazonLinux2022Backend(target *types.Target, reposDir string, logger types.Logger) (*AmazonLinux2022Backend, error) {
-	builtinVars, err := backend.ComputeBuiltinVariables("")
+	releaseVersion, err := al2022.ExtractReleaseVersionFromImageID()
+	if err != nil {
+		panic(err)
+	}
+
+	builtinVars, err := backend.ComputeBuiltinVariables(releaseVersion)
 	if err != nil {
 		return nil, err
 	}
