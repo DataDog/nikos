@@ -140,3 +140,10 @@ commands:
             . venv/bin/activate
             cd tests
             molecule test -s << parameters.platform >>-<< parameters.test_type >>
+      - run:
+          command: |
+            mkdir -p /tmp/molecule_logs
+            cp -R /home/circleci/.cache/molecule/tests/ /tmp/molecule_logs
+          when: on_fail
+      - store_artifacts:
+          path: /tmp/molecule_logs
