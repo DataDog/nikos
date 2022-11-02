@@ -8,7 +8,11 @@
     become: true
 
   - name: Set up Docker repository
-    shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    shell: |
+      yum-config-manager --enable ol7_optional_latest
+      yum-config-manager --enable ol7_addons
+      yum install -y oraclelinux-developer-release-el7
+      yum-config-manager --enable ol7_developer
     become: true
 
   - name: Install Docker
@@ -16,9 +20,7 @@
       name: "{{ item }}"
       state: latest
     with_items:
-    - docker-ce
-    - docker-ce-cli
-    - containerd.io
+    - docker-engine
     become: true
 
   - name: Install pip
