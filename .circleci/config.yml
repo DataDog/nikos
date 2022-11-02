@@ -28,9 +28,6 @@ workflows:
             parameters:
               platform: ["fedora", "centos", "opensuse", "debian", "ubuntu", "oracle"]
               test_type: ["host", "container"]
-            exclude:
-              - platform: oracle
-                test_type: container
 
 commands:
   restore_caches:
