@@ -2,11 +2,6 @@
 - name: Prepare
   hosts: all
   tasks:
-  - name: Install dnf plugins
-    package:
-      name: dnf-plugins-core
-    become: true
-
   - name: Set up Docker repository
     shell: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
     become: true
