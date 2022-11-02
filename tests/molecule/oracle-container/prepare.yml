@@ -2,8 +2,13 @@
 - name: Prepare
   hosts: all
   tasks:
+  - name: Install yum plugins
+    package:
+      name: yum-utils
+    become: true
+
   - name: Set up Docker repository
-    shell: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
     become: true
 
   - name: Install Docker
