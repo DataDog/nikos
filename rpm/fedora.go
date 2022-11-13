@@ -1,68 +1,73 @@
 package rpm
 
 import (
+	"bytes"
 	"fmt"
 
-	"github.com/DataDog/nikos/rpm/dnf"
+	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/types"
-)
-
-const (
-	updatesRepoBaseURL = "https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/"
+	"github.com/paulcacheux/did-not-finish/backend"
+	"github.com/paulcacheux/did-not-finish/repo"
+	dnfTypes "github.com/paulcacheux/did-not-finish/types"
 )
 
 type FedoraBackend struct {
-	dnfBackend *dnf.DnfBackend
+	dnfBackend *backend.Backend
 	logger     types.Logger
 	target     *types.Target
 }
 
 func (b *FedoraBackend) GetKernelHeaders(directory string) error {
-	for _, repo := range b.dnfBackend.GetEnabledRepositories() {
-		if repo.Id != "base" && repo.Id != "updates" {
-			b.dnfBackend.DisableRepository(repo)
+	for _, targetPackageName := range []string{"kernel-headers", "kernel-devel"} {
+		pkgMatcher := func(pkg *dnfTypes.Package) bool {
+			pkgKernel := fmt.Sprintf("%s-%s.%s", pkg.Version.Ver, pkg.Version.Rel, pkg.Arch)
+			return pkg.Name == targetPackageName && b.target.Uname.Kernel == pkgKernel
+		}
+
+		pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
+		if err != nil {
+			b.logger.Errorf("failed to fetch `%s` package: %w", targetPackageName, err)
 			continue
 		}
+		return extract.ExtractRPMPackageFromReader(bytes.NewReader(data), pkg.Name, directory, b.target.Uname.Kernel, b.logger)
 	}
 
-	// First, check for the correct kernel-headers package
-	pkgNevra := "kernel-headers-" + b.target.Uname.Kernel
-	fmt.Printf("Repositories %+v\n", b.dnfBackend.GetEnabledRepositories())
-	err := b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
-	if err == nil {
-		return nil
-	}
-
-	// If that doesn't work, try again with the updates-archive repo
-	updatesRepoGPGKey := "file:///" + types.HostEtc("pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch")
-	b.logger.Infof("Trying with updates-archive repository")
-	if _, err := b.dnfBackend.AddRepository("updates-archive", updatesRepoBaseURL, true, updatesRepoGPGKey, "", "", ""); err == nil {
-		err = b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
-		if err == nil {
-			return nil
-		}
-	} else {
-		b.logger.Warnf("Failed to add updates-archive repository: %w", err)
-	}
-
-	// As a last resort, check for the kernel-devel package
-	pkgNevra = "kernel-devel-" + b.target.Uname.Kernel
-	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
+	return fmt.Errorf("failed to find a valid package")
 }
 
 func (b *FedoraBackend) Close() {
-	b.dnfBackend.Close()
 }
 
 func NewFedoraBackend(target *types.Target, reposDir string, logger types.Logger) (*FedoraBackend, error) {
-	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
+	builtinVars, err := backend.ComputeBuiltinVariables(target.Distro.Release)
+	if err != nil {
+		return nil, fmt.Errorf("failed to compute DNF builting variables: %w", err)
+	}
+
+	varsDir := []string{"/etc/dnf/vars/", "/etc/yum/vars/"}
+	b, err := backend.NewBackend(reposDir, varsDir, builtinVars)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create fedora dnf backend: %w", err)
 	}
 
+	const (
+		updatesArchiveRepoBaseURL = "https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/"
+		updatesArchiveGpgKeyPath  = "/etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch"
+	)
+
+	// updates archive as a fallback
+	b.AppendRepository(repo.Repo{
+		SectionName: "",
+		Name:        "updates-archive",
+		BaseURL:     updatesArchiveRepoBaseURL,
+		Enabled:     true,
+		GpgCheck:    true,
+		GpgKey:      updatesArchiveGpgKeyPath,
+	})
+
 	return &FedoraBackend{
 		target:     target,
 		logger:     logger,
-		dnfBackend: dnfBackend,
+		dnfBackend: b,
 	}, nil
 }
