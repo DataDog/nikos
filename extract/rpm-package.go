@@ -2,6 +2,7 @@ package extract
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,7 +18,11 @@ func ExtractRPMPackage(pkg, directory, kernelUname string, l types.Logger) error
 	}
 	defer pkgFile.Close()
 
-	rpm, err := rpmutils.ReadRpm(pkgFile)
+	return ExtractRPMPackageFromReader(pkgFile, pkg, directory, kernelUname, l)
+}
+
+func ExtractRPMPackageFromReader(reader io.Reader, pkg, directory, kernelUname string, l types.Logger) error {
+	rpm, err := rpmutils.ReadRpm(reader)
 	if err != nil {
 		return fmt.Errorf("failed to parse RPM package %s: %w", pkg, err)
 	}
