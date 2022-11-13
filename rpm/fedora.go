@@ -26,7 +26,7 @@ func (b *FedoraBackend) GetKernelHeaders(directory string) error {
 
 		pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
 		if err != nil {
-			b.logger.Errorf("failed to fetch `%s` package: %w", targetPackageName, err)
+			b.logger.Errorf("failed to fetch `%s` package: %v", targetPackageName, err)
 			continue
 		}
 		return extract.ExtractRPMPackageFromReader(bytes.NewReader(data), pkg.Name, directory, b.target.Uname.Kernel, b.logger)
