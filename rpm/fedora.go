@@ -1,8 +1,9 @@
 package rpm
 
 import (
-	"bytes"
 	"fmt"
+	"os"
+	"path"
 
 	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/types"
@@ -17,11 +18,14 @@ type FedoraBackend struct {
 	target     *types.Target
 }
 
+func computePkgKernel(pkg *dnfTypes.Package) string {
+	return fmt.Sprintf("%s-%s.%s", pkg.Version.Ver, pkg.Version.Rel, pkg.Arch)
+}
+
 func (b *FedoraBackend) GetKernelHeaders(directory string) error {
-	for _, targetPackageName := range []string{"kernel-headers", "kernel-devel"} {
+	for _, targetPackageName := range []string{"kernel-devel", "kernel-headers"} {
 		pkgMatcher := func(pkg *dnfTypes.Package) bool {
-			pkgKernel := fmt.Sprintf("%s-%s.%s", pkg.Version.Ver, pkg.Version.Rel, pkg.Arch)
-			return pkg.Name == targetPackageName && b.target.Uname.Kernel == pkgKernel
+			return pkg.Name == targetPackageName && b.target.Uname.Kernel == computePkgKernel(pkg)
 		}
 
 		pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
@@ -29,7 +33,14 @@ func (b *FedoraBackend) GetKernelHeaders(directory string) error {
 			b.logger.Errorf("failed to fetch `%s` package: %v", targetPackageName, err)
 			continue
 		}
-		return extract.ExtractRPMPackageFromReader(bytes.NewReader(data), pkg.Name, directory, b.target.Uname.Kernel, b.logger)
+
+		pkgFileName := fmt.Sprintf("%s-%s.rpm", pkg.Name, computePkgKernel(pkg))
+		pkgFileName = path.Join(directory, pkgFileName)
+		if err := os.WriteFile(pkgFileName, data, 0o644); err != nil {
+			return err
+		}
+
+		return extract.ExtractRPMPackage(pkgFileName, directory, b.target.Uname.Kernel, b.logger)
 	}
 
 	return fmt.Errorf("failed to find a valid package")
