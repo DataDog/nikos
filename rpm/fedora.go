@@ -52,7 +52,7 @@ func NewFedoraBackend(target *types.Target, reposDir string, logger types.Logger
 
 	const (
 		updatesArchiveRepoBaseURL = "https://fedoraproject-updates-archive.fedoraproject.org/fedora/$releasever/$basearch/"
-		updatesArchiveGpgKeyPath  = "/etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch"
+		updatesArchiveGpgKeyPath  = "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-$basearch"
 	)
 
 	// updates archive as a fallback
