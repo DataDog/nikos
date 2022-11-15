@@ -1,0 +1,39 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+  - name: Install yum plugins
+    package:
+      name: yum-utils
+    become: true
+
+  - name: Set up Docker repository
+    shell: |
+      yum-config-manager --enable ol7_optional_latest
+      yum-config-manager --enable ol7_addons
+      yum install -y oraclelinux-developer-release-el7
+      yum-config-manager --enable ol7_developer
+    become: true
+
+  - name: Install Docker
+    package:
+      name: "{{ item }}"
+      state: latest
+    with_items:
+    - docker-engine
+    become: true
+
+  - name: Install pip
+    package:
+      name: python3-pip
+    become: true
+
+  - name: Install docker-py
+    shell: 'pip3 install docker'
+    become: true
+
+  - name: Start docker
+    service:
+      name: docker
+      state: started
+    become: true

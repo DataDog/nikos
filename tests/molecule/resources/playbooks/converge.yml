@@ -29,6 +29,8 @@
         - /etc/apt:/host/etc/apt:ro
         - /etc/zypp/repos.d:/host/etc/zypp/repos.d:ro
         - /etc/yum.repos.d:/host/etc/yum.repos.d:ro
+        - /etc/dnf:/host/etc/dnf:ro
+        - /etc/yum:/host/etc/yum:ro
         - /etc/pki:/host/etc/pki:ro
         - /etc/lsb-release:/host/etc/lsb-release:ro
         - /etc/redhat-release:/host/etc/redhat-release:ro
