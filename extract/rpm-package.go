@@ -15,6 +15,7 @@ func ExtractRPMPackage(pkg, directory, kernelUname string, l types.Logger) error
 	if err != nil {
 		return fmt.Errorf("failed to open download package %s: %w", pkg, err)
 	}
+	defer pkgFile.Close()
 
 	rpm, err := rpmutils.ReadRpm(pkgFile)
 	if err != nil {
