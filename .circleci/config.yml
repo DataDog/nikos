@@ -29,8 +29,8 @@ workflows:
       - test:
           matrix:
             parameters:
-              platform: ["centos"]
-              test_type: ["host"]
+              platform: ["fedora", "centos", "opensuse", "debian", "ubuntu", "oracle"]
+              test_type: ["host", "container"]
 
 commands:
   vagrantlock:
