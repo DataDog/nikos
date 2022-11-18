@@ -66,7 +66,7 @@ func NewCentOSBackend(target *types.Target, reposDir string, logger types.Logger
 	}
 
 	if version >= 8 {
-		gpgKey := "file:///pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
+		gpgKey := "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
 		baseURL := fmt.Sprintf("http://vault.centos.org/%s/BaseOS/$basearch/os/", release)
 		b.AppendRepository(repo.Repo{
 			Name:     fmt.Sprintf("C%s-base", release),
@@ -76,7 +76,7 @@ func NewCentOSBackend(target *types.Target, reposDir string, logger types.Logger
 			GpgKey:   gpgKey,
 		})
 	} else {
-		gpgKey := fmt.Sprintf("file:///pki/rpm-gpg/RPM-GPG-KEY-CentOS-%d", version)
+		gpgKey := fmt.Sprintf("file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-%d", version)
 		baseURL := fmt.Sprintf("http://vault.centos.org/%s/os/$basearch/", release)
 		updatesURL := fmt.Sprintf("http://vault.centos.org/%s/updates/$basearch/", release)
 		b.AppendRepository(repo.Repo{
