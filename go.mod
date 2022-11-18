@@ -10,7 +10,7 @@ require (
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/go-ini/ini v1.67.0
-	github.com/paulcacheux/did-not-finish v0.2.2-0.20221118140424-e6f4974a7d4a
+	github.com/paulcacheux/did-not-finish v0.2.2
 	github.com/sassoftware/go-rpmutils v0.2.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
