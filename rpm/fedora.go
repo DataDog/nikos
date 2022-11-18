@@ -2,10 +2,8 @@ package rpm
 
 import (
 	"fmt"
-	"os"
-	"path"
 
-	"github.com/DataDog/nikos/extract"
+	"github.com/DataDog/nikos/rpm/dnfv2"
 	"github.com/DataDog/nikos/types"
 	"github.com/paulcacheux/did-not-finish/backend"
 	"github.com/paulcacheux/did-not-finish/repo"
@@ -24,9 +22,7 @@ func computePkgKernel(pkg *dnfTypes.Package) string {
 
 func (b *FedoraBackend) GetKernelHeaders(directory string) error {
 	for _, targetPackageName := range []string{"kernel-devel", "kernel-headers"} {
-		pkgMatcher := func(pkg *dnfTypes.Package) bool {
-			return pkg.Name == targetPackageName && b.target.Uname.Kernel == computePkgKernel(pkg)
-		}
+		pkgMatcher := dnfv2.DefaultPkgMatcher(targetPackageName, b.target)
 
 		pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
 		if err != nil {
@@ -34,13 +30,7 @@ func (b *FedoraBackend) GetKernelHeaders(directory string) error {
 			continue
 		}
 
-		pkgFileName := fmt.Sprintf("%s-%s.rpm", pkg.Name, computePkgKernel(pkg))
-		pkgFileName = path.Join(directory, pkgFileName)
-		if err := os.WriteFile(pkgFileName, data, 0o644); err != nil {
-			return err
-		}
-
-		return extract.ExtractRPMPackage(pkgFileName, directory, b.target.Uname.Kernel, b.logger)
+		return dnfv2.ExtractPackage(pkg, data, directory, b.target, b.logger)
 	}
 
 	return fmt.Errorf("failed to find a valid package")
@@ -50,15 +40,9 @@ func (b *FedoraBackend) Close() {
 }
 
 func NewFedoraBackend(target *types.Target, reposDir string, logger types.Logger) (*FedoraBackend, error) {
-	builtinVars, err := backend.ComputeBuiltinVariables(target.Distro.Release)
+	b, err := dnfv2.NewBackend(target.Distro.Release, reposDir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to compute DNF builting variables: %w", err)
-	}
-
-	varsDir := []string{"/etc/dnf/vars/", "/etc/yum/vars/"}
-	b, err := backend.NewBackend(reposDir, varsDir, builtinVars)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create fedora dnf backend: %w", err)
+		return nil, err
 	}
 
 	const (
@@ -68,12 +52,11 @@ func NewFedoraBackend(target *types.Target, reposDir string, logger types.Logger
 
 	// updates archive as a fallback
 	b.AppendRepository(repo.Repo{
-		SectionName: "",
-		Name:        "updates-archive",
-		BaseURL:     updatesArchiveRepoBaseURL,
-		Enabled:     true,
-		GpgCheck:    true,
-		GpgKey:      updatesArchiveGpgKeyPath,
+		Name:     "updates-archive",
+		BaseURL:  updatesArchiveRepoBaseURL,
+		Enabled:  true,
+		GpgCheck: true,
+		GpgKey:   updatesArchiveGpgKeyPath,
 	})
 
 	return &FedoraBackend{
