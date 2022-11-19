@@ -11,6 +11,7 @@ jobs:
       image: android:2022.09.1
     steps:
       - checkout
+      - vagrantlock
       - restore_caches
       - setup
       - save_caches
@@ -30,6 +31,13 @@ workflows:
               test_type: ["host", "container"]
 
 commands:
+  vagrantlock:
+    steps:
+      - run:
+          name: Compute vagrant lock file
+          command: |
+            grep -R box tests/* > .vagrantlock
+
   restore_caches:
     steps:
       - restore_cache:
@@ -43,6 +51,10 @@ commands:
       - restore_cache:
           keys:
             - python-dependencies-v2-{{ checksum ".circleci/requirements.txt" }}
+
+      - restore_cache:
+          keys:
+            - vagrant-boxes-v1-{{ checksum ".vagrantlock" }}
 
   setup:
     description: "Set up build env & install all dependencies"
@@ -113,6 +125,11 @@ commands:
           paths:
             - ./venv
           key: python-dependencies-v2-{{ checksum ".circleci/requirements.txt" }}
+
+      - save_cache:
+          paths:
+            - /home/circleci/.vagrant.d/boxes
+          key: vagrant-boxes-v1-{{ checksum ".vagrantlock" }}
 
   build_nikos:
     steps:
