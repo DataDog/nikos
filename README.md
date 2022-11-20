@@ -68,5 +68,3 @@ To run the tests for Debian, simply run in the `tests` folder:
 `$ molecule test -s debian`
 
 You can also run the tests for `centos`, `debian`, `opensuse` and `ubuntu`.
-
-TEST
