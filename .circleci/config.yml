@@ -156,7 +156,7 @@ commands:
           command: |
             . venv/bin/activate
             cd tests
-            molecule test -s << parameters.platform >>-<< parameters.test_type >>
+            molecule test -s << parameters.platform >>-<< parameters.test_type >> --parallel
 
   save_vagrant_cache:
     steps:
