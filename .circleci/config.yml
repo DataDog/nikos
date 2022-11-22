@@ -11,6 +11,8 @@ jobs:
       image: android:2022.09.1
     steps:
       - checkout
+      - vagrantlock:
+          platform: << parameters.platform >>
       - restore_caches
       - setup
       - save_caches
@@ -19,6 +21,7 @@ jobs:
       - molecule_test:
           platform: << parameters.platform >>
           test_type: << parameters.test_type >>
+      - save_vagrant_cache
 
 workflows:
   all-tests:
@@ -30,6 +33,16 @@ workflows:
               test_type: ["host", "container"]
 
 commands:
+  vagrantlock:
+    parameters:
+      platform:
+        type: string
+    steps:
+      - run:
+          name: Compute vagrant lock file
+          command: |
+            grep -R box tests/molecule/<< parameters.platform >>* > .vagrantlock
+
   restore_caches:
     steps:
       - restore_cache:
@@ -43,6 +56,10 @@ commands:
       - restore_cache:
           keys:
             - python-dependencies-v2-{{ checksum ".circleci/requirements.txt" }}
+
+      - restore_cache:
+          keys:
+            - vagrant-boxes-v1-{{ checksum ".vagrantlock" }}
 
   setup:
     description: "Set up build env & install all dependencies"
@@ -139,4 +156,11 @@ commands:
           command: |
             . venv/bin/activate
             cd tests
-            molecule test -s << parameters.platform >>-<< parameters.test_type >>
+            molecule test -s << parameters.platform >>-<< parameters.test_type >> --parallel
+
+  save_vagrant_cache:
+    steps:
+      - save_cache:
+          paths:
+            - /home/circleci/.vagrant.d/boxes
+          key: vagrant-boxes-v1-{{ checksum ".vagrantlock" }}
