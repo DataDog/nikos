@@ -6,10 +6,6 @@ driver:
   provider:
     name: libvirt
 platforms:
-  - name: debian8
-    box: roboxes/debian8
-    memory: 512
-    cpus: 1
   - name: debian9
     box: roboxes/debian9
     memory: 512
