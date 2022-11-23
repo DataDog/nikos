@@ -7,17 +7,12 @@ import (
 	"github.com/DataDog/nikos/types"
 	"github.com/paulcacheux/did-not-finish/backend"
 	"github.com/paulcacheux/did-not-finish/repo"
-	dnfTypes "github.com/paulcacheux/did-not-finish/types"
 )
 
 type FedoraBackend struct {
 	dnfBackend *backend.Backend
 	logger     types.Logger
 	target     *types.Target
-}
-
-func computePkgKernel(pkg *dnfTypes.Package) string {
-	return fmt.Sprintf("%s-%s.%s", pkg.Version.Ver, pkg.Version.Rel, pkg.Arch)
 }
 
 func (b *FedoraBackend) GetKernelHeaders(directory string) error {

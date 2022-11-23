@@ -37,7 +37,6 @@ func getRedhatRelease() (string, error) {
 
 func (b *CentOSBackend) GetKernelHeaders(directory string) error {
 	pkgNevra := "kernel-devel"
-
 	pkgMatcher := dnfv2.DefaultPkgMatcher(pkgNevra, b.target)
 
 	pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
