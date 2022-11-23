@@ -5,7 +5,7 @@ go 1.18
 require (
 	cloud.google.com/go/storage v1.28.0
 	github.com/DataDog/aptly v1.5.0
-	github.com/DataDog/gopsutil v1.1.0
+	github.com/DataDog/gopsutil v1.2.2
 	github.com/DataDog/zstd v1.5.2
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
@@ -69,5 +69,3 @@ require (
 	google.golang.org/grpc v1.50.1 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
-
-replace github.com/DataDog/gopsutil => github.com/DataDog/gopsutil v0.0.0-20211112231309-1e2204a98d89
