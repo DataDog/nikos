@@ -6,7 +6,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/DataDog/nikos/rpm/dnf"
+	"github.com/DataDog/nikos/rpm/dnfv2"
 	"github.com/DataDog/nikos/types"
 )
 
@@ -16,15 +16,15 @@ func NewAmazonLinux2022Backend(target *types.Target, reposDir string, logger typ
 		return nil, fmt.Errorf("failed to extract release version: %w", err)
 	}
 
-	dnfBackend, err := dnf.NewDnfBackend(releaseVer, reposDir, logger, target)
+	b, err := dnfv2.NewBackend(releaseVer, reposDir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create DNF backend: %w", err)
+		return nil, err
 	}
 
 	return &RedHatBackend{
 		target:     target,
 		logger:     logger,
-		dnfBackend: dnfBackend,
+		dnfBackend: b,
 	}, nil
 }
 
