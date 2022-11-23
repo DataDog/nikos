@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/DataDog/nikos/rpm/dnfv2"
+	"github.com/DataDog/nikos/rpm/dnfv2/backend"
+	"github.com/DataDog/nikos/rpm/dnfv2/repo"
 	"github.com/DataDog/nikos/types"
-	"github.com/paulcacheux/did-not-finish/backend"
-	"github.com/paulcacheux/did-not-finish/repo"
 )
 
 type FedoraBackend struct {

@@ -6,10 +6,10 @@ import (
 	"path"
 
 	"github.com/DataDog/nikos/extract"
+	"github.com/DataDog/nikos/rpm/dnfv2/backend"
+	"github.com/DataDog/nikos/rpm/dnfv2/repo"
+	dnfTypes "github.com/DataDog/nikos/rpm/dnfv2/types"
 	"github.com/DataDog/nikos/types"
-	"github.com/paulcacheux/did-not-finish/backend"
-	"github.com/paulcacheux/did-not-finish/repo"
-	dnfTypes "github.com/paulcacheux/did-not-finish/types"
 )
 
 func NewBackend(release string, reposDir string) (*backend.Backend, error) {
