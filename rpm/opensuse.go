@@ -6,6 +6,7 @@ import (
 
 	"github.com/DataDog/nikos/rpm/dnfv2"
 	"github.com/DataDog/nikos/rpm/dnfv2/backend"
+	"github.com/DataDog/nikos/rpm/dnfv2/repo"
 	"github.com/DataDog/nikos/types"
 )
 
@@ -24,8 +25,11 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 		pkgNevra += kernelRelease[flavourIndex:]
 		kernelRelease = kernelRelease[:flavourIndex]
 	}
+	pkgNevra += "-devel"
 
-	pkgMatcher := dnfv2.DefaultPkgMatcher(pkgNevra, b.target)
+	pkgMatcher := func(pkg *repo.PkgInfo) bool {
+		return pkg.Name == pkgNevra && kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) && pkg.Arch == b.target.Uname.Machine
+	}
 
 	pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
 	if err != nil {
@@ -43,6 +47,8 @@ func NewOpenSUSEBackend(target *types.Target, reposDir string, logger types.Logg
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Errorf("repos: %+v", b.Repositories)
 
 	return &OpenSUSEBackend{
 		target:     target,

@@ -73,9 +73,15 @@ func ReadFromDir(repoDir string) ([]Repo, error) {
 	return repos, nil
 }
 
-type PkgMatchFunc = func(*types.Package) bool
+type PkgInfo struct {
+	Name string
+	types.Version
+	Arch string
+}
 
-func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*types.Package, []byte, error) {
+type PkgMatchFunc = func(*PkgInfo) bool
+
+func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
 	repoMd, err := r.FetchRepoMD()
 	if err != nil {
 		return nil, nil, err
@@ -101,32 +107,48 @@ func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*types.Package, []byte, er
 	}
 
 	for _, pkg := range pkgs {
-		if pkgMatcher(pkg) {
-			pkgUrl, err := utils.UrlJoinPath(fetchURL, pkg.Location.Href)
-			if err != nil {
-				return nil, nil, err
-			}
+		pkgInfos := make([]*PkgInfo, 0, len(pkg.Provides)+1)
+		pkgInfos = append(pkgInfos, &PkgInfo{
+			Name:    pkg.Name,
+			Version: pkg.Version,
+			Arch:    pkg.Arch,
+		})
+		for _, provided := range pkg.Provides {
+			pkgInfos = append(pkgInfos, &PkgInfo{
+				Name:    provided.Name,
+				Version: provided.Version,
+				Arch:    pkg.Arch,
+			})
+		}
 
-			resp, err := http.Get(pkgUrl)
-			if err != nil {
-				return nil, nil, err
-			}
-			defer resp.Body.Close()
-
-			pkgRpm, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return nil, nil, err
-			}
-
-			if r.GpgCheck {
-				rpmReader := bytes.NewReader(pkgRpm)
-				_, _, err := rpmutils.Verify(rpmReader, entityList)
+		for _, pkgInfo := range pkgInfos {
+			if pkgMatcher(pkgInfo) {
+				pkgUrl, err := utils.UrlJoinPath(fetchURL, pkg.Location.Href)
 				if err != nil {
 					return nil, nil, err
 				}
-			}
 
-			return pkg, pkgRpm, nil
+				resp, err := http.Get(pkgUrl)
+				if err != nil {
+					return nil, nil, err
+				}
+				defer resp.Body.Close()
+
+				pkgRpm, err := io.ReadAll(resp.Body)
+				if err != nil {
+					return nil, nil, err
+				}
+
+				if r.GpgCheck {
+					rpmReader := bytes.NewReader(pkgRpm)
+					_, _, err := rpmutils.Verify(rpmReader, entityList)
+					if err != nil {
+						return nil, nil, err
+					}
+				}
+
+				return pkgInfo, pkgRpm, nil
+			}
 		}
 	}
 

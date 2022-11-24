@@ -8,7 +8,6 @@ import (
 	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/rpm/dnfv2/backend"
 	"github.com/DataDog/nikos/rpm/dnfv2/repo"
-	dnfTypes "github.com/DataDog/nikos/rpm/dnfv2/types"
 	"github.com/DataDog/nikos/types"
 )
 
@@ -27,17 +26,17 @@ func NewBackend(release string, reposDir string) (*backend.Backend, error) {
 	return b, nil
 }
 
-func computePkgKernel(pkg *dnfTypes.Package) string {
+func computePkgKernel(pkg *repo.PkgInfo) string {
 	return fmt.Sprintf("%s-%s.%s", pkg.Version.Ver, pkg.Version.Rel, pkg.Arch)
 }
 
-func DefaultPkgMatcher(pkgName string, target *types.Target) repo.PkgMatchFunc {
-	return func(pkg *dnfTypes.Package) bool {
-		return pkg.Name == pkgName && target.Uname.Kernel == computePkgKernel(pkg)
+func DefaultPkgMatcher(pkgName, kernelVersion string) repo.PkgMatchFunc {
+	return func(pkg *repo.PkgInfo) bool {
+		return pkg.Name == pkgName && kernelVersion == computePkgKernel(pkg)
 	}
 }
 
-func ExtractPackage(pkg *dnfTypes.Package, data []byte, directory string, target *types.Target, logger types.Logger) error {
+func ExtractPackage(pkg *repo.PkgInfo, data []byte, directory string, target *types.Target, logger types.Logger) error {
 	pkgFileName := fmt.Sprintf("%s-%s.rpm", pkg.Name, computePkgKernel(pkg))
 	pkgFileName = path.Join(directory, pkgFileName)
 	if err := os.WriteFile(pkgFileName, data, 0o644); err != nil {

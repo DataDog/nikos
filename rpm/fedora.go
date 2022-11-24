@@ -17,7 +17,7 @@ type FedoraBackend struct {
 
 func (b *FedoraBackend) GetKernelHeaders(directory string) error {
 	for _, targetPackageName := range []string{"kernel-devel", "kernel-headers"} {
-		pkgMatcher := dnfv2.DefaultPkgMatcher(targetPackageName, b.target)
+		pkgMatcher := dnfv2.DefaultPkgMatcher(targetPackageName, b.target.Uname.Kernel)
 
 		pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
 		if err != nil {
