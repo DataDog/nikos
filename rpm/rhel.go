@@ -16,7 +16,7 @@ type RedHatBackend struct {
 
 func (b *RedHatBackend) GetKernelHeaders(directory string) error {
 	pkgNevra := "kernel-devel"
-	pkgMatcher := dnfv2.DefaultPkgMatcher(pkgNevra, b.target)
+	pkgMatcher := dnfv2.DefaultPkgMatcher(pkgNevra, b.target.Uname.Kernel)
 
 	pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
 	if err != nil {

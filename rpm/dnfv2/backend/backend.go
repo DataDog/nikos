@@ -7,7 +7,6 @@ import (
 
 	"github.com/DataDog/nikos/rpm/dnfv2/internal/utils"
 	"github.com/DataDog/nikos/rpm/dnfv2/repo"
-	"github.com/DataDog/nikos/rpm/dnfv2/types"
 	"github.com/hashicorp/go-multierror"
 )
 
@@ -64,7 +63,7 @@ func (b *Backend) AppendRepository(r repo.Repo) {
 	b.Repositories = append(b.Repositories, replaceInRepo(b.varsReplacer, r))
 }
 
-func (b *Backend) FetchPackage(matcher repo.PkgMatchFunc) (*types.Package, []byte, error) {
+func (b *Backend) FetchPackage(matcher repo.PkgMatchFunc) (*repo.PkgInfo, []byte, error) {
 	var mErr error
 
 	for _, repository := range b.Repositories {
