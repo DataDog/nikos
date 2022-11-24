@@ -7,24 +7,6 @@ on:
       - master
 
 jobs:
-  build_no_dnf:
-    name: Build nikos [no dnf]
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
-
-      - name: Setup go
-        uses: actions/setup-go@v3
-        with:
-          go-version: '1.18'
-
-      - name: Build nikos (no dnf)
-        run: go build
-
-      - name: Verify build
-        run: ./nikos
-
   build:
     name: Build nikos
     runs-on: ubuntu-20.04
@@ -37,8 +19,8 @@ jobs:
         with:
           go-version: '1.18'
 
-      - name: Build nikos (with dnf)
-        run: bash .ci_build/build_install_nikos.sh . .ci_build/nikos-libs.tar.gz
+      - name: Build nikos
+        run: bash .ci_build/build_install_nikos.sh .
 
       - name: Verify build
         run: /opt/nikos/bin/nikos
