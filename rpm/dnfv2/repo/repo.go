@@ -27,6 +27,7 @@ type Repo struct {
 	BaseURL     string
 	MirrorList  string
 	MetaLink    string
+	Type        string
 	Enabled     bool
 	GpgCheck    bool
 	GpgKey      string
@@ -56,9 +57,15 @@ func ReadFromDir(repoDir string) ([]Repo, error) {
 			repo.BaseURL = section.Key("baseurl").String()
 			repo.MirrorList = section.Key("mirrorlist").String()
 			repo.MetaLink = section.Key("metalink").String()
+			repo.Type = section.Key("type").String()
 			repo.Enabled, _ = section.Key("enabled").Bool()
 			repo.GpgCheck, _ = section.Key("gpgcheck").Bool()
 			repo.GpgKey = section.Key("gpgkey").String()
+
+			// hack for yast2 repo support
+			if repo.Type == "yast2" && repo.BaseURL != "" {
+				repo.BaseURL += "suse/"
+			}
 
 			repos = append(repos, repo)
 		}
