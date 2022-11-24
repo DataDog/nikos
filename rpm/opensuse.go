@@ -48,8 +48,6 @@ func NewOpenSUSEBackend(target *types.Target, reposDir string, logger types.Logg
 		return nil, err
 	}
 
-	logger.Errorf("repos: %+v", b.Repositories)
-
 	return &OpenSUSEBackend{
 		target:     target,
 		logger:     logger,
