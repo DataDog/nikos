@@ -16,7 +16,7 @@ func NewAmazonLinux2022Backend(target *types.Target, reposDir string, logger typ
 		return nil, fmt.Errorf("failed to extract release version: %w", err)
 	}
 
-	b, err := dnfv2.NewBackend(releaseVer, reposDir)
+	b, err := dnfv2.NewBackend(releaseVer, reposDir, logger)
 	if err != nil {
 		return nil, err
 	}

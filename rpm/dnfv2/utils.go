@@ -11,14 +11,14 @@ import (
 	"github.com/DataDog/nikos/types"
 )
 
-func NewBackend(release string, reposDir string) (*backend.Backend, error) {
+func NewBackend(release string, reposDir string, logger types.Logger) (*backend.Backend, error) {
 	builtinVars, err := backend.ComputeBuiltinVariables(release)
 	if err != nil {
 		return nil, fmt.Errorf("failed to compute DNF builting variables: %w", err)
 	}
 
 	varsDir := []string{"/etc/dnf/vars/", "/etc/yum/vars/"}
-	b, err := backend.NewBackend(reposDir, varsDir, builtinVars)
+	b, err := backend.NewBackend(reposDir, varsDir, builtinVars, logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create fedora dnf backend: %w", err)
 	}

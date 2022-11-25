@@ -30,7 +30,7 @@ func (b *RedHatBackend) Close() {
 }
 
 func NewRedHatBackend(target *types.Target, reposDir string, logger types.Logger) (*RedHatBackend, error) {
-	b, err := dnfv2.NewBackend(target.Distro.Release, reposDir)
+	b, err := dnfv2.NewBackend(target.Distro.Release, reposDir, logger)
 	if err != nil {
 		return nil, err
 	}

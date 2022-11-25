@@ -9,6 +9,7 @@ import (
 
 	"github.com/DataDog/nikos/rpm/dnfv2/internal/utils"
 	"github.com/DataDog/nikos/rpm/dnfv2/repo"
+	"github.com/DataDog/nikos/types"
 	"github.com/hashicorp/go-multierror"
 )
 
@@ -19,9 +20,10 @@ type Backend struct {
 	varsReplacer *strings.Replacer
 }
 
-func hostRootsHttpClient() *http.Client {
+func hostRootsHttpClient(logger types.Logger) *http.Client {
 	roots, err := GetSystemRoots()
 	if err != nil {
+		logger.Errorf("failed to read system roots: %v", err)
 		return &http.Client{}
 	}
 
@@ -33,8 +35,8 @@ func hostRootsHttpClient() *http.Client {
 	return &http.Client{Transport: tr}
 }
 
-func NewBackend(reposDir string, varsDir []string, builtinVariables map[string]string) (*Backend, error) {
-	client := hostRootsHttpClient()
+func NewBackend(reposDir string, varsDir []string, builtinVariables map[string]string, logger types.Logger) (*Backend, error) {
+	client := hostRootsHttpClient(logger)
 
 	varMaps := []map[string]string{builtinVariables}
 	for _, varDir := range varsDir {
