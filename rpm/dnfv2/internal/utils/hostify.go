@@ -30,7 +30,3 @@ func rawHostJoin(envName, defaultValue string, parts ...string) string {
 func HostEtcJoin(parts ...string) string {
 	return rawHostJoin("HOST_ETC", "/etc", parts...)
 }
-
-func HostVarJoin(parts ...string) string {
-	return rawHostJoin("HOST_VAR", "/var", parts...)
-}

@@ -14,8 +14,8 @@ import (
 	"github.com/DataDog/nikos/rpm/dnfv2/types"
 )
 
-func GetAndUnmarshalXML[T any](url string, checksum *types.Checksum) (*T, error) {
-	resp, err := http.Get(url)
+func GetAndUnmarshalXML[T any](client *http.Client, url string, checksum *types.Checksum) (*T, error) {
+	resp, err := client.Get(url)
 	if err != nil {
 		return nil, err
 	}

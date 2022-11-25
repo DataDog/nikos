@@ -32,6 +32,7 @@
         - /etc/dnf:/host/etc/dnf:ro
         - /etc/yum:/host/etc/yum:ro
         - /etc/pki:/host/etc/pki:ro
+        - /etc/ssl:/host/etc/ssl:ro
         - /etc/lsb-release:/host/etc/lsb-release:ro
         - /etc/redhat-release:/host/etc/redhat-release:ro
         - /etc/os-release:/host/etc/os-release:ro

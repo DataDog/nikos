@@ -1,7 +1,9 @@
 package backend
 
 import (
+	"crypto/tls"
 	"errors"
+	"net/http"
 	"os"
 	"strings"
 
@@ -11,11 +13,29 @@ import (
 )
 
 type Backend struct {
+	client *http.Client
+
 	Repositories []repo.Repo
 	varsReplacer *strings.Replacer
 }
 
+func hostRootsHttpClient() *http.Client {
+	roots, err := GetSystemRoots()
+	if err != nil {
+		return &http.Client{}
+	}
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			RootCAs: roots,
+		},
+	}
+	return &http.Client{Transport: tr}
+}
+
 func NewBackend(reposDir string, varsDir []string, builtinVariables map[string]string) (*Backend, error) {
+	client := hostRootsHttpClient()
+
 	varMaps := []map[string]string{builtinVariables}
 	for _, varDir := range varsDir {
 		if varDir == "" {
@@ -45,6 +65,7 @@ func NewBackend(reposDir string, varsDir []string, builtinVariables map[string]s
 	}
 
 	return &Backend{
+		client:       client,
 		Repositories: replacedRepos,
 		varsReplacer: varsReplacer,
 	}, nil
@@ -71,7 +92,7 @@ func (b *Backend) FetchPackage(matcher repo.PkgMatchFunc) (*repo.PkgInfo, []byte
 			continue
 		}
 
-		p, content, err := repository.FetchPackage(matcher)
+		p, content, err := repository.FetchPackage(b.client, matcher)
 		if err != nil {
 			mErr = multierror.Append(mErr, err)
 			continue

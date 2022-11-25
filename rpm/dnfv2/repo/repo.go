@@ -81,25 +81,25 @@ type PkgInfo struct {
 
 type PkgMatchFunc = func(*PkgInfo) bool
 
-func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
-	repoMd, err := r.FetchRepoMD()
+func (r *Repo) FetchPackage(client *http.Client, pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
+	repoMd, err := r.FetchRepoMD(client)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	pkgs, err := r.FetchPackagesLists(repoMd)
+	pkgs, err := r.FetchPackagesLists(client, repoMd)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	fetchURL, err := r.FetchURL()
+	fetchURL, err := r.FetchURL(client)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	var entityList openpgp.EntityList
 	if r.GpgCheck {
-		el, err := readGPGKey(r.GpgKey)
+		el, err := readGPGKey(client, r.GpgKey)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to read gpg key: %w", err)
 		}
@@ -128,7 +128,7 @@ func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
 					return nil, nil, err
 				}
 
-				resp, err := http.Get(pkgUrl)
+				resp, err := client.Get(pkgUrl)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -156,7 +156,7 @@ func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
 	return nil, nil, fmt.Errorf("failed to find valid package from repo %s", r.Name)
 }
 
-func readGPGKey(gpgKey string) (openpgp.EntityList, error) {
+func readGPGKey(client *http.Client, gpgKey string) (openpgp.EntityList, error) {
 	gpgKeyUrl, err := url.Parse(gpgKey)
 	if err != nil {
 		return nil, err
@@ -171,7 +171,7 @@ func readGPGKey(gpgKey string) (openpgp.EntityList, error) {
 		defer publicKeyFile.Close()
 		publicKeyReader = publicKeyFile
 	} else if gpgKeyUrl.Scheme == "http" || gpgKeyUrl.Scheme == "https" {
-		resp, err := http.Get(gpgKeyUrl.RequestURI())
+		resp, err := client.Get(gpgKeyUrl.RequestURI())
 		if err != nil {
 			return nil, err
 		}
@@ -190,8 +190,8 @@ func readGPGKey(gpgKey string) (openpgp.EntityList, error) {
 
 const repomdSubpath = "repodata/repomd.xml"
 
-func (r *Repo) FetchRepoMD() (*types.Repomd, error) {
-	fetchURL, err := r.FetchURL()
+func (r *Repo) FetchRepoMD(client *http.Client) (*types.Repomd, error) {
+	fetchURL, err := r.FetchURL(client)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +205,7 @@ func (r *Repo) FetchRepoMD() (*types.Repomd, error) {
 		repoMDUrl = withFile
 	}
 
-	repoMd, err := utils.GetAndUnmarshalXML[types.Repomd](repoMDUrl, nil)
+	repoMd, err := utils.GetAndUnmarshalXML[types.Repomd](client, repoMDUrl, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -213,13 +213,13 @@ func (r *Repo) FetchRepoMD() (*types.Repomd, error) {
 	return repoMd, nil
 }
 
-func (r *Repo) FetchURL() (string, error) {
+func (r *Repo) FetchURL(client *http.Client) (string, error) {
 	if r.BaseURL != "" {
 		return r.BaseURL, nil
 	}
 
 	if r.MirrorList != "" {
-		baseURL, err := fetchURLFromMirrorList(r.MirrorList)
+		baseURL, err := fetchURLFromMirrorList(client, r.MirrorList)
 		if err != nil {
 			return "", err
 		}
@@ -228,7 +228,7 @@ func (r *Repo) FetchURL() (string, error) {
 	}
 
 	if r.MetaLink != "" {
-		url, err := fetchURLFromMetaLink(r.MetaLink)
+		url, err := fetchURLFromMetaLink(client, r.MetaLink)
 		if err != nil {
 			return "", err
 		}
@@ -239,8 +239,8 @@ func (r *Repo) FetchURL() (string, error) {
 	return "", fmt.Errorf("unable to get a base URL for this repo `%s`", r.Name)
 }
 
-func fetchURLFromMirrorList(mirrorListURL string) (string, error) {
-	resp, err := http.Get(mirrorListURL)
+func fetchURLFromMirrorList(client *http.Client, mirrorListURL string) (string, error) {
+	resp, err := client.Get(mirrorListURL)
 	if err != nil {
 		return "", err
 	}
@@ -272,8 +272,8 @@ func fetchURLFromMirrorList(mirrorListURL string) (string, error) {
 	return mirrors[0], nil
 }
 
-func fetchURLFromMetaLink(metaLinkURL string) (string, error) {
-	metalink, err := utils.GetAndUnmarshalXML[types.MetaLink](metaLinkURL, nil)
+func fetchURLFromMetaLink(client *http.Client, metaLinkURL string) (string, error) {
+	metalink, err := utils.GetAndUnmarshalXML[types.MetaLink](client, metaLinkURL, nil)
 	if err != nil {
 		return "", err
 	}
@@ -303,8 +303,8 @@ func fetchURLFromMetaLink(metaLinkURL string) (string, error) {
 	return "", fmt.Errorf("failed to fetch base URL from meta link: %s", metaLinkURL)
 }
 
-func (r *Repo) FetchPackagesLists(repoMd *types.Repomd) ([]*types.Package, error) {
-	fetchURL, err := r.FetchURL()
+func (r *Repo) FetchPackagesLists(client *http.Client, repoMd *types.Repomd) ([]*types.Package, error) {
+	fetchURL, err := r.FetchURL(client)
 	if err != nil {
 		return nil, err
 	}
@@ -318,7 +318,7 @@ func (r *Repo) FetchPackagesLists(repoMd *types.Repomd) ([]*types.Package, error
 				return nil, err
 			}
 
-			metadata, err := utils.GetAndUnmarshalXML[types.Metadata](primaryURL, &d.OpenChecksum)
+			metadata, err := utils.GetAndUnmarshalXML[types.Metadata](client, primaryURL, &d.OpenChecksum)
 			if err != nil {
 				return nil, err
 			}
