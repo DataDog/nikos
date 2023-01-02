@@ -34,7 +34,7 @@ jobs:
 
       - name: Test RHEL CI
         run: |
-          make -C fixtures test.rhel.ci
+          make -f fixtures/Makefile test.rhel.ci
 
   verify-glibc:
     name: Check GLIBC references
