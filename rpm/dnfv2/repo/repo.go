@@ -31,7 +31,7 @@ type Repo struct {
 	Type        string
 	Enabled     bool
 	GpgCheck    bool
-	GpgKey      []string
+	GpgKeys     []string
 }
 
 func ReadFromDir(repoDir string) ([]Repo, error) {
@@ -61,7 +61,7 @@ func ReadFromDir(repoDir string) ([]Repo, error) {
 			repo.Type = section.Key("type").String()
 			repo.Enabled, _ = section.Key("enabled").Bool()
 			repo.GpgCheck, _ = section.Key("gpgcheck").Bool()
-			repo.GpgKey = strings.Split(section.Key("gpgkey").String(), ",")
+			repo.GpgKeys = strings.Split(section.Key("gpgkey").String(), ",")
 
 			// hack for yast2 repo support
 			if repo.Type == "yast2" && repo.BaseURL != "" {
@@ -100,7 +100,7 @@ func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
 
 	var entityList openpgp.EntityList
 	if r.GpgCheck {
-		el, err := readGPGKeys(r.GpgKey)
+		el, err := readGPGKeys(r.GpgKeys)
 		// if we found keys we can ignore the error
 		if err != nil && len(el) == 0 {
 			return nil, nil, fmt.Errorf("failed to read gpg key: %w", err)

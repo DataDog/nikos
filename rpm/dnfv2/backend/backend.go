@@ -55,7 +55,11 @@ func replaceInRepo(varsReplacer *strings.Replacer, r repo.Repo) repo.Repo {
 	r.BaseURL = varsReplacer.Replace(r.BaseURL)
 	r.MirrorList = varsReplacer.Replace(r.MirrorList)
 	r.MetaLink = varsReplacer.Replace(r.MetaLink)
-	r.GpgKey = varsReplacer.Replace(r.GpgKey)
+	replacedGpgKeys := make([]string, 0, len(r.GpgKeys))
+	for _, key := range r.GpgKeys {
+		replacedGpgKeys = append(replacedGpgKeys, varsReplacer.Replace(key))
+	}
+	r.GpgKeys = replacedGpgKeys
 	return r
 }
 

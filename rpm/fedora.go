@@ -51,7 +51,7 @@ func NewFedoraBackend(target *types.Target, reposDir string, logger types.Logger
 		BaseURL:  updatesArchiveRepoBaseURL,
 		Enabled:  true,
 		GpgCheck: true,
-		GpgKey:   updatesArchiveGpgKeyPath,
+		GpgKeys:  []string{updatesArchiveGpgKeyPath},
 	})
 
 	return &FedoraBackend{

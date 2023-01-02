@@ -72,7 +72,7 @@ func NewCentOSBackend(target *types.Target, reposDir string, logger types.Logger
 			BaseURL:  baseURL,
 			Enabled:  true,
 			GpgCheck: true,
-			GpgKey:   gpgKey,
+			GpgKeys:  []string{gpgKey},
 		})
 	} else {
 		gpgKey := fmt.Sprintf("file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-%d", version)
@@ -83,14 +83,14 @@ func NewCentOSBackend(target *types.Target, reposDir string, logger types.Logger
 			BaseURL:  baseURL,
 			Enabled:  true,
 			GpgCheck: true,
-			GpgKey:   gpgKey,
+			GpgKeys:  []string{gpgKey},
 		})
 		b.AppendRepository(repo.Repo{
 			Name:     fmt.Sprintf("C%s-updates", release),
 			BaseURL:  updatesURL,
 			Enabled:  true,
 			GpgCheck: true,
-			GpgKey:   gpgKey,
+			GpgKeys:  []string{gpgKey},
 		})
 	}
 

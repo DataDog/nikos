@@ -63,7 +63,7 @@ func NewSLESBackend(target *types.Target, reposDir string, logger types.Logger) 
 				BaseURL:  baseurl,
 				Enabled:  true,
 				GpgCheck: true,
-				GpgKey:   gpgKey,
+				GpgKeys:  []string{gpgKey},
 			})
 		}
 
