@@ -159,10 +159,18 @@ func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
 }
 
 func readGPGKeys(gpgKeys []string) (openpgp.EntityList, *multierror.Error) {
+	visited := make(map[string]bool, len(gpgKeys))
+
 	var entities openpgp.EntityList
 	var errors *multierror.Error
 
 	for _, gpgKey := range gpgKeys {
+		if visited[gpgKey] {
+			// this key is already loaded
+			continue
+		}
+		visited[gpgKey] = true
+
 		gpgKeyUrl, err := url.Parse(gpgKey)
 		if err != nil {
 			errors = multierror.Append(errors, err)
