@@ -50,6 +50,10 @@ jobs:
           path: /opt/nikos/bin/nikos
           retention-days: 1
 
+      - name: Test RHEL CI
+        run: |
+          make -C fixtures test.rhel.ci
+
   verify-glibc:
     name: Check GLIBC references
     needs: build
