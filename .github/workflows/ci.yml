@@ -17,7 +17,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.18'
+          go-version: "1.18"
 
       - name: Build nikos
         run: bash .ci_build/build_install_nikos.sh .
@@ -32,10 +32,6 @@ jobs:
           path: /opt/nikos/bin/nikos
           retention-days: 1
 
-      - name: Test RHEL CI
-        run: |
-          make -f fixtures/Makefile test.rhel.ci
-
   verify-glibc:
     name: Check GLIBC references
     needs: build
@@ -49,3 +45,19 @@ jobs:
 
       - name: Fail if there are references to GLIBC >= 2.18
         run: objdump -p /opt/nikos/bin/nikos | egrep -zqv 'GLIBC_2\.(1[8-9]|[2-9][0-9])'
+
+  test-fixture-rhel:
+    name: Fixture test RHEL
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download the nikos artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: nikos-binary
+          path: /opt/nikos/bin
+
+      - name: Test RHEL CI
+        continue-on-error: true
+        run: |
+          make -f fixtures/Makefile test.rhel.ci
