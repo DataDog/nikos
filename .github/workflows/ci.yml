@@ -60,6 +60,10 @@ jobs:
           name: nikos-binary
           path: /opt/nikos/bin
 
+      - name: Fix permission
+        run: |
+          sudo chmod +x /opt/nikos/bin/nikos
+
       - name: Test RHEL CI
         continue-on-error: true
         run: |
