@@ -89,8 +89,7 @@ jobs:
 
       - name: Extract tar
         run: |
-          mkdir -p /opt/nikos
-          tar -xf nikos.tar -C /opt/nikos
+          tar -xf nikos.tar -C /
 
       - name: Test RHEL CI
         continue-on-error: true
