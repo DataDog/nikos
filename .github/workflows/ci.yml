@@ -74,6 +74,5 @@ jobs:
           tar -xf nikos.tar -C /
 
       - name: Test RHEL CI
-        continue-on-error: true
         run: |
-          make -f fixtures/Makefile test.rhel.ci
+          make -f fixtures/Makefile test.rhel.ci | grep -q "Status code: 403 for https://cdn.redhat.com/content/dist/rhel/server/7/7.9/x86_64/os/repodata/repomd.xml"
