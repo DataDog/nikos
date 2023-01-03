@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"io"
@@ -36,6 +37,7 @@ type Repo struct {
 	SSLVerify     bool
 	SSLClientKey  string
 	SSLClientCert string
+	SSLCaCert     string
 }
 
 func ReadFromDir(repoDir string) ([]Repo, error) {
@@ -72,6 +74,7 @@ func ReadFromDir(repoDir string) ([]Repo, error) {
 			}
 			repo.SSLClientKey = section.Key("sslclientkey").String()
 			repo.SSLClientCert = section.Key("sslclientcert").String()
+			repo.SSLCaCert = section.Key("sslcacert").String()
 
 			// hack for yast2 repo support
 			if repo.Type == "yast2" && repo.BaseURL != "" {
@@ -102,11 +105,24 @@ func (r *Repo) createHTTPClient() (*http.Client, error) {
 		certs = append(certs, cert)
 	}
 
+	var certPool *x509.CertPool
+	if r.SSLCaCert != "" {
+		certPool = x509.NewCertPool()
+		customPem, err := os.ReadFile(utils.HostEtcJoin(r.SSLCaCert))
+		if err != nil {
+			return nil, fmt.Errorf("failed to read custom CA cert")
+		}
+		if !certPool.AppendCertsFromPEM(customPem) {
+			return nil, fmt.Errorf("failed to add custom CA cert to cert pool")
+		}
+	}
+
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: !r.SSLVerify,
 				Certificates:       certs,
+				RootCAs:            certPool,
 			},
 		},
 	}, nil

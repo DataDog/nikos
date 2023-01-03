@@ -62,6 +62,7 @@ func replaceInRepo(varsReplacer *strings.Replacer, r repo.Repo) repo.Repo {
 	r.GpgKeys = replacedGpgKeys
 	r.SSLClientCert = varsReplacer.Replace(r.SSLClientCert)
 	r.SSLClientKey = varsReplacer.Replace(r.SSLClientKey)
+	r.SSLCaCert = varsReplacer.Replace(r.SSLCaCert)
 	return r
 }
 
