@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/DataDog/nikos/rpm/dnfv2/types"
 )
@@ -26,7 +25,7 @@ func GetAndUnmarshalXML[T any](httpClient *http.Client, url string, checksum *ty
 	}
 
 	var reader io.Reader = resp.Body
-	if strings.HasSuffix(url, ".gz") {
+	if UrlHasSuffix(url, ".gz") {
 		gzipReader, err := gzip.NewReader(reader)
 		if err != nil {
 			return nil, err

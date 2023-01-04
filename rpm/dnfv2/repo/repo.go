@@ -273,7 +273,7 @@ func (r *Repo) FetchRepoMD(httpClient *http.Client) (*types.Repomd, error) {
 	}
 
 	repoMDUrl := fetchURL
-	if !strings.HasSuffix(repoMDUrl, "repomd.xml") {
+	if !utils.UrlHasSuffix(repoMDUrl, "repomd.xml") {
 		withFile, err := utils.UrlJoinPath(fetchURL, repomdSubpath)
 		if err != nil {
 			return nil, err
