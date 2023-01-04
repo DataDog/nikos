@@ -1,0 +1,7 @@
+[Basesystem_Module_15_SP2_x86_64:SLE-Module-Basesystem15-SP2-Updates]
+name=SLE-Module-Basesystem15-SP2-Updates
+enabled=1
+autorefresh=1
+baseurl=https://updates.suse.com/SUSE/Updates/SLE-Module-Basesystem/15-SP2/x86_64/update?2ds6r_u5QbNNyWb5AT_T6TcG01x7_CaMhq8xTktN9HPSZeLNTJHo1TC3MsAerSWUWsCgXRwel8iqkjYTL8m9L9VOw3svu_Z5gcPvE4IZ3AqCxsstQuqK85Sk8KBCcME93ozGuNLhyO6g0-Fl1xQ1er3XGLQksA
+type=rpm-md
+service=Basesystem_Module_15_SP2_x86_64

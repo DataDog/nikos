@@ -87,9 +87,10 @@ func NewSLESBackend(target *types.Target, reposDir string, logger types.Logger) 
 	}
 
 	return &SLESBackend{
-		target:     target,
-		flavour:    flavour,
-		logger:     logger,
-		dnfBackend: b,
+		target:        target,
+		flavour:       flavour,
+		kernelRelease: kernelRelease,
+		logger:        logger,
+		dnfBackend:    b,
 	}, nil
 }
