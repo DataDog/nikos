@@ -235,7 +235,7 @@ func readGPGKeys(httpClient *http.Client, gpgKeys []string) (openpgp.EntityList,
 			defer publicKeyFile.Close()
 			publicKeyReader = publicKeyFile
 		} else if gpgKeyUrl.Scheme == "http" || gpgKeyUrl.Scheme == "https" {
-			resp, err := httpClient.Get(gpgKeyUrl.RequestURI())
+			resp, err := httpClient.Get(gpgKey)
 			if err != nil {
 				errors = multierror.Append(errors, err)
 				continue
