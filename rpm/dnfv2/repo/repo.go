@@ -65,13 +65,10 @@ func ReadFromDir(repoDir string) ([]Repo, error) {
 			repo.MirrorList = section.Key("mirrorlist").String()
 			repo.MetaLink = section.Key("metalink").String()
 			repo.Type = section.Key("type").String()
-			repo.Enabled, _ = section.Key("enabled").Bool()
-			repo.GpgCheck, _ = section.Key("gpgcheck").Bool()
+			repo.Enabled = section.Key("enabled").MustBool()
+			repo.GpgCheck = section.Key("gpgcheck").MustBool()
 			repo.GpgKeys = strings.Split(section.Key("gpgkey").String(), ",")
-			repo.SSLVerify, err = section.Key("sslverify").Bool()
-			if err != nil {
-				repo.SSLVerify = true
-			}
+			repo.SSLVerify = section.Key("sslverify").MustBool(true)
 			repo.SSLClientKey = section.Key("sslclientkey").String()
 			repo.SSLClientCert = section.Key("sslclientcert").String()
 			repo.SSLCaCert = section.Key("sslcacert").String()
