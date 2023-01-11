@@ -2,51 +2,54 @@
 - name: Prepare
   hosts: all
   tasks:
-  - name: Install software-properties-common
-    shell: 'sudo apt-get install -y -o Acquire::https::Verify-Peer=false software-properties-common'
-    become: true
+    - name: Install software-properties-common
+      shell: "sudo apt-get install -y -o Acquire::https::Verify-Peer=false software-properties-common"
+      become: true
 
-  - name: Install dependencies
-    package:
-      name: "{{ item }}"
-    with_items:
-    - ca-certificates
-    - apt-transport-https
-    - curl
-    - gnupg-agent
-    become: true
+    - name: Force apt update
+      shell: "sudo apt-get update -y"
+      become: true
 
-  - name: Add docker official key
-    shell: "curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -"
-    become: true
+    - name: Install dependencies
+      package:
+        name: "{{ item }}"
+      with_items:
+        - ca-certificates
+        - apt-transport-https
+        - curl
+        - gnupg-agent
+      become: true
 
-  - name: Add APT repository
-    shell: 'add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"'
-    become: true
+    - name: Add docker official key
+      shell: "curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -"
+      become: true
 
-  - name: Update repositories cache and install "docker-ce" package
-    shell: 'sudo apt-get update -o Acquire::https::Verify-Peer=false && sudo apt-get install -y -o Acquire::https::Verify-Peer=false docker-ce'
-    become: true
+    - name: Add APT repository
+      shell: 'add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"'
+      become: true
 
-  - name: Install pip
-    shell: 'curl -O https://bootstrap.pypa.io/pip/2.7/get-pip.py && sudo -E python get-pip.py'
-    become: true
-    when: ansible_distribution_release == 'jessie' or  ansible_distribution_release == 'stretch'
+    - name: Update repositories cache and install "docker-ce" package
+      shell: "sudo apt-get update -o Acquire::https::Verify-Peer=false && sudo apt-get install -y -o Acquire::https::Verify-Peer=false docker-ce"
+      become: true
 
-  - name: Install docker-py
-    shell: 'pip install docker'
-    become: true
-    when: ansible_distribution_release == 'jessie' or  ansible_distribution_release == 'stretch'
+    - name: Install pip
+      shell: "curl -O https://bootstrap.pypa.io/pip/2.7/get-pip.py && sudo -E python get-pip.py"
+      become: true
+      when: ansible_distribution_release == 'jessie' or  ansible_distribution_release == 'stretch'
 
-  - name: Install docker-py
-    package:
-      name: python3-docker
-    become: true
-    when: ansible_distribution_release != 'jessie' or  ansible_distribution_release == 'stretch'
+    - name: Install docker-py
+      shell: "pip install docker"
+      become: true
+      when: ansible_distribution_release == 'jessie' or  ansible_distribution_release == 'stretch'
 
-  - name: Start docker
-    service:
-      name: docker
-      state: started
-    become: true
+    - name: Install docker-py
+      package:
+        name: python3-docker
+      become: true
+      when: ansible_distribution_release != 'jessie' or  ansible_distribution_release == 'stretch'
 
+    - name: Start docker
+      service:
+        name: docker
+        state: started
+      become: true
