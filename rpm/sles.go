@@ -4,45 +4,67 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/DataDog/nikos/rpm/dnf"
+	"github.com/DataDog/nikos/rpm/dnfv2"
+	"github.com/DataDog/nikos/rpm/dnfv2/backend"
+	"github.com/DataDog/nikos/rpm/dnfv2/repo"
 	"github.com/DataDog/nikos/types"
 )
 
 type SLESBackend struct {
-	target     *types.Target
-	logger     types.Logger
-	dnfBackend *dnf.DnfBackend
+	target        *types.Target
+	flavour       string
+	kernelRelease string
+	logger        types.Logger
+	dnfBackend    *backend.Backend
 }
 
 func (b *SLESBackend) GetKernelHeaders(directory string) error {
-	kernelRelease := b.target.Uname.Kernel
+	pkgNevra := "kernel" + b.flavour + "-devel"
+	pkgMatcher := func(pkg *repo.PkgInfo) bool {
+		return pkg.Name == pkgNevra && b.kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) && pkg.Arch == b.target.Uname.Machine
+	}
 
+	pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
+	if err != nil {
+		return fmt.Errorf("failed to fetch `%s` package: %w", pkgNevra, err)
+	}
+
+	return dnfv2.ExtractPackage(pkg, data, directory, b.target, b.logger)
+}
+
+func (b *SLESBackend) Close() {
+}
+
+func NewSLESBackend(target *types.Target, reposDir string, logger types.Logger) (types.Backend, error) {
+	b, err := dnfv2.NewBackend(target.Distro.Release, reposDir)
+	if err != nil {
+		return nil, err
+	}
+
+	kernelRelease := target.Uname.Kernel
 	flavour := "-generic"
 	flavourIndex := strings.LastIndex(kernelRelease, "-")
 	if flavourIndex != -1 {
 		flavour = kernelRelease[flavourIndex:]
 		kernelRelease = kernelRelease[:flavourIndex]
 	}
-	pkgNevra := "kernel" + flavour + "-devel-" + kernelRelease
-
-	// On a registered SUSE Entreprise Linux, we should be able to find
-	// the kernel headers without doing anything
-	b.logger.Info("Trying with the configured set of repositories")
-	if err := b.dnfBackend.GetKernelHeaders(pkgNevra, directory); err == nil {
-		return nil
-	}
 
 	// On not registered systems, we use the repositories from
 	// https://download.opensuse.org/repositories/Kernel:
-	if version := b.target.OSRelease["VERSION"]; version != "" {
+	if version := target.OSRelease["VERSION"]; version != "" {
 		addKernelRepository := func(version string) {
 			version = "SLE" + version
 			repoID := "Kernel_" + version
 			baseurl := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/", version)
 			gpgKey := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/repodata/repomd.xml.key", version)
 
-			b.logger.Infof("Using with %s repository", repoID)
-			b.dnfBackend.AddRepository(repoID, baseurl, true, gpgKey, "", "", "")
+			b.AppendRepository(repo.Repo{
+				Name:     repoID,
+				BaseURL:  baseurl,
+				Enabled:  true,
+				GpgCheck: true,
+				GpgKeys:  []string{gpgKey},
+			})
 		}
 
 		addKernelRepository(version)
@@ -53,30 +75,22 @@ func (b *SLESBackend) GetKernelHeaders(directory string) error {
 	}
 
 	// On SLES 15.2 without a subscription, the kernel headers can be found on the 'jump' repository
-	if versionID := b.target.OSRelease["VERSION_ID"]; versionID != "" {
+	if versionID := target.OSRelease["VERSION_ID"]; versionID != "" {
 		repoID := "Jump-" + versionID
 		baseurl := fmt.Sprintf("https://download.opensuse.org/distribution/jump/%s/repo/oss/", versionID)
 
-		b.logger.Infof("Using with %s repository", repoID)
-		b.dnfBackend.AddRepository(repoID, baseurl, true, "", "", "", "")
-	}
-
-	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
-}
-
-func (b *SLESBackend) Close() {
-	b.dnfBackend.Close()
-}
-
-func NewSLESBackend(target *types.Target, reposDir string, logger types.Logger) (types.Backend, error) {
-	dnfBackend, err := dnf.NewDnfBackend(target.Distro.Release, reposDir, logger, target)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create DNF backend: %w", err)
+		b.AppendRepository(repo.Repo{
+			Name:    repoID,
+			BaseURL: baseurl,
+			Enabled: true,
+		})
 	}
 
 	return &SLESBackend{
-		target:     target,
-		logger:     logger,
-		dnfBackend: dnfBackend,
+		target:        target,
+		flavour:       flavour,
+		kernelRelease: kernelRelease,
+		logger:        logger,
+		dnfBackend:    b,
 	}, nil
 }

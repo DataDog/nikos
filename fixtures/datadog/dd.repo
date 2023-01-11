@@ -1,0 +1,10 @@
+[datadog]
+name = Datadog, Inc.
+baseurl = https://yum.datad0g.com/beta/7/x86_64/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=0
+priority=1
+gpgkey=https://keys.datadoghq.com/DATADOG_RPM_KEY_CURRENT.public
+       https://keys.datadoghq.com/DATADOG_RPM_KEY_E09422B3.public
+       https://keys.datadoghq.com/DATADOG_RPM_KEY_FD4BF915.public

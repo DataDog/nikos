@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/DataDog/nikos/rpm/dnf"
+	"github.com/DataDog/nikos/rpm/dnfv2"
+	"github.com/DataDog/nikos/rpm/dnfv2/backend"
+	"github.com/DataDog/nikos/rpm/dnfv2/repo"
 	"github.com/DataDog/nikos/types"
 )
 
 type CentOSBackend struct {
-	version    int
-	release    string
-	dnfBackend *dnf.DnfBackend
+	dnfBackend *backend.Backend
 	target     *types.Target
 	logger     types.Logger
 }
@@ -36,49 +36,18 @@ func getRedhatRelease() (string, error) {
 }
 
 func (b *CentOSBackend) GetKernelHeaders(directory string) error {
-	pkgNevra := "kernel-devel-" + b.target.Uname.Kernel
+	pkgNevra := "kernel-devel"
+	pkgMatcher := dnfv2.DefaultPkgMatcher(pkgNevra, b.target.Uname.Kernel)
 
-	// First try with the 'base' and 'updates' repositories.
-	// This should work if the user is using the latest minor version
-	b.logger.Info("Trying with 'base' and 'updates' repositories")
-
-	for _, repo := range b.dnfBackend.GetEnabledRepositories() {
-		if repo.Id != "base" && repo.Id != "updates" {
-			b.dnfBackend.DisableRepository(repo)
-		}
+	pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
+	if err != nil {
+		return fmt.Errorf("failed to fetch `%s` package: %w", pkgNevra, err)
 	}
 
-	if b.dnfBackend.GetKernelHeaders(pkgNevra, directory) == nil {
-		return nil
-	}
-
-	// Otherwise, we try with Vault
-	b.logger.Infof("Trying with Vault repositories for %s", b.release)
-
-	var baseURL string
-	gpgKey := "file:///" + types.HostEtc("pki/rpm-gpg/RPM-GPG-KEY-")
-	if b.version >= 8 {
-		gpgKey += "centosofficial" // gpg key name convention changed in centos8
-		baseURL = fmt.Sprintf("http://vault.centos.org/%s/BaseOS/$basearch/os/", b.release)
-	} else {
-		gpgKey += "CentOS-" + strconv.Itoa(b.version)
-		baseURL = fmt.Sprintf("http://vault.centos.org/%s/os/$basearch/", b.release)
-
-		updatesURL := fmt.Sprintf("http://vault.centos.org/%s/updates/$basearch/", b.release)
-		if _, err := b.dnfBackend.AddRepository("C"+b.release+"-updates", updatesURL, true, gpgKey, "", "", ""); err != nil {
-			return fmt.Errorf("failed to add Vault updates repository: %w", err)
-		}
-	}
-
-	if _, err := b.dnfBackend.AddRepository("C"+b.release+"-base", baseURL, true, gpgKey, "", "", ""); err != nil {
-		return fmt.Errorf("failed to add Vault base repository: %w", err)
-	}
-
-	return b.dnfBackend.GetKernelHeaders(pkgNevra, directory)
+	return dnfv2.ExtractPackage(pkg, data, directory, b.target, b.logger)
 }
 
 func (b *CentOSBackend) Close() {
-	b.dnfBackend.Close()
 }
 
 func NewCentOSBackend(target *types.Target, reposDir string, logger types.Logger) (*CentOSBackend, error) {
@@ -88,16 +57,46 @@ func NewCentOSBackend(target *types.Target, reposDir string, logger types.Logger
 	}
 
 	version, _ := strconv.Atoi(strings.SplitN(release, ".", 2)[0])
-	dnfBackend, err := dnf.NewDnfBackend(fmt.Sprintf("%d", version), reposDir, logger, target)
+	versionStr := fmt.Sprintf("%d", version)
+
+	b, err := dnfv2.NewBackend(versionStr, reposDir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create DNF backend: %w", err)
+		return nil, err
+	}
+
+	if version >= 8 {
+		gpgKey := "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial"
+		baseURL := fmt.Sprintf("http://vault.centos.org/%s/BaseOS/$basearch/os/", release)
+		b.AppendRepository(repo.Repo{
+			Name:     fmt.Sprintf("C%s-base", release),
+			BaseURL:  baseURL,
+			Enabled:  true,
+			GpgCheck: true,
+			GpgKeys:  []string{gpgKey},
+		})
+	} else {
+		gpgKey := fmt.Sprintf("file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-%d", version)
+		baseURL := fmt.Sprintf("http://vault.centos.org/%s/os/$basearch/", release)
+		updatesURL := fmt.Sprintf("http://vault.centos.org/%s/updates/$basearch/", release)
+		b.AppendRepository(repo.Repo{
+			Name:     fmt.Sprintf("C%s-base", release),
+			BaseURL:  baseURL,
+			Enabled:  true,
+			GpgCheck: true,
+			GpgKeys:  []string{gpgKey},
+		})
+		b.AppendRepository(repo.Repo{
+			Name:     fmt.Sprintf("C%s-updates", release),
+			BaseURL:  updatesURL,
+			Enabled:  true,
+			GpgCheck: true,
+			GpgKeys:  []string{gpgKey},
+		})
 	}
 
 	return &CentOSBackend{
-		version:    version,
 		target:     target,
 		logger:     logger,
-		release:    release,
-		dnfBackend: dnfBackend,
+		dnfBackend: b,
 	}, nil
 }
