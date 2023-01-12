@@ -135,7 +135,7 @@ commands:
     steps:
       - run: 
           name: Build the nikos binary
-          command: bash .ci_build/build_install_nikos.sh . .ci_build/nikos-libs.tar.gz
+          command: bash .ci_build/build_install_nikos.sh .
 
   set_permissions:
     steps:
