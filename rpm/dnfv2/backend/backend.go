@@ -1,9 +1,11 @@
 package backend
 
 import (
+	"context"
 	"errors"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/DataDog/nikos/rpm/dnfv2/internal/utils"
 	"github.com/DataDog/nikos/rpm/dnfv2/repo"
@@ -78,7 +80,10 @@ func (b *Backend) FetchPackage(matcher repo.PkgMatchFunc) (*repo.PkgInfo, []byte
 			continue
 		}
 
-		p, content, err := repository.FetchPackage(matcher)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+		defer cancel()
+
+		p, content, err := repository.FetchPackage(ctx, matcher)
 		if err != nil {
 			mErr = multierror.Append(mErr, err)
 			continue

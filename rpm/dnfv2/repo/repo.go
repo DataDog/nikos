@@ -3,6 +3,7 @@ package repo
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -125,30 +126,30 @@ func (r *Repo) createHTTPClient() (*http.Client, error) {
 	}, nil
 }
 
-func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
+func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
 	httpClient, err := r.createHTTPClient()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	repoMd, err := r.FetchRepoMD(httpClient)
+	repoMd, err := r.FetchRepoMD(ctx, httpClient)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	pkgs, err := r.FetchPackagesLists(httpClient, repoMd)
+	pkgs, err := r.FetchPackagesLists(ctx, httpClient, repoMd)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	fetchURL, err := r.FetchURL(httpClient)
+	fetchURL, err := r.FetchURL(ctx, httpClient)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	var entityList openpgp.EntityList
 	if r.GpgCheck {
-		el, err := readGPGKeys(httpClient, r.GpgKeys)
+		el, err := readGPGKeys(ctx, httpClient, r.GpgKeys)
 		// if we found keys we can ignore the error
 		if err != nil && len(el) == 0 {
 			return nil, nil, fmt.Errorf("failed to read gpg key: %w", err)
@@ -170,7 +171,7 @@ func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
 					return nil, nil, err
 				}
 
-				resp, err := httpClient.Get(pkgUrl)
+				resp, err := utils.HttpGet(ctx, httpClient, pkgUrl)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -198,7 +199,7 @@ func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
 	return nil, nil, fmt.Errorf("failed to find valid package from repo %s", r.Name)
 }
 
-func readGPGKeys(httpClient *http.Client, gpgKeys []string) (openpgp.EntityList, *multierror.Error) {
+func readGPGKeys(ctx context.Context, httpClient *http.Client, gpgKeys []string) (openpgp.EntityList, *multierror.Error) {
 	visited := make(map[string]bool, len(gpgKeys))
 
 	var entities openpgp.EntityList
@@ -227,7 +228,7 @@ func readGPGKeys(httpClient *http.Client, gpgKeys []string) (openpgp.EntityList,
 			defer publicKeyFile.Close()
 			publicKeyReader = publicKeyFile
 		} else if gpgKeyUrl.Scheme == "http" || gpgKeyUrl.Scheme == "https" {
-			resp, err := httpClient.Get(gpgKey)
+			resp, err := utils.HttpGet(ctx, httpClient, gpgKey)
 			if err != nil {
 				errors = multierror.Append(errors, err)
 				continue
@@ -258,8 +259,8 @@ func readGPGKeys(httpClient *http.Client, gpgKeys []string) (openpgp.EntityList,
 
 const repomdSubpath = "repodata/repomd.xml"
 
-func (r *Repo) FetchRepoMD(httpClient *http.Client) (*types.Repomd, error) {
-	fetchURL, err := r.FetchURL(httpClient)
+func (r *Repo) FetchRepoMD(ctx context.Context, httpClient *http.Client) (*types.Repomd, error) {
+	fetchURL, err := r.FetchURL(ctx, httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +274,7 @@ func (r *Repo) FetchRepoMD(httpClient *http.Client) (*types.Repomd, error) {
 		repoMDUrl = withFile
 	}
 
-	repoMd, err := utils.GetAndUnmarshalXML[types.Repomd](httpClient, repoMDUrl, nil)
+	repoMd, err := utils.GetAndUnmarshalXML[types.Repomd](ctx, httpClient, repoMDUrl, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -281,13 +282,13 @@ func (r *Repo) FetchRepoMD(httpClient *http.Client) (*types.Repomd, error) {
 	return repoMd, nil
 }
 
-func (r *Repo) FetchURL(httpClient *http.Client) (string, error) {
+func (r *Repo) FetchURL(ctx context.Context, httpClient *http.Client) (string, error) {
 	if r.BaseURL != "" {
 		return r.BaseURL, nil
 	}
 
 	if r.MirrorList != "" {
-		baseURL, err := fetchURLFromMirrorList(httpClient, r.MirrorList)
+		baseURL, err := fetchURLFromMirrorList(ctx, httpClient, r.MirrorList)
 		if err != nil {
 			return "", err
 		}
@@ -296,7 +297,7 @@ func (r *Repo) FetchURL(httpClient *http.Client) (string, error) {
 	}
 
 	if r.MetaLink != "" {
-		url, err := fetchURLFromMetaLink(httpClient, r.MetaLink)
+		url, err := fetchURLFromMetaLink(ctx, httpClient, r.MetaLink)
 		if err != nil {
 			return "", err
 		}
@@ -307,8 +308,8 @@ func (r *Repo) FetchURL(httpClient *http.Client) (string, error) {
 	return "", fmt.Errorf("unable to get a base URL for this repo `%s`", r.Name)
 }
 
-func fetchURLFromMirrorList(httpClient *http.Client, mirrorListURL string) (string, error) {
-	resp, err := httpClient.Get(mirrorListURL)
+func fetchURLFromMirrorList(ctx context.Context, httpClient *http.Client, mirrorListURL string) (string, error) {
+	resp, err := utils.HttpGet(ctx, httpClient, mirrorListURL)
 	if err != nil {
 		return "", err
 	}
@@ -340,8 +341,8 @@ func fetchURLFromMirrorList(httpClient *http.Client, mirrorListURL string) (stri
 	return mirrors[0], nil
 }
 
-func fetchURLFromMetaLink(httpClient *http.Client, metaLinkURL string) (string, error) {
-	metalink, err := utils.GetAndUnmarshalXML[types.MetaLink](httpClient, metaLinkURL, nil)
+func fetchURLFromMetaLink(ctx context.Context, httpClient *http.Client, metaLinkURL string) (string, error) {
+	metalink, err := utils.GetAndUnmarshalXML[types.MetaLink](ctx, httpClient, metaLinkURL, nil)
 	if err != nil {
 		return "", err
 	}
@@ -371,8 +372,8 @@ func fetchURLFromMetaLink(httpClient *http.Client, metaLinkURL string) (string, 
 	return "", fmt.Errorf("failed to fetch base URL from meta link: %s", metaLinkURL)
 }
 
-func (r *Repo) FetchPackagesLists(httpClient *http.Client, repoMd *types.Repomd) ([]*types.Package, error) {
-	fetchURL, err := r.FetchURL(httpClient)
+func (r *Repo) FetchPackagesLists(ctx context.Context, httpClient *http.Client, repoMd *types.Repomd) ([]*types.Package, error) {
+	fetchURL, err := r.FetchURL(ctx, httpClient)
 	if err != nil {
 		return nil, err
 	}
@@ -386,7 +387,7 @@ func (r *Repo) FetchPackagesLists(httpClient *http.Client, repoMd *types.Repomd)
 				return nil, err
 			}
 
-			metadata, err := utils.GetAndUnmarshalXML[types.Metadata](httpClient, primaryURL, &d.OpenChecksum)
+			metadata, err := utils.GetAndUnmarshalXML[types.Metadata](ctx, httpClient, primaryURL, &d.OpenChecksum)
 			if err != nil {
 				return nil, err
 			}

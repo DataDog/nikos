@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"context"
+	"net/http"
 	"net/url"
 	"path"
 	"strings"
@@ -23,4 +25,13 @@ func UrlHasSuffix(rawUrl string, suffix string) bool {
 	}
 
 	return strings.HasSuffix(parsed.Path, suffix)
+}
+
+func HttpGet(ctx context.Context, client *http.Client, url string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.Do(req)
 }
