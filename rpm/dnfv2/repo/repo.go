@@ -157,21 +157,13 @@ func (r *Repo) FetchPackage(pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
 	}
 
 	for _, pkg := range pkgs {
-		pkgInfos := make([]*PkgInfo, 0, len(pkg.Provides)+1)
-		pkgInfos = append(pkgInfos, &PkgInfo{
-			Name:    pkg.Name,
-			Version: pkg.Version,
-			Arch:    pkg.Arch,
-		})
 		for _, provided := range pkg.Provides {
-			pkgInfos = append(pkgInfos, &PkgInfo{
+			pkgInfo := &PkgInfo{
 				Name:    provided.Name,
 				Version: provided.Version,
 				Arch:    pkg.Arch,
-			})
-		}
+			}
 
-		for _, pkgInfo := range pkgInfos {
 			if pkgMatcher(pkgInfo) {
 				pkgUrl, err := utils.UrlJoinPath(fetchURL, pkg.Location.Href)
 				if err != nil {
