@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -88,7 +89,8 @@ func ReadFromDir(repoDir string) ([]Repo, error) {
 type PkgInfo struct {
 	Name string
 	types.Version
-	Arch string
+	Arch     string
+	Location string
 }
 
 type PkgMatchFunc = func(*PkgInfo) bool
@@ -137,11 +139,6 @@ func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc) (*PkgI
 		return nil, nil, err
 	}
 
-	pkgs, err := r.FetchPackagesLists(ctx, httpClient, repoMd)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	fetchURL, err := r.FetchURL(ctx, httpClient)
 	if err != nil {
 		return nil, nil, err
@@ -157,46 +154,36 @@ func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc) (*PkgI
 		entityList = el
 	}
 
-	for _, pkg := range pkgs {
-		for _, provided := range pkg.Provides {
-			pkgInfo := &PkgInfo{
-				Name:    provided.Name,
-				Version: provided.Version,
-				Arch:    pkg.Arch,
-			}
+	pkgInfo, err := r.FetchPackageFromList(ctx, httpClient, repoMd, pkgMatcher)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to find valid package from repo %s: %w", r.Name, err)
+	}
 
-			if pkgMatcher(pkgInfo) {
-				pkgUrl, err := utils.UrlJoinPath(fetchURL, pkg.Location.Href)
-				if err != nil {
-					return nil, nil, err
-				}
+	pkgUrl, err := utils.UrlJoinPath(fetchURL, pkgInfo.Location)
+	if err != nil {
+		return nil, nil, err
+	}
 
-				resp, err := utils.HttpGet(ctx, httpClient, pkgUrl)
-				if err != nil {
-					return nil, nil, err
-				}
-				defer resp.Body.Close()
+	resp, err := utils.HttpGet(ctx, httpClient, pkgUrl)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer resp.Body.Close()
 
-				pkgRpm, err := io.ReadAll(resp.Body)
-				if err != nil {
-					return nil, nil, err
-				}
+	pkgRpm, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, err
+	}
 
-				if r.GpgCheck {
-					rpmReader := bytes.NewReader(pkgRpm)
-					_, _, err := rpmutils.Verify(rpmReader, entityList)
-					if err != nil {
-						return nil, nil, err
-					}
-				}
-
-				return pkgInfo, pkgRpm, nil
-			}
+	if r.GpgCheck {
+		rpmReader := bytes.NewReader(pkgRpm)
+		_, _, err := rpmutils.Verify(rpmReader, entityList)
+		if err != nil {
+			return nil, nil, err
 		}
 	}
 
-	// no error, but no package found either
-	return nil, nil, fmt.Errorf("failed to find valid package from repo %s", r.Name)
+	return pkgInfo, pkgRpm, nil
 }
 
 func readGPGKeys(ctx context.Context, httpClient *http.Client, gpgKeys []string) (openpgp.EntityList, *multierror.Error) {
@@ -372,13 +359,11 @@ func fetchURLFromMetaLink(ctx context.Context, httpClient *http.Client, metaLink
 	return "", fmt.Errorf("failed to fetch base URL from meta link: %s", metaLinkURL)
 }
 
-func (r *Repo) FetchPackagesLists(ctx context.Context, httpClient *http.Client, repoMd *types.Repomd) ([]*types.Package, error) {
+func (r *Repo) FetchPackageFromList(ctx context.Context, httpClient *http.Client, repoMd *types.Repomd, pkgMatcher PkgMatchFunc) (*PkgInfo, error) {
 	fetchURL, err := r.FetchURL(ctx, httpClient)
 	if err != nil {
 		return nil, err
 	}
-
-	allPackages := make([]*types.Package, 0)
 
 	for _, d := range repoMd.Data {
 		if d.Type == "primary" {
@@ -387,14 +372,46 @@ func (r *Repo) FetchPackagesLists(ctx context.Context, httpClient *http.Client, 
 				return nil, err
 			}
 
-			metadata, err := utils.GetAndUnmarshalXML[types.Metadata](ctx, httpClient, primaryURL, &d.OpenChecksum)
+			primaryContent, err := utils.GetAndChecksum(ctx, httpClient, primaryURL, &d.OpenChecksum)
 			if err != nil {
 				return nil, err
 			}
 
-			allPackages = append(allPackages, metadata.Packages...)
+			d := xml.NewDecoder(bytes.NewReader(primaryContent))
+			for {
+				tok, err := d.Token()
+				if tok == nil || err == io.EOF {
+					break
+				} else if err != nil {
+					return nil, err
+				}
+
+				switch ty := tok.(type) {
+				case xml.StartElement:
+					if ty.Name.Local == "package" {
+						var pkg types.Package
+						if err = d.DecodeElement(&pkg, &ty); err != nil {
+							return nil, fmt.Errorf("error decoding item: %w", err)
+						}
+
+						for _, provided := range pkg.Provides {
+							pkgInfo := &PkgInfo{
+								Name:     provided.Name,
+								Version:  provided.Version,
+								Arch:     pkg.Arch,
+								Location: pkg.Location.Href,
+							}
+
+							if pkgMatcher(pkgInfo) {
+								return pkgInfo, nil
+							}
+						}
+					}
+				default:
+				}
+			}
 		}
 	}
 
-	return allPackages, nil
+	return nil, errors.New("no matching package found")
 }
