@@ -14,8 +14,8 @@ import (
 	"github.com/DataDog/nikos/rpm/dnfv2/types"
 )
 
-func GetAndChecksum(ctx context.Context, httpClient *http.Client, url string, checksum *types.Checksum) ([]byte, error) {
-	resp, err := HttpGet(ctx, httpClient, url)
+func GetAndChecksum(ctx context.Context, httpClient *HttpClient, url string, checksum *types.Checksum) ([]byte, error) {
+	resp, err := httpClient.Get(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func GetAndChecksum(ctx context.Context, httpClient *http.Client, url string, ch
 	return content, nil
 }
 
-func GetAndUnmarshalXML[T any](ctx context.Context, httpClient *http.Client, url string, checksum *types.Checksum) (*T, error) {
+func GetAndUnmarshalXML[T any](ctx context.Context, httpClient *HttpClient, url string, checksum *types.Checksum) (*T, error) {
 	content, err := GetAndChecksum(ctx, httpClient, url, checksum)
 	if err != nil {
 		return nil, err

@@ -95,7 +95,7 @@ type PkgInfo struct {
 
 type PkgMatchFunc = func(*PkgInfo) bool
 
-func (r *Repo) createHTTPClient() (*http.Client, error) {
+func (r *Repo) createHTTPClient() (*utils.HttpClient, error) {
 	var certs []tls.Certificate
 	if r.SSLClientCert != "" || r.SSLClientKey != "" {
 		cert, err := tls.LoadX509KeyPair(utils.HostEtcJoin(r.SSLClientCert), utils.HostEtcJoin(r.SSLClientKey))
@@ -117,7 +117,7 @@ func (r *Repo) createHTTPClient() (*http.Client, error) {
 		}
 	}
 
-	return &http.Client{
+	inner := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: !r.SSLVerify,
@@ -125,7 +125,9 @@ func (r *Repo) createHTTPClient() (*http.Client, error) {
 				RootCAs:            certPool,
 			},
 		},
-	}, nil
+	}
+
+	return utils.NewHttpClientFromInner(inner), nil
 }
 
 func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
@@ -164,7 +166,7 @@ func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc) (*PkgI
 		return nil, nil, err
 	}
 
-	resp, err := utils.HttpGet(ctx, httpClient, pkgUrl)
+	resp, err := httpClient.Get(ctx, pkgUrl)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -186,7 +188,7 @@ func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc) (*PkgI
 	return pkgInfo, pkgRpm, nil
 }
 
-func readGPGKeys(ctx context.Context, httpClient *http.Client, gpgKeys []string) (openpgp.EntityList, *multierror.Error) {
+func readGPGKeys(ctx context.Context, httpClient *utils.HttpClient, gpgKeys []string) (openpgp.EntityList, *multierror.Error) {
 	visited := make(map[string]bool, len(gpgKeys))
 
 	var entities openpgp.EntityList
@@ -215,7 +217,7 @@ func readGPGKeys(ctx context.Context, httpClient *http.Client, gpgKeys []string)
 			defer publicKeyFile.Close()
 			publicKeyReader = publicKeyFile
 		} else if gpgKeyUrl.Scheme == "http" || gpgKeyUrl.Scheme == "https" {
-			resp, err := utils.HttpGet(ctx, httpClient, gpgKey)
+			resp, err := httpClient.Get(ctx, gpgKey)
 			if err != nil {
 				errors = multierror.Append(errors, err)
 				continue
@@ -246,7 +248,7 @@ func readGPGKeys(ctx context.Context, httpClient *http.Client, gpgKeys []string)
 
 const repomdSubpath = "repodata/repomd.xml"
 
-func (r *Repo) FetchRepoMD(ctx context.Context, httpClient *http.Client) (*types.Repomd, error) {
+func (r *Repo) FetchRepoMD(ctx context.Context, httpClient *utils.HttpClient) (*types.Repomd, error) {
 	fetchURL, err := r.FetchURL(ctx, httpClient)
 	if err != nil {
 		return nil, err
@@ -269,7 +271,7 @@ func (r *Repo) FetchRepoMD(ctx context.Context, httpClient *http.Client) (*types
 	return repoMd, nil
 }
 
-func (r *Repo) FetchURL(ctx context.Context, httpClient *http.Client) (string, error) {
+func (r *Repo) FetchURL(ctx context.Context, httpClient *utils.HttpClient) (string, error) {
 	if r.BaseURL != "" {
 		return r.BaseURL, nil
 	}
@@ -295,8 +297,8 @@ func (r *Repo) FetchURL(ctx context.Context, httpClient *http.Client) (string, e
 	return "", fmt.Errorf("unable to get a base URL for this repo `%s`", r.Name)
 }
 
-func fetchURLFromMirrorList(ctx context.Context, httpClient *http.Client, mirrorListURL string) (string, error) {
-	resp, err := utils.HttpGet(ctx, httpClient, mirrorListURL)
+func fetchURLFromMirrorList(ctx context.Context, httpClient *utils.HttpClient, mirrorListURL string) (string, error) {
+	resp, err := httpClient.Get(ctx, mirrorListURL)
 	if err != nil {
 		return "", err
 	}
@@ -328,7 +330,7 @@ func fetchURLFromMirrorList(ctx context.Context, httpClient *http.Client, mirror
 	return mirrors[0], nil
 }
 
-func fetchURLFromMetaLink(ctx context.Context, httpClient *http.Client, metaLinkURL string) (string, error) {
+func fetchURLFromMetaLink(ctx context.Context, httpClient *utils.HttpClient, metaLinkURL string) (string, error) {
 	metalink, err := utils.GetAndUnmarshalXML[types.MetaLink](ctx, httpClient, metaLinkURL, nil)
 	if err != nil {
 		return "", err
@@ -359,7 +361,7 @@ func fetchURLFromMetaLink(ctx context.Context, httpClient *http.Client, metaLink
 	return "", fmt.Errorf("failed to fetch base URL from meta link: %s", metaLinkURL)
 }
 
-func (r *Repo) FetchPackageFromList(ctx context.Context, httpClient *http.Client, repoMd *types.Repomd, pkgMatcher PkgMatchFunc) (*PkgInfo, error) {
+func (r *Repo) FetchPackageFromList(ctx context.Context, httpClient *utils.HttpClient, repoMd *types.Repomd, pkgMatcher PkgMatchFunc) (*PkgInfo, error) {
 	fetchURL, err := r.FetchURL(ctx, httpClient)
 	if err != nil {
 		return nil, err
