@@ -7,6 +7,8 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"hash"
+	"io"
 
 	"github.com/DataDog/nikos/rpm/dnfv2/types"
 )
@@ -17,27 +19,36 @@ func GetAndUnmarshalXML[T any](ctx context.Context, httpClient *HttpClient, url 
 		return nil, err
 	}
 
+	contentData, err := content.Data()
+	if err != nil {
+		return nil, err
+	}
+
 	var res T
-	if err := xml.Unmarshal(content, &res); err != nil {
+	if err := xml.Unmarshal(contentData, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
 
-func verifyChecksum(content []byte, checksum *types.Checksum) error {
+func verifyChecksum(reader io.Reader, checksum *types.Checksum) error {
 	var contentSum []byte
 
+	var hasher hash.Hash
 	switch checksum.Type {
 	case "sha256":
-		tmp := sha256.Sum256(content)
-		contentSum = tmp[:]
+		hasher = sha256.New()
 	case "sha1":
-		tmp := sha1.Sum(content)
-		contentSum = tmp[:]
+		hasher = sha1.New()
 	default:
 		return fmt.Errorf("unsupported sha type: %s", checksum.Type)
 	}
 
+	if _, err := io.Copy(hasher, reader); err != nil {
+		return err
+	}
+
+	contentSum = hasher.Sum(nil)
 	if checksum.Hash != fmt.Sprintf("%x", contentSum) {
 		return errors.New("failed checksum")
 	}

@@ -2,7 +2,6 @@ package repo
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -174,14 +173,20 @@ func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc, cache 
 	}
 
 	if r.GpgCheck {
-		rpmReader := bytes.NewReader(pkgRpm)
-		_, _, err := rpmutils.Verify(rpmReader, entityList)
+		rpmReader, err := pkgRpm.Reader()
+		defer rpmReader.Close()
+
+		if err != nil {
+			return nil, nil, err
+		}
+		_, _, err = rpmutils.Verify(rpmReader, entityList)
 		if err != nil {
 			return nil, nil, err
 		}
 	}
 
-	return pkgInfo, pkgRpm, nil
+	pkgRpmData, err := pkgRpm.Data()
+	return pkgInfo, pkgRpmData, err
 }
 
 func readGPGKeys(ctx context.Context, httpClient *utils.HttpClient, gpgKeys []string) (openpgp.EntityList, *multierror.Error) {
@@ -218,7 +223,13 @@ func readGPGKeys(ctx context.Context, httpClient *utils.HttpClient, gpgKeys []st
 				errors = multierror.Append(errors, err)
 				continue
 			}
-			publicKeyReader = bytes.NewReader(content)
+			publicKeyDataReader, err := content.Reader()
+			if err != nil {
+				errors = multierror.Append(errors, err)
+				continue
+			}
+			defer publicKeyDataReader.Close()
+			publicKeyReader = publicKeyDataReader
 		} else {
 			err := fmt.Errorf("only file and http(s) scheme are supported for gpg key: %s", gpgKey)
 			errors = multierror.Append(errors, err)
@@ -292,8 +303,13 @@ func fetchURLFromMirrorList(ctx context.Context, httpClient *utils.HttpClient, m
 		return "", err
 	}
 
+	mirrorListReader, err := mirrorList.Reader()
+	if err != nil {
+		return "", err
+	}
+
 	mirrors := make([]string, 0)
-	sc := bufio.NewScanner(bytes.NewReader(mirrorList))
+	sc := bufio.NewScanner(mirrorListReader)
 	for sc.Scan() {
 		if sc.Err() != nil {
 			return "", err
@@ -363,7 +379,12 @@ func (r *Repo) FetchPackageFromList(ctx context.Context, httpClient *utils.HttpC
 				return nil, err
 			}
 
-			d := xml.NewDecoder(bytes.NewReader(primaryContent))
+			primaryContentReader, err := primaryContent.Reader()
+			if err != nil {
+				return nil, err
+			}
+
+			d := xml.NewDecoder(primaryContentReader)
 			for {
 				tok, err := d.Token()
 				if tok == nil || err == io.EOF {
