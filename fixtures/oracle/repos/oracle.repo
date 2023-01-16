@@ -1,0 +1,27 @@
+[ksplice-uptrack]
+name=Ksplice Uptrack for Oracle Linux
+baseurl=https://www.ksplice.com/yum/uptrack/ol/$releasever/$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=https://ksplice.oracle.com/yum/RPM-GPG-KEY-ksplice
+
+[ol7_latest]
+name=Oracle Linux $releasever Latest ($basearch)
+baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL7/latest/$basearch/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+gpgcheck=1
+enabled=1
+
+[ol7_addons]
+name=Oracle Linux $releasever Add ons ($basearch)
+baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL7/addons/$basearch/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+gpgcheck=1
+enabled=1
+
+[ol7_UEKR6]
+name=Latest Unbreakable Enterprise Kernel Release 6 for Oracle Linux $releasever ($basearch)
+baseurl=https://yum$ociregion.$ocidomain/repo/OracleLinux/OL7/UEKR6/$basearch/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+gpgcheck=1
+enabled=1
