@@ -2,7 +2,6 @@ package repo
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -16,6 +15,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"unsafe"
 
 	"golang.org/x/crypto/openpgp"
 	"gopkg.in/ini.v1"
@@ -95,7 +95,7 @@ type PkgInfo struct {
 
 type PkgMatchFunc = func(*PkgInfo) bool
 
-func (r *Repo) createHTTPClient() (*utils.HttpClient, error) {
+func (r *Repo) createHTTPClient(cache *utils.HttpClientCache) (*utils.HttpClient, error) {
 	var certs []tls.Certificate
 	if r.SSLClientCert != "" || r.SSLClientKey != "" {
 		cert, err := tls.LoadX509KeyPair(utils.HostEtcJoin(r.SSLClientCert), utils.HostEtcJoin(r.SSLClientKey))
@@ -127,11 +127,12 @@ func (r *Repo) createHTTPClient() (*utils.HttpClient, error) {
 		},
 	}
 
-	return utils.NewHttpClientFromInner(inner), nil
+	repoID := uintptr(unsafe.Pointer(r))
+	return utils.NewHttpClientFromInner(inner, cache, repoID), nil
 }
 
-func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
-	httpClient, err := r.createHTTPClient()
+func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc, cache *utils.HttpClientCache) (*PkgInfo, []byte, error) {
+	httpClient, err := r.createHTTPClient(cache)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -166,26 +167,26 @@ func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc) (*PkgI
 		return nil, nil, err
 	}
 
-	resp, err := httpClient.Get(ctx, pkgUrl)
-	if err != nil {
-		return nil, nil, err
-	}
-	defer resp.Body.Close()
-
-	pkgRpm, err := io.ReadAll(resp.Body)
+	pkgRpm, err := httpClient.Get(ctx, pkgUrl)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	if r.GpgCheck {
-		rpmReader := bytes.NewReader(pkgRpm)
-		_, _, err := rpmutils.Verify(rpmReader, entityList)
+		rpmReader, err := pkgRpm.Reader()
+		defer rpmReader.Close()
+
+		if err != nil {
+			return nil, nil, err
+		}
+		_, _, err = rpmutils.Verify(rpmReader, entityList)
 		if err != nil {
 			return nil, nil, err
 		}
 	}
 
-	return pkgInfo, pkgRpm, nil
+	pkgRpmData, err := pkgRpm.Data()
+	return pkgInfo, pkgRpmData, err
 }
 
 func readGPGKeys(ctx context.Context, httpClient *utils.HttpClient, gpgKeys []string) (openpgp.EntityList, *multierror.Error) {
@@ -217,19 +218,18 @@ func readGPGKeys(ctx context.Context, httpClient *utils.HttpClient, gpgKeys []st
 			defer publicKeyFile.Close()
 			publicKeyReader = publicKeyFile
 		} else if gpgKeyUrl.Scheme == "http" || gpgKeyUrl.Scheme == "https" {
-			resp, err := httpClient.Get(ctx, gpgKey)
+			content, err := httpClient.Get(ctx, gpgKey)
 			if err != nil {
 				errors = multierror.Append(errors, err)
 				continue
 			}
-			defer resp.Body.Close()
-
-			if resp.StatusCode != http.StatusOK {
-				err := fmt.Errorf("bad status for `%s` : %s", gpgKey, resp.Status)
+			publicKeyDataReader, err := content.Reader()
+			if err != nil {
 				errors = multierror.Append(errors, err)
 				continue
 			}
-			publicKeyReader = resp.Body
+			defer publicKeyDataReader.Close()
+			publicKeyReader = publicKeyDataReader
 		} else {
 			err := fmt.Errorf("only file and http(s) scheme are supported for gpg key: %s", gpgKey)
 			errors = multierror.Append(errors, err)
@@ -298,18 +298,18 @@ func (r *Repo) FetchURL(ctx context.Context, httpClient *utils.HttpClient) (stri
 }
 
 func fetchURLFromMirrorList(ctx context.Context, httpClient *utils.HttpClient, mirrorListURL string) (string, error) {
-	resp, err := httpClient.Get(ctx, mirrorListURL)
+	mirrorList, err := httpClient.Get(ctx, mirrorListURL)
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("bad status for `%s` : %s", mirrorListURL, resp.Status)
+	mirrorListReader, err := mirrorList.Reader()
+	if err != nil {
+		return "", err
 	}
 
 	mirrors := make([]string, 0)
-	sc := bufio.NewScanner(resp.Body)
+	sc := bufio.NewScanner(mirrorListReader)
 	for sc.Scan() {
 		if sc.Err() != nil {
 			return "", err
@@ -376,12 +376,18 @@ func (r *Repo) FetchPackageFromList(ctx context.Context, httpClient *utils.HttpC
 				return nil, err
 			}
 
-			primaryContent, err := utils.GetAndChecksum(ctx, httpClient, primaryURL, &d.OpenChecksum)
+			primaryContent, err := httpClient.GetWithChecksum(ctx, primaryURL, &d.OpenChecksum)
 			if err != nil {
 				return nil, err
 			}
 
-			d := xml.NewDecoder(bytes.NewReader(primaryContent))
+			primaryContentReader, err := primaryContent.Reader()
+			if err != nil {
+				return nil, err
+			}
+			defer primaryContentReader.Close()
+
+			d := xml.NewDecoder(primaryContentReader)
 			for {
 				tok, err := d.Token()
 				if tok == nil || err == io.EOF {
