@@ -28,7 +28,7 @@
 
   - name: copy Dockerfile
     copy:
-      src: ../ci_build/Dockerfile
+      src: Dockerfile
       dest: /tmp/debian-ca-certs
       mode: '0644'
     when: test_type == 'container'
