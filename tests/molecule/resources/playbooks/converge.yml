@@ -19,10 +19,33 @@
     become: true
     when: test_type == 'container'
 
+  - name: create build directory
+    file:
+      path: /tmp/debian-ca-certs
+      state: directory
+      mode: '0755'
+    when: test_type == 'container'
+
+  - name: copy Dockerfile
+    copy:
+      src: ../ci_build/Dockerfile
+      dest: /tmp/debian-ca-certs
+      mode: '0644'
+    when: test_type == 'container'
+
+  - name: build container image
+    docker_image:
+      name: debian_ca_certs
+      build:
+        path: /tmp/debian-ca-certs
+        source: build
+      state: present
+    when: test_type == 'container'
+
   - name: Create a debian container
     community.general.docker_container:
       name: debian
-      image: debian
+      image: debian_ca_certs
       env:
         HOST_ETC: /host/etc
       volumes:
