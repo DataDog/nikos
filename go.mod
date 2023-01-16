@@ -9,17 +9,16 @@ require (
 	github.com/DataDog/zstd v1.5.2
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
-	github.com/go-ini/ini v1.67.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/sassoftware/go-rpmutils v0.2.0
-	github.com/shirou/gopsutil/v3 v3.22.10
+	github.com/shirou/gopsutil/v3 v3.22.12
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 	github.com/xor-gate/ar v0.0.0-20170530204233-5c72ae81e2b7
 	golang.org/x/crypto v0.3.0
-	golang.org/x/sys v0.2.0
+	golang.org/x/sys v0.3.0
 	google.golang.org/api v0.106.0
 	gopkg.in/ini.v1 v1.67.0
 )
