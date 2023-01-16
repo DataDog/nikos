@@ -15,6 +15,7 @@ import (
 type Backend struct {
 	Repositories []repo.Repo
 	varsReplacer *strings.Replacer
+	cache        *utils.HttpClientCache
 }
 
 func NewBackend(reposDir string, varsDir []string, builtinVariables map[string]string) (*Backend, error) {
@@ -49,6 +50,7 @@ func NewBackend(reposDir string, varsDir []string, builtinVariables map[string]s
 	return &Backend{
 		Repositories: replacedRepos,
 		varsReplacer: varsReplacer,
+		cache: utils.NewHttpClientCache(),
 	}, nil
 }
 
@@ -83,7 +85,7 @@ func (b *Backend) FetchPackage(matcher repo.PkgMatchFunc) (*repo.PkgInfo, []byte
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
 
-		p, content, err := repository.FetchPackage(ctx, matcher)
+		p, content, err := repository.FetchPackage(ctx, matcher, b.cache)
 		if err != nil {
 			mErr = multierror.Append(mErr, err)
 			continue

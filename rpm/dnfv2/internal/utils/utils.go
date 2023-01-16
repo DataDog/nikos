@@ -1,55 +1,18 @@
 package utils
 
 import (
-	"compress/gzip"
 	"context"
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/DataDog/nikos/rpm/dnfv2/types"
 )
 
-func GetAndChecksum(ctx context.Context, httpClient *HttpClient, url string, checksum *types.Checksum) ([]byte, error) {
-	resp, err := httpClient.Get(ctx, url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("bad status for `%s`: %s", url, resp.Status)
-	}
-
-	var reader io.Reader = resp.Body
-	if UrlHasSuffix(url, ".gz") {
-		gzipReader, err := gzip.NewReader(reader)
-		if err != nil {
-			return nil, err
-		}
-		defer gzipReader.Close()
-		reader = gzipReader
-	}
-
-	content, err := io.ReadAll(reader)
-	if err != nil {
-		return nil, err
-	}
-
-	if checksum != nil {
-		if err := verifyChecksum(content, checksum); err != nil {
-			return nil, err
-		}
-	}
-	return content, nil
-}
-
 func GetAndUnmarshalXML[T any](ctx context.Context, httpClient *HttpClient, url string, checksum *types.Checksum) (*T, error) {
-	content, err := GetAndChecksum(ctx, httpClient, url, checksum)
+	content, err := httpClient.GetWithChecksum(ctx, url, checksum)
 	if err != nil {
 		return nil, err
 	}
