@@ -32,8 +32,6 @@ func GetAndUnmarshalXML[T any](ctx context.Context, httpClient *HttpClient, url 
 }
 
 func verifyChecksum(reader io.Reader, checksum *types.Checksum) error {
-	var contentSum []byte
-
 	var hasher hash.Hash
 	switch checksum.Type {
 	case "sha256":
@@ -48,7 +46,7 @@ func verifyChecksum(reader io.Reader, checksum *types.Checksum) error {
 		return err
 	}
 
-	contentSum = hasher.Sum(nil)
+	contentSum := hasher.Sum(nil)
 	if checksum.Hash != fmt.Sprintf("%x", contentSum) {
 		return errors.New("failed checksum")
 	}

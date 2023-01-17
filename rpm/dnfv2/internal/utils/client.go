@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/DataDog/nikos/rpm/dnfv2/types"
 )
@@ -77,17 +76,14 @@ func NewHttpClientFromInner(inner *http.Client, cache *HttpClientCache, repoID u
 }
 
 func (hc *HttpClient) GetWithChecksum(ctx context.Context, url string, checksum *types.Checksum) (FetchedData, error) {
-	fmt.Printf("get: %s\n", url)
 	content, ok := hc.cache.Get(hc.repoID, url)
 
 	if !ok {
-		fmt.Println("not cached")
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 		if err != nil {
 			return FetchedData{}, err
 		}
 
-		start := time.Now()
 		resp, err := hc.inner.Do(req)
 		if err != nil {
 			return FetchedData{}, err
@@ -103,7 +99,6 @@ func (hc *HttpClient) GetWithChecksum(ctx context.Context, url string, checksum 
 		if err != nil {
 			return FetchedData{}, err
 		}
-		fmt.Printf("in: %v\n", time.Since(start))
 		content = FetchedData{data: readContent, gzipped: gzipped}
 	}
 
@@ -120,7 +115,6 @@ func (hc *HttpClient) GetWithChecksum(ctx context.Context, url string, checksum 
 	}
 
 	hc.cache.Set(hc.repoID, url, content)
-	fmt.Printf("size: %d\n", len(content.data))
 	return content, nil
 }
 
