@@ -391,6 +391,7 @@ func (r *Repo) FetchPackageFromList(ctx context.Context, httpClient *utils.HttpC
 			if err != nil {
 				return nil, err
 			}
+			defer primaryContentReader.Close()
 
 			d := xml.NewDecoder(primaryContentReader)
 			for {
