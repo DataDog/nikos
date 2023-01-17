@@ -129,7 +129,7 @@ func SetupCommands() error {
 
 	RootCmd.PersistentFlags().StringVarP(&aptConfigDir, "apt-config-dir", "", types.HostEtc("apt"), "APT configuration dir")
 	RootCmd.PersistentFlags().StringVarP(&rpmReposDir, "yum-repos-dir", "", types.HostEtc("yum.repos.d"), "YUM configuration dir")
-	RootCmd.PersistentFlags().StringVarP(&rpmReposDir, "zypper-repos-dir", "", types.HostEtc("zypp", "repos.d"), "YUM configuration dir")
+	RootCmd.PersistentFlags().StringVarP(&zypperReposDir, "zypper-repos-dir", "", types.HostEtc("zypp", "repos.d"), "YUM configuration dir")
 
 	RootCmd.AddCommand(DownloadCmd)
 	return nil
