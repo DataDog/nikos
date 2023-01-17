@@ -16,12 +16,13 @@ import (
 )
 
 var (
-	osReleaseFile string
-	target        types.Target
-	outputDir     string
-	verbose       bool
-	aptConfigDir  string
-	rpmReposDir   string
+	osReleaseFile  string
+	target         types.Target
+	outputDir      string
+	verbose        bool
+	aptConfigDir   string
+	rpmReposDir    string
+	zypperReposDir string
 )
 
 var RootCmd = &cobra.Command{
@@ -70,7 +71,7 @@ var DownloadCmd = &cobra.Command{
 				backend, err = rpm.NewRedHatBackend(&target, rpmReposDir, logger)
 			case "centos":
 				backend, err = rpm.NewCentOSBackend(&target, rpmReposDir, logger)
-			case "oracle":
+			case "oracle", "ol":
 				backend, err = rpm.NewRedHatBackend(&target, rpmReposDir, logger)
 			default:
 				err = fmt.Errorf("unsupported RedHat based distribution '%s'", target.Distro.Display)
@@ -78,9 +79,9 @@ var DownloadCmd = &cobra.Command{
 		case "suse":
 			switch target.Distro.Display {
 			case "suse", "sles", "sled", "caasp":
-				backend, err = rpm.NewSLESBackend(&target, rpmReposDir, logger)
+				backend, err = rpm.NewSLESBackend(&target, zypperReposDir, logger)
 			case "opensuse", "opensuse-leap", "opensuse-tumbleweed", "opensuse-tumbleweed-kubic":
-				backend, err = rpm.NewOpenSUSEBackend(&target, rpmReposDir, logger)
+				backend, err = rpm.NewOpenSUSEBackend(&target, zypperReposDir, logger)
 			default:
 				err = fmt.Errorf("unsupported Debian based distribution '%s'", target.Distro.Display)
 			}
@@ -126,15 +127,9 @@ func SetupCommands() error {
 	RootCmd.PersistentFlags().StringVarP(&outputDir, "output", "o", "/tmp", "output directory")
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose mode")
 
-	switch target.Distro.Family {
-	case "debian":
-		RootCmd.PersistentFlags().StringVarP(&aptConfigDir, "apt-config-dir", "", types.HostEtc("apt"), "APT configuration dir")
-	case "fedora", "rhel":
-		RootCmd.PersistentFlags().StringVarP(&rpmReposDir, "yum-repos-dir", "", types.HostEtc("yum.repos.d"), "YUM configuration dir")
-	case "suse":
-		RootCmd.PersistentFlags().StringVarP(&rpmReposDir, "yum-repos-dir", "", types.HostEtc("zypp", "repos.d"), "YUM configuration dir")
-	default:
-	}
+	RootCmd.PersistentFlags().StringVarP(&aptConfigDir, "apt-config-dir", "", types.HostEtc("apt"), "APT configuration dir")
+	RootCmd.PersistentFlags().StringVarP(&rpmReposDir, "yum-repos-dir", "", types.HostEtc("yum.repos.d"), "YUM configuration dir")
+	RootCmd.PersistentFlags().StringVarP(&rpmReposDir, "zypper-repos-dir", "", types.HostEtc("zypp", "repos.d"), "YUM configuration dir")
 
 	RootCmd.AddCommand(DownloadCmd)
 	return nil
