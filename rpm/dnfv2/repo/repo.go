@@ -367,6 +367,8 @@ func (r *Repo) FetchPackageFromList(ctx context.Context, httpClient *utils.HttpC
 		return nil, err
 	}
 
+	var pkg types.Package
+
 	for _, d := range repoMd.Data {
 		if d.Type == "primary" {
 			primaryURL, err := utils.UrlJoinPath(fetchURL, d.Location.Href)
@@ -391,7 +393,6 @@ func (r *Repo) FetchPackageFromList(ctx context.Context, httpClient *utils.HttpC
 				switch ty := tok.(type) {
 				case xml.StartElement:
 					if ty.Name.Local == "package" {
-						var pkg types.Package
 						if err = d.DecodeElement(&pkg, &ty); err != nil {
 							return nil, fmt.Errorf("error decoding item: %w", err)
 						}
