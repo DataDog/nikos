@@ -5,62 +5,39 @@
   vars:
     test_type: "{{ lookup('env', 'TEST_TYPE') }}"
   tasks:
-  - synchronize:
-      src: /opt/nikos
-      dest: /opt
-      archive: yes
-    become: true
+    - synchronize:
+        src: /opt/nikos
+        dest: /opt
+        archive: yes
+      become: true
 
-  - name: Create a directory if it does not exist
-    file:
-      path: /tmp/result
-      state: directory
-      mode: 0755
-    become: true
-    when: test_type == 'container'
+    - name: Create a directory if it does not exist
+      file:
+        path: /tmp/result
+        state: directory
+        mode: 0755
+      become: true
+      when: test_type == 'container'
 
-  - name: create build directory
-    file:
-      path: /tmp/debian-ca-certs
-      state: directory
-      mode: '0755'
-    when: test_type == 'container'
-
-  - name: copy Dockerfile
-    copy:
-      src: Dockerfile
-      dest: /tmp/debian-ca-certs
-      mode: '0644'
-    when: test_type == 'container'
-
-  - name: build container image
-    docker_image:
-      name: debian_ca_certs
-      source: build
-      build:
-        path: /tmp/debian-ca-certs
-      state: present
-    when: test_type == 'container'
-
-  - name: Create a debian container
-    community.general.docker_container:
-      name: debian
-      image: debian_ca_certs
-      env:
-        HOST_ETC: /host/etc
-      volumes:
-        - /etc/apt:/host/etc/apt:ro
-        - /etc/zypp/repos.d:/host/etc/zypp/repos.d:ro
-        - /etc/yum.repos.d:/host/etc/yum.repos.d:ro
-        - /etc/dnf:/host/etc/dnf:ro
-        - /etc/yum:/host/etc/yum:ro
-        - /etc/pki:/host/etc/pki:ro
-        - /etc/lsb-release:/host/etc/lsb-release:ro
-        - /etc/redhat-release:/host/etc/redhat-release:ro
-        - /etc/os-release:/host/etc/os-release:ro
-        - /etc/fedora-release:/host/etc/fedora-release:ro
-        - /opt/nikos:/opt/nikos:ro
-        - /tmp/result:/tmp/result
-      command: sleep 3600
-    become: true
-    when: test_type == 'container'
+    - name: Create a debian container
+      community.general.docker_container:
+        name: debian
+        image: ghcr.io/paulcacheux/nikos-debian-test:latest
+        env:
+          HOST_ETC: /host/etc
+        volumes:
+          - /etc/apt:/host/etc/apt:ro
+          - /etc/zypp/repos.d:/host/etc/zypp/repos.d:ro
+          - /etc/yum.repos.d:/host/etc/yum.repos.d:ro
+          - /etc/dnf:/host/etc/dnf:ro
+          - /etc/yum:/host/etc/yum:ro
+          - /etc/pki:/host/etc/pki:ro
+          - /etc/lsb-release:/host/etc/lsb-release:ro
+          - /etc/redhat-release:/host/etc/redhat-release:ro
+          - /etc/os-release:/host/etc/os-release:ro
+          - /etc/fedora-release:/host/etc/fedora-release:ro
+          - /opt/nikos:/opt/nikos:ro
+          - /tmp/result:/tmp/result
+        command: sleep 3600
+      become: true
+      when: test_type == 'container'
