@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/DataDog/nikos/extract"
 	"github.com/DataDog/nikos/rpm/dnfv2/backend"
@@ -32,6 +33,9 @@ func computePkgKernel(pkg *repo.PkgInfo) string {
 
 func DefaultPkgMatcher(pkgName, kernelVersion string) repo.PkgMatchFunc {
 	return func(pkg *repo.PkgInfo) bool {
+		if strings.Contains(pkg.Name, "kernel") {
+			fmt.Println(pkg)
+		}
 		return pkg.Name == pkgName && kernelVersion == computePkgKernel(pkg)
 	}
 }
