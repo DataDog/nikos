@@ -34,7 +34,7 @@ func computePkgKernel(pkg *repo.PkgInfo) string {
 func DefaultPkgMatcher(pkgName, kernelVersion string) repo.PkgMatchFunc {
 	return func(pkg *repo.PkgInfo) bool {
 		if strings.Contains(pkg.Name, "kernel") {
-			fmt.Println(pkg)
+			fmt.Println(pkg, kernelVersion, computePkgKernel(pkg))
 		}
 		return pkg.Name == pkgName && kernelVersion == computePkgKernel(pkg)
 	}
