@@ -101,7 +101,7 @@ type PkgInfoHeader struct {
 
 type PkgMatchFunc = func(*PkgInfoHeader) bool
 
-func (r *Repo) createHTTPClient(cache *utils.HttpClientCache) (*utils.HttpClient, error) {
+func (r *Repo) createHTTPClient() (*utils.HttpClient, error) {
 	var certs []tls.Certificate
 	if r.SSLClientCert != "" || r.SSLClientKey != "" {
 		cert, err := tls.LoadX509KeyPair(utils.HostEtcJoin(r.SSLClientCert), utils.HostEtcJoin(r.SSLClientKey))
@@ -134,11 +134,11 @@ func (r *Repo) createHTTPClient(cache *utils.HttpClientCache) (*utils.HttpClient
 	}
 
 	repoID := uintptr(unsafe.Pointer(r))
-	return utils.NewHttpClientFromInner(inner, cache, repoID), nil
+	return utils.NewHttpClientFromInner(inner, repoID), nil
 }
 
-func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc, cache *utils.HttpClientCache) (*PkgInfo, []byte, error) {
-	httpClient, err := r.createHTTPClient(cache)
+func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
+	httpClient, err := r.createHTTPClient()
 	if err != nil {
 		return nil, nil, err
 	}

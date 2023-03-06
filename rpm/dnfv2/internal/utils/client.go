@@ -7,41 +7,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sync"
 
 	"github.com/DataDog/nikos/rpm/dnfv2/types"
 )
-
-type HttpClientCacheEntry struct {
-	repoID uintptr
-	url    string
-}
-
-type HttpClientCache struct {
-	sync.RWMutex
-	cache map[HttpClientCacheEntry]FetchedData
-}
-
-func NewHttpClientCache() *HttpClientCache {
-	return &HttpClientCache{
-		cache: make(map[HttpClientCacheEntry]FetchedData),
-	}
-}
-
-func (c *HttpClientCache) Get(repoID uintptr, url string) (FetchedData, bool) {
-	c.RLock()
-	defer c.RUnlock()
-
-	content, ok := c.cache[HttpClientCacheEntry{repoID, url}]
-	return content, ok
-}
-
-func (c *HttpClientCache) Set(repoID uintptr, url string, content FetchedData) {
-	c.Lock()
-	defer c.Unlock()
-
-	c.cache[HttpClientCacheEntry{repoID, url}] = content
-}
 
 type FetchedData struct {
 	data    []byte
@@ -67,54 +35,48 @@ func (d *FetchedData) Data() ([]byte, error) {
 
 type HttpClient struct {
 	inner  *http.Client
-	cache  *HttpClientCache
 	repoID uintptr
 }
 
-func NewHttpClientFromInner(inner *http.Client, cache *HttpClientCache, repoID uintptr) *HttpClient {
-	return &HttpClient{inner: inner, cache: cache, repoID: repoID}
+func NewHttpClientFromInner(inner *http.Client, repoID uintptr) *HttpClient {
+	return &HttpClient{inner: inner, repoID: repoID}
 }
 
 func (hc *HttpClient) GetWithChecksum(ctx context.Context, url string, checksum *types.Checksum) (FetchedData, error) {
-	content, ok := hc.cache.Get(hc.repoID, url)
-
-	if !ok {
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-		if err != nil {
-			return FetchedData{}, err
-		}
-
-		resp, err := hc.inner.Do(req)
-		if err != nil {
-			return FetchedData{}, err
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			return FetchedData{}, fmt.Errorf("bad status for `%s`: %s", url, resp.Status)
-		}
-
-		gzipped := UrlHasSuffix(url, ".gz")
-		readContent, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return FetchedData{}, err
-		}
-		content = FetchedData{data: readContent, gzipped: gzipped}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return FetchedData{}, err
 	}
+
+	resp, err := hc.inner.Do(req)
+	if err != nil {
+		return FetchedData{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return FetchedData{}, fmt.Errorf("bad status for `%s`: %s", url, resp.Status)
+	}
+
+	gzipped := UrlHasSuffix(url, ".gz") || resp.Header.Get("Content-Encoding") == "gzip"
+	readContent, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return FetchedData{}, err
+	}
+	content := FetchedData{data: readContent, gzipped: gzipped}
 
 	if checksum != nil {
 		contentReader, err := content.Reader()
-		defer contentReader.Close()
 		if err != nil {
 			return FetchedData{}, err
 		}
+		defer contentReader.Close()
 
 		if err := verifyChecksum(contentReader, checksum); err != nil {
 			return FetchedData{}, err
 		}
 	}
 
-	hc.cache.Set(hc.repoID, url, content)
 	return content, nil
 }
 
