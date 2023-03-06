@@ -27,7 +27,7 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 	}
 	pkgNevra += "-devel"
 
-	pkgMatcher := func(pkg *repo.PkgInfo) bool {
+	pkgMatcher := func(pkg *repo.PkgInfoHeader) bool {
 		return pkg.Name == pkgNevra && kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) && pkg.Arch == b.target.Uname.Machine
 	}
 

@@ -26,18 +26,18 @@ func NewBackend(release string, reposDir string) (*backend.Backend, error) {
 	return b, nil
 }
 
-func computePkgKernel(pkg *repo.PkgInfo) string {
+func computePkgKernel(pkg *repo.PkgInfoHeader) string {
 	return fmt.Sprintf("%s-%s.%s", pkg.Version.Ver, pkg.Version.Rel, pkg.Arch)
 }
 
 func DefaultPkgMatcher(pkgName, kernelVersion string) repo.PkgMatchFunc {
-	return func(pkg *repo.PkgInfo) bool {
+	return func(pkg *repo.PkgInfoHeader) bool {
 		return pkg.Name == pkgName && kernelVersion == computePkgKernel(pkg)
 	}
 }
 
 func ExtractPackage(pkg *repo.PkgInfo, data []byte, directory string, target *types.Target, logger types.Logger) error {
-	pkgFileName := fmt.Sprintf("%s-%s.rpm", pkg.Name, computePkgKernel(pkg))
+	pkgFileName := fmt.Sprintf("%s-%s.rpm", pkg.Header.Name, computePkgKernel(&pkg.Header))
 	pkgFileName = path.Join(directory, pkgFileName)
 	if err := os.WriteFile(pkgFileName, data, 0o644); err != nil {
 		return err

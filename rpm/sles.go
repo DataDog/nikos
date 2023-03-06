@@ -20,7 +20,7 @@ type SLESBackend struct {
 
 func (b *SLESBackend) GetKernelHeaders(directory string) error {
 	pkgNevra := "kernel" + b.flavour + "-devel"
-	pkgMatcher := func(pkg *repo.PkgInfo) bool {
+	pkgMatcher := func(pkg *repo.PkgInfoHeader) bool {
 		return pkg.Name == pkgNevra && b.kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) && pkg.Arch == b.target.Uname.Machine
 	}
 
