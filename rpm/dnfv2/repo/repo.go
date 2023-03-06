@@ -17,12 +17,12 @@ import (
 	"strings"
 	"unsafe"
 
-	xmlite "github.com/paulcacheux/xmlite/xml"
 	"golang.org/x/crypto/openpgp"
 	"gopkg.in/ini.v1"
 
 	"github.com/DataDog/nikos/rpm/dnfv2/internal/utils"
 	"github.com/DataDog/nikos/rpm/dnfv2/types"
+	"github.com/DataDog/nikos/xmlite"
 	"github.com/hashicorp/go-multierror"
 	"github.com/sassoftware/go-rpmutils"
 )

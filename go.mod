@@ -10,7 +10,6 @@ require (
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/paulcacheux/xmlite v0.1.0
 	github.com/sassoftware/go-rpmutils v0.2.0
 	github.com/shirou/gopsutil/v3 v3.23.2
 	github.com/sirupsen/logrus v1.9.0
