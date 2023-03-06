@@ -2,6 +2,7 @@ package utils
 
 import (
 	"compress/gzip"
+	"context"
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/xml"
@@ -13,8 +14,8 @@ import (
 	"github.com/DataDog/nikos/rpm/dnfv2/types"
 )
 
-func GetAndUnmarshalXML[T any](httpClient *http.Client, url string, checksum *types.Checksum) (*T, error) {
-	resp, err := httpClient.Get(url)
+func GetAndChecksum(ctx context.Context, httpClient *HttpClient, url string, checksum *types.Checksum) ([]byte, error) {
+	resp, err := httpClient.Get(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -43,6 +44,14 @@ func GetAndUnmarshalXML[T any](httpClient *http.Client, url string, checksum *ty
 		if err := verifyChecksum(content, checksum); err != nil {
 			return nil, err
 		}
+	}
+	return content, nil
+}
+
+func GetAndUnmarshalXML[T any](ctx context.Context, httpClient *HttpClient, url string, checksum *types.Checksum) (*T, error) {
+	content, err := GetAndChecksum(ctx, httpClient, url, checksum)
+	if err != nil {
+		return nil, err
 	}
 
 	var res T

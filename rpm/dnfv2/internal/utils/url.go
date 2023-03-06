@@ -24,3 +24,5 @@ func UrlHasSuffix(rawUrl string, suffix string) bool {
 
 	return strings.HasSuffix(parsed.Path, suffix)
 }
+
+
