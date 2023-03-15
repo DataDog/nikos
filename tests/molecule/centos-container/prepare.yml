@@ -7,13 +7,17 @@
       become: true
 
     - name: Set up Docker repository
-      shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+
+    - name: Refresh cache
+      shell: yum clean expire-cache
       become: true
 
     - name: Install Docker
       package:
         name: "{{ item }}"
-        state: latest
       with_items:
         - libseccomp
         - docker-ce
