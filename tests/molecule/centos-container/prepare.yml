@@ -38,10 +38,6 @@
       with_items: "{{ repos.files }}"
       when: ansible_distribution_major_version > '7'
 
-    - name: Refresh cache
-      shell: yum clean expire-cache
-      become: true
-
     - name: Install Docker
       yum:
         name:
