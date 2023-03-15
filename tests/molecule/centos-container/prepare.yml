@@ -49,8 +49,6 @@
           - docker-ce
           - docker-ce-cli
           - containerd.io
-          - docker-buildx-plugin
-          - docker-compose-plugin
       become: true
 
     - name: Install Docker
