@@ -2,76 +2,71 @@
 - name: Prepare
   hosts: all
   tasks:
-  - name: Disable SElinux
-    shell: setenforce 0
-    become: true
+    - name: Disable SElinux
+      shell: setenforce 0
+      become: true
 
-  - name: Install Docker
-    package:
-      name: "{{ item }}"
-    become: true
-    with_items:
-    - docker
-    - python-requests
-    - python-docker
-    when: ansible_distribution_major_version == '7'
+    - name: Set up Docker repository
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+      become: true
 
-  - name: Set up Docker repository
-    shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-    become: true
-    when: ansible_distribution_major_version > '7'
+    - name: Find all repo files
+      find:
+        paths: /etc/yum.repos.d/
+        patterns: "CentOS*.repo"
+      become: true
+      register: repos
+      when: ansible_distribution_major_version > '7'
 
-  - name: Find all repo files
-    find:
-      paths: /etc/yum.repos.d/
-      patterns: "CentOS*.repo"
-    become: true
-    register: repos
-    when: ansible_distribution_major_version > '7'
+    - name: Comment out mirrorlists
+      replace:
+        path: "{{ item.path }}"
+        regexp: "mirrorlist"
+        replace: "#mirrorlist"
+      become: true
+      with_items: "{{ repos.files }}"
+      when: ansible_distribution_major_version > '7'
 
-  - name: Comment out mirrorlists
-    replace:
-      path: "{{ item.path }}"
-      regexp: 'mirrorlist'
-      replace: '#mirrorlist'
-    become: true
-    with_items: "{{ repos.files }}"
-    when: ansible_distribution_major_version > '7'
+    - name: Use vault instead of mirror
+      replace:
+        path: "{{ item.path }}"
+        regexp: "#baseurl=http://mirror.centos.org"
+        replace: "baseurl=http://vault.centos.org"
+      become: true
+      with_items: "{{ repos.files }}"
+      when: ansible_distribution_major_version > '7'
 
-  - name: Use vault instead of mirror
-    replace:
-      path: "{{ item.path }}"
-      regexp: '#baseurl=http://mirror.centos.org'
-      replace: 'baseurl=http://vault.centos.org'
-    become: true
-    with_items: "{{ repos.files }}"
-    when: ansible_distribution_major_version > '7'
+    - name: Install Docker
+      yum:
+        name:
+          - libseccomp
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: latest
+      become: true
 
-  - name: Install Docker
-    package:
-      name: "{{ item }}"
-      state: latest
-    with_items:
-    - docker-ce
-    - docker-ce-cli
-    - containerd.io
-    - libseccomp
-    become: true
-    when: ansible_distribution_major_version > '7'
+    - name: Install Docker
+      package:
+        name: python-docker
+      become: true
+      when: ansible_distribution_major_version == '7'
 
-  - name: Install pip
-    package:
-      name: python3-pip
-    become: true
-    when: ansible_distribution_major_version > '7'
+    - name: Install pip
+      package:
+        name: python3-pip
+      become: true
+      when: ansible_distribution_major_version > '7'
 
-  - name: Install docker-py
-    shell: 'pip3 install docker'
-    become: true
-    when: ansible_distribution_major_version > '7'
+    - name: Install docker-py
+      shell: "pip3 install docker"
+      become: true
+      when: ansible_distribution_major_version > '7'
 
-  - name: Start docker
-    service:
-      name: docker
-      state: started
-    become: true
+    - name: Start docker
+      service:
+        name: docker
+        state: started
+      become: true
