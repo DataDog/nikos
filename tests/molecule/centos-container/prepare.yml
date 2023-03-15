@@ -10,29 +10,6 @@
       shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
       become: true
 
-    - name: Find all repo files
-      find:
-        paths: /etc/yum.repos.d/
-        patterns: "CentOS*.repo"
-      become: true
-      register: repos
-
-    - name: Comment out mirrorlists
-      replace:
-        path: "{{ item.path }}"
-        regexp: "mirrorlist"
-        replace: "#mirrorlist"
-      become: true
-      with_items: "{{ repos.files }}"
-
-    - name: Use vault instead of mirror
-      replace:
-        path: "{{ item.path }}"
-        regexp: "#baseurl=http://mirror.centos.org"
-        replace: "baseurl=http://vault.centos.org"
-      become: true
-      with_items: "{{ repos.files }}"
-
     - name: Install Docker
       package:
         name: "{{ item }}"
