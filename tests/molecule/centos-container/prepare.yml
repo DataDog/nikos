@@ -45,6 +45,7 @@
           - docker-ce
           - docker-ce-cli
           - containerd.io
+        state: latest
       become: true
 
     - name: Install Docker
