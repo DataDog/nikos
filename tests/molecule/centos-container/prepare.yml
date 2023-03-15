@@ -17,20 +17,15 @@
       become: true
 
     - name: Install Docker
-      package:
-        name: "{{ item }}"
-      with_items:
-        - libseccomp
-        - docker-ce
-        - docker-ce-cli
-        - containerd.io
-        - docker-buildx-plugin
-        - docker-compose-plugin
-      become: true
-
-    - name: Install pip
-      package:
-        name: python3-pip
+      yum:
+        name:
+          - libseccomp
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+          - python3-pip
       become: true
 
     - name: Install docker-py
