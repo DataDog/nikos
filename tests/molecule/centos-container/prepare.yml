@@ -25,8 +25,13 @@
           - containerd.io
           - docker-buildx-plugin
           - docker-compose-plugin
-          - python3-pip
       become: true
+
+    - name: Install pip
+      package:
+        name: python3-pip
+      become: true
+      when: ansible_distribution_major_version > '7'
 
     - name: Install docker-py
       shell: "pip3 install docker"
