@@ -3,8 +3,6 @@ dependency:
   name: galaxy
 driver:
   name: vagrant
-  provider:
-    name: libvirt
 platforms:
   - name: centos7.1804.02
     box: centos/7

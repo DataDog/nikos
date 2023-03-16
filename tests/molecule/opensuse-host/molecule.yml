@@ -3,21 +3,15 @@ dependency:
   name: galaxy
 driver:
   name: vagrant
-  provider:
-    name: libvirt
 platforms:
   - name: opensuse15
     box: roboxes/opensuse15
     memory: 512
     cpus: 1
-    provider_options:
-      disk_bus: '"sata"'
   - name: opensuse42
     box: generic/opensuse42
     memory: 512
     cpus: 1
-    provider_options:
-      disk_bus: '"sata"'
 provisioner:
   name: ansible
   env:

@@ -17,7 +17,17 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.18'
+          go-version: "1.18"
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Build nikos
         run: bash .ci_build/build_install_nikos.sh .
@@ -28,8 +38,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: nikos-binary
-          path: /opt/nikos/bin/nikos
+          name: nikos-archive
+          path: /opt/nikos
           retention-days: 1
 
   verify-glibc:
@@ -40,8 +50,49 @@ jobs:
       - name: Download the nikos artifact
         uses: actions/download-artifact@v3
         with:
-          name: nikos-binary
-          path: /opt/nikos/bin
+          name: nikos-archive
+          path: /opt/nikos
 
       - name: Fail if there are references to GLIBC >= 2.18
         run: objdump -p /opt/nikos/bin/nikos | egrep -zqv 'GLIBC_2\.(1[8-9]|[2-9][0-9])'
+
+  molecule-tests:
+    name: Molecule tests
+    needs: build
+    runs-on: macos-12
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ["fedora", "centos", "opensuse", "debian", "ubuntu", "oracle"]
+        test_type: ["host", "container"]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/Library/Caches/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('.ci_build/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install pip dependencies
+        run: pip install -r .ci_build/requirements.txt
+
+      - name: Download the nikos artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: nikos-archive
+          path: tests/molecule/resources/playbooks/nikos-archive
+
+      - name: Set nikos binary executable
+        run: |
+          chmod +x tests/molecule/resources/playbooks/nikos-archive/bin/nikos
+
+      - name: Run molecule test
+        working-directory: tests
+        run: molecule test -s ${{ matrix.platform }}-${{ matrix.test_type }}

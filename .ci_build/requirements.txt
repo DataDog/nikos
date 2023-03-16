@@ -2,4 +2,3 @@ ansible
 molecule
 molecule-vagrant
 python-vagrant
-libvirt-python
