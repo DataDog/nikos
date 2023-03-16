@@ -89,6 +89,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      - name: Cache Vagrant boxes
+        uses: actions/cache@v3
+        with:
+          path: ~/.vagrant.d/boxes
+          key: ${{ runner.os }}-vagrant-${{ hashFiles('tests/molecule/**/molecule.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-vagrant-
+
       - name: Install pip dependencies
         run: pip install -r .ci_build/requirements.txt
 
