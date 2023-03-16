@@ -73,6 +73,12 @@ var DownloadCmd = &cobra.Command{
 				backend, err = rpm.NewCentOSBackend(&target, rpmReposDir, logger)
 			case "oracle", "ol":
 				backend, err = rpm.NewRedHatBackend(&target, rpmReposDir, logger)
+			case "amazon":
+				if target.Distro.Release == "2022" {
+					backend, err = rpm.NewAmazonLinux2022Backend(&target, rpmReposDir, logger)
+				} else {
+					backend, err = rpm.NewRedHatBackend(&target, rpmReposDir, logger)
+				}
 			default:
 				err = fmt.Errorf("unsupported RedHat based distribution '%s'", target.Distro.Display)
 			}
