@@ -64,7 +64,7 @@ jobs:
       fail-fast: false
       matrix:
         platform: ["amazon-linux"]
-        test_type: ["host"]
+        test_type: ["host", "container"]
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3

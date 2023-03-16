@@ -1,0 +1,20 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+platforms:
+  - name: amzn2
+    box: gbailey/amzn2
+    memory: 512
+    cpus: 1
+provisioner:
+  name: ansible
+  env:
+    TEST_TYPE: "container"
+    NIKOS_PREFIX: sudo docker exec -ti debian
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    verify: ../resources/playbooks/verify.yml
+verifier:
+  name: ansible
