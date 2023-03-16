@@ -63,7 +63,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ["fedora", "centos", "opensuse", "debian", "ubuntu", "oracle"]
+        platform:
+          [
+            "fedora",
+            "centos",
+            "opensuse",
+            "debian",
+            "ubuntu",
+            "oracle",
+            "amazon-linux",
+          ]
         test_type: ["host", "container"]
     steps:
       - name: Checkout source code
