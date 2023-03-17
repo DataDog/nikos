@@ -161,7 +161,9 @@ func (b *Backend) createGpgVerifier() (*pgp.GoVerifier, error) {
 		}
 	}
 
-	gpgVerifier.InitKeyring()
+	if err := gpgVerifier.InitKeyring(); err != nil {
+		return nil, err
+	}
 	return gpgVerifier, nil
 }
 
