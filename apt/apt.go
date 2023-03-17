@@ -147,19 +147,31 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 	return packageDeps, b.extractPackage(outputFile, directory)
 }
 
+func (b *Backend) createGpgVerifier() (*pgp.GoVerifier, error) {
+	gpgVerifier := &pgp.GoVerifier{}
+
+	for _, searchPattern := range []string{types.HostEtc("apt", "trusted.gpg.d", "*.gpg"), "/usr/share/keyrings/*.gpg"} {
+		keyrings, err := filepath.Glob(searchPattern)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find valid apt keyrings: %w", err)
+		}
+		for _, keyring := range keyrings {
+			b.logger.Infof("Adding keyring from: %s", keyring)
+			gpgVerifier.AddKeyring(keyring)
+		}
+	}
+
+	gpgVerifier.InitKeyring()
+	return gpgVerifier, nil
+}
+
 func (b *Backend) GetKernelHeaders(directory string) error {
 	downloader := http.NewDownloader(0, 1, nil)
 
-	gpgVerifier := &pgp.GoVerifier{}
-	keyrings, err := filepath.Glob(types.HostEtc("apt", "trusted.gpg.d", "*"))
+	gpgVerifier, err := b.createGpgVerifier()
 	if err != nil {
-		return fmt.Errorf("failed to find valid apt keyrings: %w", err)
+		return err
 	}
-	for _, keyring := range keyrings {
-		b.logger.Infof("Adding keyring from: %s", keyring)
-		gpgVerifier.AddKeyring(keyring)
-	}
-	gpgVerifier.InitKeyring()
 
 	collectionFactory := deb.NewCollectionFactory(b.db)
 
