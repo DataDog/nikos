@@ -156,6 +156,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 		return fmt.Errorf("failed to find valid apt keyrings: %w", err)
 	}
 	for _, keyring := range keyrings {
+		b.logger.Infof("Adding keyring from: %s", keyring)
 		gpgVerifier.AddKeyring(keyring)
 	}
 	gpgVerifier.InitKeyring()
