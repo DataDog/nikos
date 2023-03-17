@@ -151,6 +151,15 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	downloader := http.NewDownloader(0, 1, nil)
 
 	gpgVerifier := &pgp.GoVerifier{}
+	keyrings, err := filepath.Glob(types.HostEtc("apt", "trusted.gpg.d"))
+	if err != nil {
+		return fmt.Errorf("failed to find valid apt keyrings: %w", err)
+	}
+	for _, keyring := range keyrings {
+		gpgVerifier.AddKeyring(keyring)
+	}
+	gpgVerifier.InitKeyring()
+
 	collectionFactory := deb.NewCollectionFactory(b.db)
 
 	kernelRelease := b.target.Uname.Kernel
