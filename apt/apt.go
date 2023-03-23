@@ -150,7 +150,7 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 func (b *Backend) createGpgVerifier() (*pgp.GoVerifier, error) {
 	gpgVerifier := &pgp.GoVerifier{}
 
-	for _, searchPattern := range []string{types.HostEtc("apt", "trusted.gpg.d", "*.gpg"), "/usr/share/keyrings/*.gpg"} {
+	for _, searchPattern := range []string{types.HostEtc("apt", "trusted.gpg"), types.HostEtc("apt", "trusted.gpg.d", "*.gpg"), "/usr/share/keyrings/*.gpg"} {
 		keyrings, err := filepath.Glob(searchPattern)
 		if err != nil {
 			return nil, fmt.Errorf("failed to find valid apt keyrings: %w", err)
