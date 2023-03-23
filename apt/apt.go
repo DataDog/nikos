@@ -16,6 +16,7 @@ import (
 	"github.com/DataDog/aptly/database/goleveldb"
 	"github.com/DataDog/aptly/deb"
 	"github.com/DataDog/aptly/http"
+	"github.com/DataDog/aptly/pgp"
 	"github.com/arduino/go-apt-client"
 	"github.com/xor-gate/ar"
 
@@ -61,7 +62,7 @@ func (b *Backend) extractPackage(pkg, directory string) error {
 	return errors.New("failed to decompress deb")
 }
 
-func (b *Backend) downloadPackage(downloader aptly.Downloader, factory *deb.CollectionFactory, query *deb.FieldQuery, directory string) (*deb.PackageDependencies, error) {
+func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Verifier, factory *deb.CollectionFactory, query *deb.FieldQuery, directory string) (*deb.PackageDependencies, error) {
 	var packageURL *url.URL
 	var packageDeps *deb.PackageDependencies
 
@@ -76,7 +77,7 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, factory *deb.Coll
 		repo.SkipComponentCheck = true
 
 		stanza.Clear()
-		if err := repo.FetchBuffered(stanza, downloader, nil); err != nil {
+		if err := repo.FetchBuffered(stanza, downloader, verifier); err != nil {
 			b.logger.Debugf("Error fetching repo: %s", err)
 			return err
 		}
@@ -146,11 +147,33 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, factory *deb.Coll
 	return packageDeps, b.extractPackage(outputFile, directory)
 }
 
+func (b *Backend) createGpgVerifier() (*pgp.GoVerifier, error) {
+	gpgVerifier := &pgp.GoVerifier{}
+
+	for _, searchPattern := range []string{types.HostEtc("apt", "trusted.gpg"), types.HostEtc("apt", "trusted.gpg.d", "*.gpg"), "/usr/share/keyrings/*.gpg"} {
+		keyrings, err := filepath.Glob(searchPattern)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find valid apt keyrings: %w", err)
+		}
+		for _, keyring := range keyrings {
+			b.logger.Infof("Adding keyring from: %s", keyring)
+			gpgVerifier.AddKeyring(keyring)
+		}
+	}
+
+	if err := gpgVerifier.InitKeyring(); err != nil {
+		return nil, err
+	}
+	return gpgVerifier, nil
+}
+
 func (b *Backend) GetKernelHeaders(directory string) error {
 	downloader := http.NewDownloader(0, 1, nil)
 
-	// TODO(lebauce) fix GPG verifier
-	// gpgVerifier := pgp.NewGpgVerifier(pgp.GPGDefaultFinder())
+	gpgVerifier, err := b.createGpgVerifier()
+	if err != nil {
+		return err
+	}
 
 	collectionFactory := deb.NewCollectionFactory(b.db)
 
@@ -162,7 +185,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	}
 	b.logger.Infof("Looking for %s", query.Value)
 
-	dependencies, err := b.downloadPackage(downloader, collectionFactory, query, directory)
+	dependencies, err := b.downloadPackage(downloader, gpgVerifier, collectionFactory, query, directory)
 	if err != nil {
 		return err
 	}
@@ -181,7 +204,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 					Value:    depName,
 				}
 
-				_, err = b.downloadPackage(downloader, collectionFactory, query, directory)
+				_, err = b.downloadPackage(downloader, gpgVerifier, collectionFactory, query, directory)
 				if err != nil {
 					b.logger.Warnf("Failed to download dependent package %s", depName)
 				}
