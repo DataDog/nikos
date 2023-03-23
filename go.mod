@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	cloud.google.com/go/storage v1.30.0
-	github.com/DataDog/aptly v1.5.1-0.20230323140931-c2aa7a30e505
+	github.com/DataDog/aptly v1.5.1-0.20230323141905-90813dde9c62
 	github.com/DataDog/gopsutil v1.2.2
 	github.com/DataDog/zstd v1.5.2
 	github.com/acobaugh/osrelease v0.1.0
