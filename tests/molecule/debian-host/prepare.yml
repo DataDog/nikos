@@ -4,6 +4,7 @@
   tasks:
     - name: Switch to archive
       shell: |
+        echo "Acquire::Check-Valid-Until false;" | sudo tee -a /etc/apt/apt.conf.d/nikos-ignore-expired
         echo "deb http://archive.debian.org/ jessie/updates main contrib non-free" | sudo tee -a /etc/apt/sources.list
         echo "deb http://archive.debian.org/debian/ jessie main" | sudo tee -a /etc/apt/sources.list
         echo "deb http://archive.debian.org/debian/ jessie-backports main" | sudo tee -a /etc/apt/sources.list
