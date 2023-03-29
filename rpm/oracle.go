@@ -34,7 +34,7 @@ func (b *OracleBackend) GetKernelHeaders(directory string) error {
 func (b *OracleBackend) Close() {
 }
 
-func NewOracleBackend(target *types.Target, reposDir string, logger types.Logger) (*RedHatBackend, error) {
+func NewOracleBackend(target *types.Target, reposDir string, logger types.Logger) (*OracleBackend, error) {
 	b, err := dnfv2.NewBackend(target.Distro.Release, reposDir)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func NewOracleBackend(target *types.Target, reposDir string, logger types.Logger
 		}
 	}
 
-	return &RedHatBackend{
+	return &OracleBackend{
 		target:     target,
 		logger:     logger,
 		dnfBackend: b,
