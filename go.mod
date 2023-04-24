@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/storage v1.30.1
 	github.com/DataDog/aptly v1.5.1
 	github.com/DataDog/gopsutil v1.2.2
-	github.com/DataDog/zstd v1.5.2
+	github.com/DataDog/zstd v1.5.5
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/hashicorp/go-multierror v1.1.1
