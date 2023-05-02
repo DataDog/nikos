@@ -35,18 +35,18 @@
     - name: Install pip
       shell: "curl -O https://bootstrap.pypa.io/pip/2.7/get-pip.py && sudo -E python get-pip.py"
       become: true
-      when: ansible_distribution_release == 'jessie' or  ansible_distribution_release == 'stretch'
+      when: ansible_distribution_release == 'stretch'
 
     - name: Install docker-py
       shell: "pip install docker"
       become: true
-      when: ansible_distribution_release == 'jessie' or  ansible_distribution_release == 'stretch'
+      when: ansible_distribution_release == 'stretch'
 
     - name: Install docker-py
       package:
         name: python3-docker
       become: true
-      when: ansible_distribution_release != 'jessie' or  ansible_distribution_release == 'stretch'
+      when: ansible_distribution_release == 'stretch'
 
     - name: Start docker
       service:
