@@ -2,6 +2,14 @@
 - name: Prepare
   hosts: all
   tasks:
+    - name: Switch to archive
+      shell: |
+        sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list
+        sed -i 's/security.debian.org/archive.debian.org/g' /etc/apt/sources.list
+        sed -i '/stretch-updates/d' /etc/apt/sources.list
+      become: true
+      when: ansible_distribution_release == 'stretch'
+
     - name: Install software-properties-common
       shell: "sudo apt-get install -y -o Acquire::https::Verify-Peer=false software-properties-common"
       become: true
