@@ -19,7 +19,7 @@ platforms:
 provisioner:
   name: ansible
   env:
-    TEST_TYPE: 'host'
+    TEST_TYPE: "host"
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml
