@@ -11,7 +11,7 @@ require (
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/sassoftware/go-rpmutils v0.2.0
-	github.com/shirou/gopsutil/v3 v3.23.7
+	github.com/shirou/gopsutil/v3 v3.23.8
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.4
@@ -71,8 +71,8 @@ require (
 	github.com/smira/go-xz v0.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20190923125748-758128399b1d // indirect
-	github.com/tklauser/go-sysconf v0.3.11 // indirect
-	github.com/tklauser/numcpus v0.6.0 // indirect
+	github.com/tklauser/go-sysconf v0.3.12 // indirect
+	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
