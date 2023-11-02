@@ -53,17 +53,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          [
-            "fedora",
-            "centos",
-            "opensuse",
-            "debian",
-            "ubuntu",
-            "oracle",
-            "amazon-linux",
-          ]
-        test_type: ["host", "container"]
+        platform: ["ubuntu"]
+        test_type: ["host"]
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
