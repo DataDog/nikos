@@ -53,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ["ubuntu"]
+        platform: ["fedora"]
         test_type: ["host"]
     steps:
       - name: Checkout source code
