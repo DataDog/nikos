@@ -46,15 +46,10 @@ jobs:
       - name: Fail if there are references to GLIBC >= 2.18
         run: objdump -p /opt/nikos/bin/nikos | egrep -zqv 'GLIBC_2\.(1[8-9]|[2-9][0-9])'
 
-  molecule-tests:
-    name: Molecule tests
+  tests-v2:
+    name: Tests V2
     needs: build
     runs-on: macos-12
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: ["fedora"]
-        test_type: ["host"]
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -72,12 +67,14 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: nikos-archive
-          path: tests/molecule/resources/playbooks/nikos-archive
+          path: .ci_build/nikos-archive
 
       - name: Set nikos binary executable
         run: |
-          chmod +x tests/molecule/resources/playbooks/nikos-archive/bin/nikos
+          chmod +x .ci_build/nikos-archive/bin/nikos
 
-      - name: Run molecule test
-        working-directory: tests
-        run: molecule test -s ${{ matrix.platform }}-${{ matrix.test_type }}
+      - name: Setup VM
+        working-directory: .ci_build
+        run: |
+          vagrant up
+          vagrant ssh -c /vagrant/setup.sh
