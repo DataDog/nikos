@@ -71,13 +71,8 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: "3.x"
-
-      - uses: actions/cache@v3
-        with:
-          path: ~/Library/Caches/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('.ci_build/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          cache: "pip"
+          cache-dependency-path: .ci_build/requirements.txt
 
       - name: Install pip dependencies
         run: pip install -r .ci_build/requirements.txt
