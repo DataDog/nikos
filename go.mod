@@ -3,7 +3,7 @@ module github.com/DataDog/nikos
 go 1.20
 
 require (
-	cloud.google.com/go/storage v1.33.0
+	cloud.google.com/go/storage v1.34.1
 	github.com/DataDog/aptly v1.5.3
 	github.com/DataDog/gopsutil v1.2.2
 	github.com/DataDog/zstd v1.5.5
