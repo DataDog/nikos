@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	cloud.google.com/go/storage v1.33.0
-	github.com/DataDog/aptly v1.5.2
+	github.com/DataDog/aptly v1.5.3
 	github.com/DataDog/gopsutil v1.2.2
 	github.com/DataDog/zstd v1.5.5
 	github.com/acobaugh/osrelease v0.1.0
