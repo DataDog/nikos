@@ -59,7 +59,7 @@ jobs:
   molecule-tests:
     name: Molecule tests
     needs: build
-    runs-on: macos-12
+    runs-on: macos-13
     strategy:
       fail-fast: false
       matrix:
@@ -75,6 +75,11 @@ jobs:
           ]
         test_type: ["host", "container"]
     steps:
+      - name: Install vagrant
+        run: |
+          brew install --cask virtualbox
+          brew install --cask vagrant
+
       - name: Checkout source code
         uses: actions/checkout@v4
 
