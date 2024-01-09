@@ -59,8 +59,6 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 	var packageURL *url.URL
 	var packageDeps *deb.PackageDependencies
 
-	stanza := make(deb.Stanza, 32)
-
 	for _, repoInfo := range b.repoCollection {
 		repo, err := deb.NewRemoteRepo(repoInfo.repoID, repoInfo.uri, repoInfo.distribution, repoInfo.components, []string{b.debArch}, false, false, false)
 		if err != nil {
@@ -71,8 +69,7 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 		b.logger.Debugf("Fetching repository: name=%s, distribution=%s, components=%v, arch=%v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
 		repo.SkipComponentCheck = true
 
-		stanza.Clear()
-		if err := repo.FetchBuffered(stanza, downloader, verifier); err != nil {
+		if err := repo.Fetch(downloader, verifier, false); err != nil {
 			b.logger.Debugf("Error fetching repo: %s", err)
 			return nil, err
 		}
@@ -80,7 +77,7 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 		b.logger.Debug("Downloading package indexes")
 		// factory is not used by DownloadPackageIndexes so we can use nil here
 		var factory *deb.CollectionFactory
-		if err := repo.DownloadPackageIndexes(nil, downloader, nil, factory, false); err != nil {
+		if err := repo.DownloadPackageIndexes(nil, downloader, nil, factory, false, false); err != nil {
 			b.logger.Debugf("Failed to download package indexes: %s", err)
 			return nil, err
 		}
@@ -157,7 +154,7 @@ func (b *Backend) createGpgVerifier() (*pgp.GoVerifier, error) {
 		}
 	}
 
-	if err := gpgVerifier.InitKeyring(); err != nil {
+	if err := gpgVerifier.InitKeyring(false); err != nil {
 		return nil, err
 	}
 	return gpgVerifier, nil
