@@ -64,8 +64,6 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 	var packageURL *url.URL
 	var packageDeps *deb.PackageDependencies
 
-	stanza := make(deb.Stanza, 32)
-
 	err := b.repoCollection.ForEach(func(repo *deb.RemoteRepo) error {
 		if packageURL != nil {
 			return nil
@@ -74,8 +72,7 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 		b.logger.Debugf("Fetching repository: name=%s, distribution=%s, components=%v, arch=%v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
 		repo.SkipComponentCheck = true
 
-		stanza.Clear()
-		if err := repo.FetchBuffered(stanza, downloader, verifier); err != nil {
+		if err := repo.Fetch(downloader, verifier); err != nil {
 			b.logger.Debugf("Error fetching repo: %s", err)
 			return err
 		}
