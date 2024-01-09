@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/DataDog/aptly/aptly"
-	"github.com/DataDog/aptly/deb"
-	"github.com/DataDog/aptly/http"
-	"github.com/DataDog/aptly/pgp"
+	"github.com/aptly-dev/aptly/aptly"
+	"github.com/aptly-dev/aptly/deb"
+	"github.com/aptly-dev/aptly/http"
+	"github.com/aptly-dev/aptly/pgp"
 	"github.com/xor-gate/ar"
 
 	"github.com/DataDog/nikos/extract"
