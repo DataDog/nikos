@@ -3,6 +3,7 @@
 // Extracted from https://github.com/arduino/go-apt-client
 // Fixes:
 // - fix option parsing when no component is provided
+// - remove io/ioutil usage
 
 package apt
 
@@ -10,7 +11,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -40,7 +41,6 @@ func parseAPTConfigLine(line string) *Repository {
 		return nil
 	}
 	fields := match[0]
-	//fmt.Printf("%+v\n", fields)
 	return &Repository{
 		Enabled:      fields[1] != "# ",
 		SourceRepo:   fields[2] == "deb-src",
@@ -53,7 +53,7 @@ func parseAPTConfigLine(line string) *Repository {
 }
 
 func parseAPTConfigFile(configPath string) (RepositoryList, error) {
-	data, err := ioutil.ReadFile(configPath)
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, fmt.Errorf("Reading %s: %s", configPath, err)
 	}
@@ -63,7 +63,6 @@ func parseAPTConfigFile(configPath string) (RepositoryList, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		repo := parseAPTConfigLine(line)
-		//fmt.Printf("%+v\n", repo)
 		if repo != nil {
 			repo.configFile = configPath
 			res = append(res, repo)
@@ -79,7 +78,7 @@ func parseAPTConfigFolder(folderPath string) (RepositoryList, error) {
 	sources := []string{filepath.Join(folderPath, "sources.list")}
 
 	sourcesFolder := filepath.Join(folderPath, "sources.list.d")
-	list, err := ioutil.ReadDir(sourcesFolder)
+	list, err := os.ReadDir(sourcesFolder)
 	if err != nil {
 		return nil, fmt.Errorf("Reading %s folder: %s", sourcesFolder, err)
 	}
