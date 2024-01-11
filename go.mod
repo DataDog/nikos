@@ -9,7 +9,6 @@ require (
 	github.com/DataDog/zstd v1.5.5
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/paulcacheux/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/sassoftware/go-rpmutils v0.2.0
 	github.com/shirou/gopsutil/v3 v3.23.12
 	github.com/sirupsen/logrus v1.9.3
