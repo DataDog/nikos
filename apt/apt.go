@@ -17,7 +17,7 @@ import (
 	"github.com/DataDog/aptly/deb"
 	"github.com/DataDog/aptly/http"
 	"github.com/DataDog/aptly/pgp"
-	"github.com/arduino/go-apt-client"
+	"github.com/paulcacheux/go-apt-client"
 	"github.com/xor-gate/ar"
 
 	"github.com/DataDog/nikos/extract"
