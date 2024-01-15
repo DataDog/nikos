@@ -17,7 +17,6 @@ import (
 	"github.com/DataDog/aptly/deb"
 	"github.com/DataDog/aptly/http"
 	"github.com/DataDog/aptly/pgp"
-	"github.com/arduino/go-apt-client"
 	"github.com/xor-gate/ar"
 
 	"github.com/DataDog/nikos/extract"
@@ -254,7 +253,7 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 
 	backend.repoCollection = deb.NewRemoteRepoCollection(backend.db)
 
-	repoList, err := apt.ParseAPTConfigFolder(aptConfigDir)
+	repoList, err := parseAPTConfigFolder(aptConfigDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse APT folder: %w", err)
 	}
@@ -263,7 +262,12 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 		if repo.Enabled && !repo.SourceRepo {
 			prefix := target.Distro.Display
 			repoID := fmt.Sprintf("%s-%d", prefix, i)
-			components := strings.Split(repo.Components, " ")
+
+			var components []string
+			if repo.Components != "" {
+				components = strings.Split(repo.Components, " ")
+			}
+
 			remoteRepo, err := deb.NewRemoteRepo(repoID, repo.URI, repo.Distribution, components, []string{debArch}, false, false, false)
 			if err != nil {
 				return nil, err
