@@ -263,6 +263,10 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 			continue
 		}
 
+		if isSignedByUnreachableKey(repo) {
+			continue
+		}
+
 		prefix := target.Distro.Display
 		repoID := fmt.Sprintf("%s-%d", prefix, i)
 
@@ -285,4 +289,27 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 	}
 
 	return backend, nil
+}
+
+func isSignedByUnreachableKey(repo *Repository) bool {
+	if repo.Options == "" {
+		return false
+	}
+
+	options := strings.Split(repo.Options, " ")
+	for _, opt := range options {
+		optName, optValue, found := strings.Cut(opt, "=")
+		if !found {
+			continue
+		}
+
+		if strings.ToLower(optName) == "signed-by" {
+			// if the key is not in `/etc/*` then we cannot reach it
+			if !strings.HasPrefix(optValue, "/etc") {
+				return true
+			}
+		}
+	}
+
+	return false
 }
