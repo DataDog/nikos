@@ -259,28 +259,57 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 	}
 
 	for i, repo := range repoList {
-		if repo.Enabled && !repo.SourceRepo {
-			prefix := target.Distro.Display
-			repoID := fmt.Sprintf("%s-%d", prefix, i)
-
-			var components []string
-			if repo.Components != "" {
-				components = strings.Split(repo.Components, " ")
-			}
-
-			remoteRepo, err := deb.NewRemoteRepo(repoID, repo.URI, repo.Distribution, components, []string{debArch}, false, false, false)
-			if err != nil {
-				return nil, err
-			}
-
-			if err := backend.repoCollection.Add(remoteRepo); err != nil {
-				backend.Close()
-				return nil, fmt.Errorf("failed to add collection: %w", err)
-			}
-
-			backend.logger.Debugf("Added repository '%s' %s %s %v %v", repoID, repo.URI, repo.Distribution, components, debArch)
+		if !repo.Enabled || repo.SourceRepo {
+			continue
 		}
+
+		if isSignedByUnreachableKey(repo) {
+			continue
+		}
+
+		prefix := target.Distro.Display
+		repoID := fmt.Sprintf("%s-%d", prefix, i)
+
+		var components []string
+		if repo.Components != "" {
+			components = strings.Split(repo.Components, " ")
+		}
+
+		remoteRepo, err := deb.NewRemoteRepo(repoID, repo.URI, repo.Distribution, components, []string{debArch}, false, false, false)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := backend.repoCollection.Add(remoteRepo); err != nil {
+			backend.Close()
+			return nil, fmt.Errorf("failed to add collection: %w", err)
+		}
+
+		backend.logger.Debugf("Added repository '%s' %s %s %v %v", repoID, repo.URI, repo.Distribution, components, debArch)
 	}
 
 	return backend, nil
+}
+
+func isSignedByUnreachableKey(repo *Repository) bool {
+	if repo.Options == "" {
+		return false
+	}
+
+	options := strings.Split(repo.Options, " ")
+	for _, opt := range options {
+		optName, optValue, found := strings.Cut(opt, "=")
+		if !found {
+			continue
+		}
+
+		if strings.ToLower(optName) == "signed-by" {
+			// if the key is not in `/etc/*` then we cannot reach it
+			if !strings.HasPrefix(optValue, "/etc") {
+				return true
+			}
+		}
+	}
+
+	return false
 }
