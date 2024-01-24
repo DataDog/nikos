@@ -8,12 +8,12 @@ driver:
 platforms:
   - name: oracle7
     box: generic/oracle7
-    memory: 512
+    memory: 1024
     cpus: 1
 provisioner:
   name: ansible
   env:
-    TEST_TYPE: 'host'
+    TEST_TYPE: "host"
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml

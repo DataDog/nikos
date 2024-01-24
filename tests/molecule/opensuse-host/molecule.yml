@@ -6,16 +6,16 @@ driver:
 platforms:
   - name: opensuse15
     box: roboxes/opensuse15
-    memory: 512
+    memory: 1024
     cpus: 1
   - name: opensuse42
     box: generic/opensuse42
-    memory: 512
+    memory: 1024
     cpus: 1
 provisioner:
   name: ansible
   env:
-    TEST_TYPE: 'host'
+    TEST_TYPE: "host"
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml

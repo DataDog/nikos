@@ -6,16 +6,16 @@ driver:
 platforms:
   - name: debian9
     box: roboxes/debian9
-    memory: 512
+    memory: 1024
     cpus: 1
   - name: debian10
     box: roboxes/debian10
-    memory: 512
+    memory: 1024
     cpus: 1
 provisioner:
   name: ansible
   env:
-    TEST_TYPE: 'container'
+    TEST_TYPE: "container"
     NIKOS_PREFIX: sudo docker exec -ti debian
   playbooks:
     converge: ../resources/playbooks/converge.yml
