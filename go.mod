@@ -18,7 +18,7 @@ require (
 	github.com/xor-gate/ar v0.0.0-20170530204233-5c72ae81e2b7
 	golang.org/x/crypto v0.18.0
 	golang.org/x/sys v0.16.0
-	google.golang.org/api v0.159.0
+	google.golang.org/api v0.161.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
