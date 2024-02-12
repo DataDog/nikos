@@ -16,8 +16,8 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 	github.com/xor-gate/ar v0.0.0-20170530204233-5c72ae81e2b7
-	golang.org/x/crypto v0.18.0
-	golang.org/x/sys v0.16.0
+	golang.org/x/crypto v0.19.0
+	golang.org/x/sys v0.17.0
 	google.golang.org/api v0.161.0
 	gopkg.in/ini.v1 v1.67.0
 )
@@ -86,7 +86,7 @@ require (
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/term v0.16.0 // indirect
+	golang.org/x/term v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
