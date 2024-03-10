@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -235,7 +234,7 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 		return nil, fmt.Errorf("unsupported architecture '%s'", target.Uname.Machine)
 	}
 
-	tmpDir, err := ioutil.TempDir("", "aptly-db")
+	tmpDir, err := os.MkdirTemp("", "aptly-db")
 	if err != nil {
 		return nil, err
 	}

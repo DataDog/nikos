@@ -2,7 +2,7 @@ package rpm
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -21,7 +21,7 @@ type CentOSBackend struct {
 
 func getRedhatRelease() (string, error) {
 	redhatReleasePath := types.HostEtc("redhat-release")
-	redhatRelease, err := ioutil.ReadFile(redhatReleasePath)
+	redhatRelease, err := os.ReadFile(redhatReleasePath)
 	if err != nil {
 		return "", fmt.Errorf("failed to read /etc/redhat-release: %w", err)
 	}

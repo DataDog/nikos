@@ -3,7 +3,6 @@ package types
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -76,7 +75,7 @@ func isWSL(kernel string) bool {
 	if _, err := os.Stat("/run/WSL"); err == nil {
 		return true
 	}
-	if f, err := ioutil.ReadFile("/proc/version"); err == nil && strings.Contains(string(f), "Microsoft") {
+	if f, err := os.ReadFile("/proc/version"); err == nil && strings.Contains(string(f), "Microsoft") {
 		return true
 	}
 	return false

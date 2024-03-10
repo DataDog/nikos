@@ -2,7 +2,6 @@ package wsl
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -19,7 +18,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	filename := b.target.Uname.Kernel + ".tar.gz"
 	url := fmt.Sprintf("https://codeload.github.com/microsoft/WSL2-Linux-Kernel/tar.gz/%s", b.target.Uname.Kernel)
 
-	tempfile, err := ioutil.TempFile("", "wsl-headers")
+	tempfile, err := os.CreateTemp("", "wsl-headers")
 	if err != nil {
 		return fmt.Errorf("failed to create temporary file for kernel headers: %w", err)
 	}
