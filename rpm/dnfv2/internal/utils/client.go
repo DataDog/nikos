@@ -34,12 +34,11 @@ func (d *FetchedData) Data() ([]byte, error) {
 }
 
 type HttpClient struct {
-	inner  *http.Client
-	repoID uintptr
+	inner *http.Client
 }
 
-func NewHttpClientFromInner(inner *http.Client, repoID uintptr) *HttpClient {
-	return &HttpClient{inner: inner, repoID: repoID}
+func NewHttpClientFromInner(inner *http.Client) *HttpClient {
+	return &HttpClient{inner: inner}
 }
 
 func (hc *HttpClient) GetWithChecksum(ctx context.Context, url string, checksum *types.Checksum) (FetchedData, error) {

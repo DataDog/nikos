@@ -15,7 +15,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"unsafe"
 
 	"golang.org/x/crypto/openpgp"
 	"gopkg.in/ini.v1"
@@ -133,8 +132,7 @@ func (r *Repo) createHTTPClient() (*utils.HttpClient, error) {
 		},
 	}
 
-	repoID := uintptr(unsafe.Pointer(r))
-	return utils.NewHttpClientFromInner(inner, repoID), nil
+	return utils.NewHttpClientFromInner(inner), nil
 }
 
 func (r *Repo) FetchPackage(ctx context.Context, pkgMatcher PkgMatchFunc) (*PkgInfo, []byte, error) {
