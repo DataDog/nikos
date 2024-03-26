@@ -7,17 +7,17 @@ platforms:
   - name: centos7.1804.02
     box: centos/7
     box_version: 1804.02
-    memory: 1024
+    memory: 256
     cpus: 1
   - name: centos7.1905.1
     box: centos/7
     box_version: 1905.1
-    memory: 1024
+    memory: 256
     cpus: 1
   - name: centos8.1905.1
     box: centos/8
     box_version: 1905.1
-    memory: 1024
+    memory: 256
     cpus: 1
 provisioner:
   name: ansible
