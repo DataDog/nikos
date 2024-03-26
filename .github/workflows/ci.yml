@@ -118,3 +118,8 @@ jobs:
       - name: Run molecule test
         working-directory: tests
         run: molecule test -s ${{ matrix.platform }}-${{ matrix.test_type }}
+
+      - name: Print vagrant error
+        if: failure()
+        run: |
+          cat /Users/runner/.cache/molecule/tests/centos-host/vagrant.err
