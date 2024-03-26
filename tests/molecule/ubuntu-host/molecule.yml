@@ -4,10 +4,6 @@ dependency:
 driver:
   name: vagrant
 platforms:
-  - name: ubuntu1604
-    box: ubuntu/xenial64
-    memory: 512
-    cpus: 1
   - name: ubuntu1804
     box: ubuntu/bionic64
     memory: 512
