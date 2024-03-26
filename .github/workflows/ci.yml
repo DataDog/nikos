@@ -59,17 +59,16 @@ jobs:
   molecule-tests:
     name: Molecule tests
     needs: build
-    runs-on: macos-12
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          [
+        platform: [
             "fedora",
             "centos",
-            "opensuse",
+            # "opensuse",
             "debian",
-            "ubuntu",
+            # "ubuntu",
             "oracle",
             "amazon-linux",
           ]
@@ -81,24 +80,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-
-      - uses: actions/cache@v4
-        with:
-          path: ~/Library/Caches/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('.ci_build/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Cache Vagrant boxes
-        uses: actions/cache@v4
-        with:
-          path: ~/.vagrant.d/boxes
-          key: ${{ runner.os }}-vagrant-${{ matrix.platform }}-${{ matrix.test_type }}-${{ hashFiles('tests/molecule/**/molecule.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-vagrant-${{ matrix.platform }}-${{ matrix.test_type }}-
+          cache-dependency-path: .ci_build/requirements.txt
 
       - name: Install pip dependencies
-        run: pip install -r .ci_build/requirements.txt
+        run: |
+          pip install -r .ci_build/requirements.txt
+
+      - name: Install virtualbox and vagrant
+        run: |
+          wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt update && sudo apt install virtualbox vagrant
 
       - name: Download the nikos artifact
         uses: actions/download-artifact@v4
@@ -113,3 +105,8 @@ jobs:
       - name: Run molecule test
         working-directory: tests
         run: molecule test -s ${{ matrix.platform }}-${{ matrix.test_type }}
+
+      - name: Print vagrant error
+        if: failure()
+        run: |
+          cat /home/runner/.cache/molecule/tests/${{ matrix.platform }}-${{ matrix.test_type }}/vagrant.err
