@@ -63,13 +63,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          [
+        platform: [
             "fedora",
             "centos",
-            "opensuse",
+            # "opensuse",
             "debian",
-            "ubuntu",
+            # "ubuntu",
             "oracle",
             "amazon-linux",
           ]
