@@ -12,7 +12,7 @@
       become: true
 
     - name: Install docker-py
-      shell: "pip3 install docker"
+      shell: 'pip3 install docker "urllib3<2"'
       become: true
 
     - name: Start docker
