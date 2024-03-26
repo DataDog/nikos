@@ -4,22 +4,18 @@ dependency:
 driver:
   name: vagrant
 platforms:
-  - name: ubuntu1604
-    box: roboxes/ubuntu1604
-    memory: 512
-    cpus: 1
   - name: ubuntu1804
-    box: roboxes/ubuntu1804
+    box: ubuntu/bionic64
     memory: 512
     cpus: 1
   - name: ubuntu2004
-    box: roboxes/ubuntu2004
+    box: ubuntu/focal64
     memory: 512
     cpus: 1
 provisioner:
   name: ansible
   env:
-    TEST_TYPE: 'container'
+    TEST_TYPE: "container"
     NIKOS_PREFIX: sudo docker exec -ti debian
   playbooks:
     converge: ../resources/playbooks/converge.yml
