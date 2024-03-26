@@ -68,7 +68,7 @@ jobs:
             "centos",
             # "opensuse",
             "debian",
-            # "ubuntu",
+            "ubuntu",
             "oracle",
             "amazon-linux",
           ]
