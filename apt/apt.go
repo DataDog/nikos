@@ -10,12 +10,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/DataDog/aptly/aptly"
-	"github.com/DataDog/aptly/database"
-	"github.com/DataDog/aptly/database/goleveldb"
-	"github.com/DataDog/aptly/deb"
-	"github.com/DataDog/aptly/http"
-	"github.com/DataDog/aptly/pgp"
+	"github.com/aptly-dev/aptly/aptly"
+	"github.com/aptly-dev/aptly/database"
+	"github.com/aptly-dev/aptly/database/goleveldb"
+	"github.com/aptly-dev/aptly/deb"
+	"github.com/aptly-dev/aptly/http"
+	"github.com/aptly-dev/aptly/pgp"
 	"github.com/xor-gate/ar"
 
 	"github.com/DataDog/nikos/extract"
@@ -64,8 +64,6 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 	var packageURL *url.URL
 	var packageDeps *deb.PackageDependencies
 
-	stanza := make(deb.Stanza, 32)
-
 	err := b.repoCollection.ForEach(func(repo *deb.RemoteRepo) error {
 		if packageURL != nil {
 			return nil
@@ -74,8 +72,7 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 		b.logger.Debugf("Fetching repository: name=%s, distribution=%s, components=%v, arch=%v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
 		repo.SkipComponentCheck = true
 
-		stanza.Clear()
-		if err := repo.FetchBuffered(stanza, downloader, verifier); err != nil {
+		if err := repo.Fetch(downloader, verifier); err != nil {
 			b.logger.Debugf("Error fetching repo: %s", err)
 			return err
 		}
