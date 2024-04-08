@@ -8,14 +8,10 @@ platforms:
     box: roboxes/opensuse15
     memory: 512
     cpus: 1
-  - name: opensuse42
-    box: generic/opensuse42
-    memory: 512
-    cpus: 1
 provisioner:
   name: ansible
   env:
-    TEST_TYPE: 'host'
+    TEST_TYPE: "host"
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml
