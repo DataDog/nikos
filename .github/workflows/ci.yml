@@ -97,6 +97,10 @@ jobs:
 
           sudo apt-get update && sudo apt-get install gcc-12 virtualbox-7.0 vagrant
 
+      - name: Patch vagrant
+        run: |
+          sudo patch -p1 -d /opt/vagrant/embedded/gems/gems/vagrant-2.4.1/ < .github/vagrant.patch
+
       - name: Download the nikos artifact
         uses: actions/download-artifact@v4
         with:
