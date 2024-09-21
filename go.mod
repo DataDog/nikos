@@ -6,9 +6,9 @@ require (
 	cloud.google.com/go/storage v1.43.0
 	github.com/DataDog/aptly v1.5.3
 	github.com/DataDog/gopsutil v1.2.2
-	github.com/DataDog/zstd v1.5.6
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/hashicorp/go-multierror v1.1.1
+	github.com/klauspost/compress v1.17.4
 	github.com/sassoftware/go-rpmutils v0.3.0
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/sirupsen/logrus v1.9.3
@@ -29,6 +29,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.5.0 // indirect
 	cloud.google.com/go/iam v1.2.0 // indirect
 	github.com/AlekSi/pointer v1.2.0 // indirect
+	github.com/DataDog/zstd v1.5.6 // indirect
 	github.com/DisposaBoy/JsonConfigReader v0.0.0-20201129172854-99cf318d67e7 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230717121422-5aa5874ade95 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
@@ -53,7 +54,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jlaffaye/ftp v0.1.0 // indirect
 	github.com/kjk/lzma v0.0.0-20161016003348-3fd93898850d // indirect
-	github.com/klauspost/compress v1.17.4 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/lufia/plan9stats v0.0.0-20220913051719-115f729f3c8c // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
