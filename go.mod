@@ -8,7 +8,7 @@ require (
 	github.com/DataDog/gopsutil v1.2.2
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/klauspost/compress v1.17.4
+	github.com/klauspost/compress v1.17.9
 	github.com/sassoftware/go-rpmutils v0.3.0
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/sirupsen/logrus v1.9.3
