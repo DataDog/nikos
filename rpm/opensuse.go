@@ -2,6 +2,9 @@ package rpm
 
 import (
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/DataDog/nikos/rpm/dnfv2"
@@ -19,24 +22,76 @@ type OpenSUSEBackend struct {
 func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 	kernelRelease := b.target.Uname.Kernel
 
-	pkgNevra := "kernel"
+	flavour := ""
 	flavourIndex := strings.LastIndex(kernelRelease, "-")
 	if flavourIndex != -1 {
-		pkgNevra += kernelRelease[flavourIndex:]
-		kernelRelease = kernelRelease[:flavourIndex]
-	}
-	pkgNevra += "-devel"
-
-	pkgMatcher := func(pkg *repo.PkgInfoHeader) bool {
-		return pkg.Name == pkgNevra && kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) && pkg.Arch == b.target.Uname.Machine
+		kernelRelease = b.target.Uname.Kernel[:flavourIndex]
+		flavour = b.target.Uname.Kernel[flavourIndex:]
 	}
 
-	pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
+	pkgKernelDevel := "kernel-devel"
+	kernelDevelMatcher := func(pkg *repo.PkgInfoHeader) bool {
+		return pkg.Name == pkgKernelDevel && kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel)
+	}
+
+	pkg, data, err := b.dnfBackend.FetchPackage(kernelDevelMatcher)
 	if err != nil {
-		return fmt.Errorf("failed to fetch `%s` package: %w", pkgNevra, err)
+		return fmt.Errorf("failed to fetch `%s` package: %w", pkgKernelDevel, err)
 	}
 
-	return dnfv2.ExtractPackage(pkg, data, directory, b.target, b.logger)
+	if err := dnfv2.ExtractPackage(pkg, data, directory, b.target, b.logger); err != nil {
+		return fmt.Errorf("failed to extract `%s` package: %w", pkgKernelDevel, err)
+	}
+
+	kernelDevelBase := filepath.Join(directory, "usr", "src", "linux-"+kernelRelease)
+	if flavour != "" {
+		pkgFlavourDevel := fmt.Sprintf("kernel-devel%s", flavour)
+		kernelFlavourDevelMatcher := func(pkg *repo.PkgInfoHeader) bool {
+			return pkg.Name == pkgFlavourDevel && kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) && pkg.Arch == b.target.Uname.Machine
+		}
+
+		pkg, data, err := b.dnfBackend.FetchPackage(kernelFlavourDevelMatcher)
+		if err != nil {
+			return fmt.Errorf("failed to fetch `%s` package: %w", pkgKernelDevel, err)
+		}
+
+		if err := dnfv2.ExtractPackage(pkg, data, directory, b.target, b.logger); err != nil {
+			return fmt.Errorf("failed to extract `%s` package: %w", pkgKernelDevel, err)
+		}
+
+		kernelFlavourBase := filepath.Join(
+			directory, "usr", "src", fmt.Sprintf("linux-%s-obj", kernelRelease),
+			b.target.Uname.Machine, flavour,
+		)
+
+		if err := filepath.WalkDir(kernelFlavourBase, func(path string, _ fs.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return walkErr
+			}
+			relPath, err := filepath.Rel(kernelFlavourBase, path)
+			if err != nil {
+				return err
+			}
+			kernelDevelPath := filepath.Join(kernelDevelBase, relPath)
+			if _, err := os.Stat(kernelDevelPath); err != nil && os.IsNotExist(err) {
+				if err := os.Symlink(path, kernelDevelPath); err != nil {
+					return err
+				}
+				b.logger.Debugf("created symlink to %s at %s", path, kernelDevelPath)
+			}
+			return nil
+		}); err != nil {
+			return fmt.Errorf("failed to walk through %s: %w", kernelFlavourBase, err)
+		}
+	}
+
+	symlink := filepath.Join(directory, "usr", "src", fmt.Sprintf("linux-headers-%s", b.target.Uname.Kernel))
+	if err := os.Symlink(kernelDevelBase, symlink); err != nil {
+		return fmt.Errorf("failed to create symlink to %s at %s: %w", kernelDevelBase, symlink, err)
+	}
+	b.logger.Debugf("created symlink to %s at %s", kernelDevelBase, symlink)
+
+	return nil
 }
 
 func (b *OpenSUSEBackend) Close() {
