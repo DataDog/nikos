@@ -27,16 +27,38 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 	}
 	pkgNevra += "-devel"
 
-	pkgMatcher := func(pkg *repo.PkgInfoHeader) bool {
-		return pkg.Name == pkgNevra && kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) && pkg.Arch == b.target.Uname.Machine
+	packagesToInstall := []string{pkgNevra}
+	if pkgNevra != "kernel-devel" {
+		packagesToInstall = append(packagesToInstall, "kernel-devel")
 	}
 
-	pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
-	if err != nil {
-		return fmt.Errorf("failed to fetch `%s` package: %w", pkgNevra, err)
+	installedPackages := 0
+	for _, targetPackageName := range packagesToInstall {
+		pkgMatcher := func(pkg *repo.PkgInfoHeader) bool {
+			return pkg.Name == targetPackageName &&
+				kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) &&
+				(pkg.Arch == b.target.Uname.Machine || pkg.Arch == "noarch")
+		}
+
+		pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
+		if err != nil {
+			b.logger.Errorf("failed to fetch `%s` package: %v", targetPackageName, err)
+			continue
+		}
+
+		if err := dnfv2.ExtractPackage(pkg, data, directory, b.target, b.logger); err != nil {
+			b.logger.Errorf("failed to extract `%s` package: %v", targetPackageName, err)
+			continue
+		}
+
+		installedPackages++
 	}
 
-	return dnfv2.ExtractPackage(pkg, data, directory, b.target, b.logger)
+	if installedPackages == 0 {
+		return fmt.Errorf("failed to find a valid package")
+	}
+
+	return nil
 }
 
 func (b *OpenSUSEBackend) Close() {
