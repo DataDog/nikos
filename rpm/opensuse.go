@@ -46,7 +46,7 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 
 	kernelDevelBase := filepath.Join(directory, "usr", "src", "linux-"+kernelRelease)
 	if flavour != "" {
-		pkgFlavourDevel := fmt.Sprintf("kernel-devel-%s", flavour)
+		pkgFlavourDevel := fmt.Sprintf("kernel-%s-devel", flavour)
 		kernelFlavourDevelMatcher := func(pkg *repo.PkgInfoHeader) bool {
 			return pkg.Name == pkgFlavourDevel && kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) && pkg.Arch == b.target.Uname.Machine
 		}
