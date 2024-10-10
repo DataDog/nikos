@@ -26,7 +26,7 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 	flavourIndex := strings.LastIndex(kernelRelease, "-")
 	if flavourIndex != -1 {
 		kernelRelease = b.target.Uname.Kernel[:flavourIndex]
-		flavour = b.target.Uname.Kernel[flavourIndex:]
+		flavour = strings.TrimLeft(b.target.Uname.Kernel[flavourIndex:], "-")
 	}
 
 	pkgKernelDevel := "kernel-devel"
@@ -34,6 +34,7 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 		return pkg.Name == pkgKernelDevel && kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel)
 	}
 
+	b.logger.Debugf("fetching `%s` package", pkgKernelDevel)
 	pkg, data, err := b.dnfBackend.FetchPackage(kernelDevelMatcher)
 	if err != nil {
 		return fmt.Errorf("failed to fetch `%s` package: %w", pkgKernelDevel, err)
@@ -45,18 +46,19 @@ func (b *OpenSUSEBackend) GetKernelHeaders(directory string) error {
 
 	kernelDevelBase := filepath.Join(directory, "usr", "src", "linux-"+kernelRelease)
 	if flavour != "" {
-		pkgFlavourDevel := fmt.Sprintf("kernel-devel%s", flavour)
+		pkgFlavourDevel := fmt.Sprintf("kernel-devel-%s", flavour)
 		kernelFlavourDevelMatcher := func(pkg *repo.PkgInfoHeader) bool {
 			return pkg.Name == pkgFlavourDevel && kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) && pkg.Arch == b.target.Uname.Machine
 		}
 
+		b.logger.Debugf("fetching `%s` package", pkgFlavourDevel)
 		pkg, data, err := b.dnfBackend.FetchPackage(kernelFlavourDevelMatcher)
 		if err != nil {
-			return fmt.Errorf("failed to fetch `%s` package: %w", pkgKernelDevel, err)
+			return fmt.Errorf("failed to fetch `%s` package: %w", pkgFlavourDevel, err)
 		}
 
 		if err := dnfv2.ExtractPackage(pkg, data, directory, b.target, b.logger); err != nil {
-			return fmt.Errorf("failed to extract `%s` package: %w", pkgKernelDevel, err)
+			return fmt.Errorf("failed to extract `%s` package: %w", pkgFlavourDevel, err)
 		}
 
 		kernelFlavourBase := filepath.Join(
