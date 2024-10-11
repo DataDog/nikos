@@ -20,16 +20,32 @@ type SLESBackend struct {
 
 func (b *SLESBackend) GetKernelHeaders(directory string) error {
 	pkgNevra := "kernel" + b.flavour + "-devel"
-	pkgMatcher := func(pkg *repo.PkgInfoHeader) bool {
-		return pkg.Name == pkgNevra && b.kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) && pkg.Arch == b.target.Uname.Machine
+	packagesToInstall := []string{pkgNevra, "kernel-devel"}
+
+	installedPackages := 0
+	for _, targetPackageName := range packagesToInstall {
+		pkgMatcher := func(pkg *repo.PkgInfoHeader) bool {
+			return pkg.Name == targetPackageName &&
+				b.kernelRelease == fmt.Sprintf("%s-%s", pkg.Version.Ver, pkg.Version.Rel) &&
+				(pkg.Arch == b.target.Uname.Machine || pkg.Arch == "noarch")
+		}
+		pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
+		if err != nil {
+			return fmt.Errorf("failed to fetch `%s` package: %w", pkgNevra, err)
+		}
+
+		if err := dnfv2.ExtractPackage(pkg, data, directory, b.target, b.logger); err != nil {
+			return fmt.Errorf("failed to extract `%s` package: %w", pkgNevra, err)
+		}
+
+		installedPackages++
 	}
 
-	pkg, data, err := b.dnfBackend.FetchPackage(pkgMatcher)
-	if err != nil {
-		return fmt.Errorf("failed to fetch `%s` package: %w", pkgNevra, err)
+	if installedPackages == 0 {
+		return fmt.Errorf("failed to find a valid package")
 	}
 
-	return dnfv2.ExtractPackage(pkg, data, directory, b.target, b.logger)
+	return nil
 }
 
 func (b *SLESBackend) Close() {
