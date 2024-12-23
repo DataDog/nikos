@@ -16,7 +16,7 @@ import (
 	"sort"
 	"strings"
 
-	"golang.org/x/crypto/openpgp"
+	"github.com/ProtonMail/go-crypto/openpgp"
 	"gopkg.in/ini.v1"
 
 	"github.com/DataDog/nikos/rpm/dnfv2/internal/utils"
