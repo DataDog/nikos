@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/DataDog/aptly v1.5.3
 	github.com/DataDog/gopsutil v1.2.2
-	github.com/ProtonMail/go-crypto v1.1.3
+	github.com/ProtonMail/go-crypto v1.1.4
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/klauspost/compress v1.17.11
