@@ -1,6 +1,7 @@
 module github.com/DataDog/nikos
 
 go 1.21
+toolchain go1.23.7
 
 require (
 	github.com/DataDog/aptly v1.5.3
@@ -16,7 +17,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 	github.com/xor-gate/ar v0.0.0-20170530204233-5c72ae81e2b7
-	golang.org/x/sys v0.28.0
+	golang.org/x/sys v0.31.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
