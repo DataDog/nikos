@@ -60,7 +60,7 @@ func (b *Backend) extractPackage(pkg, directory string) error {
 	return errors.New("failed to decompress deb")
 }
 
-func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Verifier, factory *deb.CollectionFactory, query *deb.FieldQuery, directory string) (*deb.PackageDependencies, error) {
+func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Verifier, query *deb.FieldQuery, directory string) (*deb.PackageDependencies, error) {
 	var packageURL *url.URL
 	var packageDeps *deb.PackageDependencies
 
@@ -77,6 +77,8 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 		}
 
 		b.logger.Debug("Downloading package indexes")
+		// factory is not used by DownloadPackageIndexes so we can use nil here
+		var factory *deb.CollectionFactory
 		if err := repo.DownloadPackageIndexes(nil, downloader, nil, factory, false); err != nil {
 			b.logger.Debugf("Failed to download package indexes: %s", err)
 			return nil, err
@@ -168,8 +170,6 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 		return err
 	}
 
-	collectionFactory := deb.NewCollectionFactory(b.db)
-
 	kernelRelease := b.target.Uname.Kernel
 	query := &deb.FieldQuery{
 		Field:    "Name",
@@ -178,7 +178,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	}
 	b.logger.Infof("Looking for %s", query.Value)
 
-	dependencies, err := b.downloadPackage(downloader, gpgVerifier, collectionFactory, query, directory)
+	dependencies, err := b.downloadPackage(downloader, gpgVerifier, query, directory)
 	if err != nil {
 		return err
 	}
@@ -197,7 +197,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 					Value:    depName,
 				}
 
-				_, err = b.downloadPackage(downloader, gpgVerifier, collectionFactory, query, directory)
+				_, err = b.downloadPackage(downloader, gpgVerifier, query, directory)
 				if err != nil {
 					b.logger.Warnf("Failed to download dependent package %s", depName)
 				}
