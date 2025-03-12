@@ -25,7 +25,7 @@ import (
 type Backend struct {
 	target         *types.Target
 	logger         types.Logger
-	repoCollection *deb.RemoteRepoCollection
+	repoCollection []*deb.RemoteRepo
 	db             database.Storage
 	tmpDir         string
 }
@@ -66,30 +66,26 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 
 	stanza := make(deb.Stanza, 32)
 
-	err := b.repoCollection.ForEach(func(repo *deb.RemoteRepo) error {
-		if packageURL != nil {
-			return nil
-		}
-
+	for _, repo := range b.repoCollection {
 		b.logger.Debugf("Fetching repository: name=%s, distribution=%s, components=%v, arch=%v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
 		repo.SkipComponentCheck = true
 
 		stanza.Clear()
 		if err := repo.FetchBuffered(stanza, downloader, verifier); err != nil {
 			b.logger.Debugf("Error fetching repo: %s", err)
-			return err
+			return nil, err
 		}
 
 		b.logger.Debug("Downloading package indexes")
 		if err := repo.DownloadPackageIndexes(nil, downloader, nil, factory, false); err != nil {
 			b.logger.Debugf("Failed to download package indexes: %s", err)
-			return err
+			return nil, err
 		}
 
 		_, _, err := repo.ApplyFilter(-1, query, nil)
 		if err != nil {
 			b.logger.Debugf("Failed to apply filter: %s", err)
-			return err
+			return nil, err
 		}
 
 		/*
@@ -123,11 +119,10 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 			return nil
 		})
 
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
+		// if we set packageURL we can exit the loop
+		if packageURL != nil {
+			break
+		}
 	}
 
 	if packageURL == nil {
@@ -250,8 +245,6 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 		return nil, fmt.Errorf("failed to create aptly database: %w", err)
 	}
 
-	backend.repoCollection = deb.NewRemoteRepoCollection(backend.db)
-
 	repoList, err := parseAPTConfigFolder(aptConfigDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse APT folder: %w", err)
@@ -279,10 +272,7 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 			return nil, err
 		}
 
-		if err := backend.repoCollection.Add(remoteRepo); err != nil {
-			backend.Close()
-			return nil, fmt.Errorf("failed to add collection: %w", err)
-		}
+		backend.repoCollection = append(backend.repoCollection, remoteRepo)
 
 		backend.logger.Debugf("Added repository '%s' %s %s %v %v", repoID, repo.URI, repo.Distribution, components, debArch)
 	}
