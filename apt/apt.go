@@ -11,8 +11,6 @@ import (
 	"strings"
 
 	"github.com/DataDog/aptly/aptly"
-	"github.com/DataDog/aptly/database"
-	"github.com/DataDog/aptly/database/goleveldb"
 	"github.com/DataDog/aptly/deb"
 	"github.com/DataDog/aptly/http"
 	"github.com/DataDog/aptly/pgp"
@@ -26,13 +24,9 @@ type Backend struct {
 	target         *types.Target
 	logger         types.Logger
 	repoCollection []*deb.RemoteRepo
-	db             database.Storage
-	tmpDir         string
 }
 
 func (b *Backend) Close() {
-	b.db.Close()
-	os.RemoveAll(b.tmpDir)
 }
 
 func (b *Backend) extractPackage(pkg, directory string) error {
@@ -229,20 +223,9 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 		return nil, fmt.Errorf("unsupported architecture '%s'", target.Uname.Machine)
 	}
 
-	tmpDir, err := os.MkdirTemp("", "aptly-db")
-	if err != nil {
-		return nil, err
-	}
-
 	backend := &Backend{
 		target: target,
 		logger: logger,
-		tmpDir: tmpDir,
-	}
-
-	if backend.db, err = goleveldb.NewOpenDB(tmpDir); err != nil {
-		backend.Close()
-		return nil, fmt.Errorf("failed to create aptly database: %w", err)
 	}
 
 	repoList, err := parseAPTConfigFolder(aptConfigDir)
