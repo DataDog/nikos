@@ -1,6 +1,6 @@
 module github.com/DataDog/nikos
 
-go 1.23.7
+go 1.23.0
 
 require (
 	github.com/DataDog/aptly v1.5.3
