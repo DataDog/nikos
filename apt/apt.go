@@ -23,7 +23,8 @@ import (
 type Backend struct {
 	target         *types.Target
 	logger         types.Logger
-	repoCollection []*deb.RemoteRepo
+	repoCollection []remoteRepo
+	debArch        string
 }
 
 func (b *Backend) Close() {
@@ -60,7 +61,13 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 
 	stanza := make(deb.Stanza, 32)
 
-	for _, repo := range b.repoCollection {
+	for _, repoInfo := range b.repoCollection {
+		repo, err := deb.NewRemoteRepo(repoInfo.repoID, repoInfo.uri, repoInfo.distribution, repoInfo.components, []string{b.debArch}, false, false, false)
+		if err != nil {
+			b.logger.Errorf("Failed to create remote repo: %s", err)
+			continue
+		}
+
 		b.logger.Debugf("Fetching repository: name=%s, distribution=%s, components=%v, arch=%v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
 		repo.SkipComponentCheck = true
 
@@ -78,7 +85,7 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 			return nil, err
 		}
 
-		_, _, err := repo.ApplyFilter(-1, query, nil)
+		_, _, err = repo.ApplyFilter(-1, query, nil)
 		if err != nil {
 			b.logger.Debugf("Failed to apply filter: %s", err)
 			return nil, err
@@ -202,6 +209,13 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	return nil
 }
 
+type remoteRepo struct {
+	repoID       string
+	uri          string
+	distribution string
+	components   []string
+}
+
 func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) (*Backend, error) {
 	var debArch string
 	switch target.Uname.Machine {
@@ -224,8 +238,9 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 	}
 
 	backend := &Backend{
-		target: target,
-		logger: logger,
+		target:  target,
+		logger:  logger,
+		debArch: debArch,
 	}
 
 	repoList, err := parseAPTConfigFolder(aptConfigDir)
@@ -250,12 +265,14 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 			components = strings.Split(repo.Components, " ")
 		}
 
-		remoteRepo, err := deb.NewRemoteRepo(repoID, repo.URI, repo.Distribution, components, []string{debArch}, false, false, false)
-		if err != nil {
-			return nil, err
+		rr := remoteRepo{
+			repoID:       repoID,
+			uri:          repo.URI,
+			distribution: repo.Distribution,
+			components:   components,
 		}
 
-		backend.repoCollection = append(backend.repoCollection, remoteRepo)
+		backend.repoCollection = append(backend.repoCollection, rr)
 
 		backend.logger.Debugf("Added repository '%s' %s %s %v %v", repoID, repo.URI, repo.Distribution, components, debArch)
 	}
