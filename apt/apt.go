@@ -11,8 +11,6 @@ import (
 	"strings"
 
 	"github.com/DataDog/aptly/aptly"
-	"github.com/DataDog/aptly/database"
-	"github.com/DataDog/aptly/database/goleveldb"
 	"github.com/DataDog/aptly/deb"
 	"github.com/DataDog/aptly/http"
 	"github.com/DataDog/aptly/pgp"
@@ -25,14 +23,11 @@ import (
 type Backend struct {
 	target         *types.Target
 	logger         types.Logger
-	repoCollection *deb.RemoteRepoCollection
-	db             database.Storage
-	tmpDir         string
+	repoCollection []remoteRepo
+	debArch        string
 }
 
 func (b *Backend) Close() {
-	b.db.Close()
-	os.RemoveAll(b.tmpDir)
 }
 
 func (b *Backend) extractPackage(pkg, directory string) error {
@@ -60,15 +55,17 @@ func (b *Backend) extractPackage(pkg, directory string) error {
 	return errors.New("failed to decompress deb")
 }
 
-func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Verifier, factory *deb.CollectionFactory, query *deb.FieldQuery, directory string) (*deb.PackageDependencies, error) {
+func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Verifier, query *deb.FieldQuery, directory string) (*deb.PackageDependencies, error) {
 	var packageURL *url.URL
 	var packageDeps *deb.PackageDependencies
 
 	stanza := make(deb.Stanza, 32)
 
-	err := b.repoCollection.ForEach(func(repo *deb.RemoteRepo) error {
-		if packageURL != nil {
-			return nil
+	for _, repoInfo := range b.repoCollection {
+		repo, err := deb.NewRemoteRepo(repoInfo.repoID, repoInfo.uri, repoInfo.distribution, repoInfo.components, []string{b.debArch}, false, false, false)
+		if err != nil {
+			b.logger.Errorf("Failed to create remote repo: %s", err)
+			continue
 		}
 
 		b.logger.Debugf("Fetching repository: name=%s, distribution=%s, components=%v, arch=%v", repo.Name, repo.Distribution, repo.Components, repo.Architectures)
@@ -77,19 +74,21 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 		stanza.Clear()
 		if err := repo.FetchBuffered(stanza, downloader, verifier); err != nil {
 			b.logger.Debugf("Error fetching repo: %s", err)
-			return err
+			return nil, err
 		}
 
 		b.logger.Debug("Downloading package indexes")
+		// factory is not used by DownloadPackageIndexes so we can use nil here
+		var factory *deb.CollectionFactory
 		if err := repo.DownloadPackageIndexes(nil, downloader, nil, factory, false); err != nil {
 			b.logger.Debugf("Failed to download package indexes: %s", err)
-			return err
+			return nil, err
 		}
 
-		_, _, err := repo.ApplyFilter(-1, query, nil)
+		_, _, err = repo.ApplyFilter(-1, query, nil)
 		if err != nil {
 			b.logger.Debugf("Failed to apply filter: %s", err)
-			return err
+			return nil, err
 		}
 
 		/*
@@ -123,11 +122,10 @@ func (b *Backend) downloadPackage(downloader aptly.Downloader, verifier pgp.Veri
 			return nil
 		})
 
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
+		// if we set packageURL we can exit the loop
+		if packageURL != nil {
+			break
+		}
 	}
 
 	if packageURL == nil {
@@ -173,8 +171,6 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 		return err
 	}
 
-	collectionFactory := deb.NewCollectionFactory(b.db)
-
 	kernelRelease := b.target.Uname.Kernel
 	query := &deb.FieldQuery{
 		Field:    "Name",
@@ -183,7 +179,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	}
 	b.logger.Infof("Looking for %s", query.Value)
 
-	dependencies, err := b.downloadPackage(downloader, gpgVerifier, collectionFactory, query, directory)
+	dependencies, err := b.downloadPackage(downloader, gpgVerifier, query, directory)
 	if err != nil {
 		return err
 	}
@@ -202,7 +198,7 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 					Value:    depName,
 				}
 
-				_, err = b.downloadPackage(downloader, gpgVerifier, collectionFactory, query, directory)
+				_, err = b.downloadPackage(downloader, gpgVerifier, query, directory)
 				if err != nil {
 					b.logger.Warnf("Failed to download dependent package %s", depName)
 				}
@@ -211,6 +207,13 @@ func (b *Backend) GetKernelHeaders(directory string) error {
 	}
 
 	return nil
+}
+
+type remoteRepo struct {
+	repoID       string
+	uri          string
+	distribution string
+	components   []string
 }
 
 func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) (*Backend, error) {
@@ -234,23 +237,11 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 		return nil, fmt.Errorf("unsupported architecture '%s'", target.Uname.Machine)
 	}
 
-	tmpDir, err := os.MkdirTemp("", "aptly-db")
-	if err != nil {
-		return nil, err
-	}
-
 	backend := &Backend{
-		target: target,
-		logger: logger,
-		tmpDir: tmpDir,
+		target:  target,
+		logger:  logger,
+		debArch: debArch,
 	}
-
-	if backend.db, err = goleveldb.NewOpenDB(tmpDir); err != nil {
-		backend.Close()
-		return nil, fmt.Errorf("failed to create aptly database: %w", err)
-	}
-
-	backend.repoCollection = deb.NewRemoteRepoCollection(backend.db)
 
 	repoList, err := parseAPTConfigFolder(aptConfigDir)
 	if err != nil {
@@ -274,15 +265,14 @@ func NewBackend(target *types.Target, aptConfigDir string, logger types.Logger) 
 			components = strings.Split(repo.Components, " ")
 		}
 
-		remoteRepo, err := deb.NewRemoteRepo(repoID, repo.URI, repo.Distribution, components, []string{debArch}, false, false, false)
-		if err != nil {
-			return nil, err
+		rr := remoteRepo{
+			repoID:       repoID,
+			uri:          repo.URI,
+			distribution: repo.Distribution,
+			components:   components,
 		}
 
-		if err := backend.repoCollection.Add(remoteRepo); err != nil {
-			backend.Close()
-			return nil, fmt.Errorf("failed to add collection: %w", err)
-		}
+		backend.repoCollection = append(backend.repoCollection, rr)
 
 		backend.logger.Debugf("Added repository '%s' %s %s %v %v", repoID, repo.URI, repo.Distribution, components, debArch)
 	}
