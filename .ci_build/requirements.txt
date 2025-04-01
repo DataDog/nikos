@@ -2,4 +2,4 @@ ansible==8.5.0
 molecule==4.0.4
 molecule-vagrant==2.0.0
 python-vagrant==1.0.0
-ansible-compat<4 # https://github.com/ansible-community/molecule/issues/3903
+ansible-compat<25 # https://github.com/ansible-community/molecule/issues/3903
