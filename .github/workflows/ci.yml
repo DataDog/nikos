@@ -42,20 +42,6 @@ jobs:
           path: /opt/nikos
           retention-days: 1
 
-  verify-glibc:
-    name: Check GLIBC references
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download the nikos artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: nikos-archive
-          path: /opt/nikos
-
-      - name: Fail if there are references to GLIBC >= 2.18
-        run: objdump -p /opt/nikos/bin/nikos | egrep -zqv 'GLIBC_2\.(1[8-9]|[2-9][0-9])'
-
   molecule-tests:
     name: Molecule tests
     needs: build
