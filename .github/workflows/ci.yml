@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build nikos
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
   verify-glibc:
     name: Check GLIBC references
     needs: build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Download the nikos artifact
         uses: actions/download-artifact@v4
