@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/klauspost/compress v1.18.0
 	github.com/sassoftware/go-rpmutils v0.4.0
-	github.com/shirou/gopsutil/v4 v4.25.5
+	github.com/shirou/gopsutil/v4 v4.25.7
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
@@ -58,8 +58,8 @@ require (
 	github.com/smira/go-ftp-protocol v0.0.0-20140829150050-066b75c2b70d // indirect
 	github.com/smira/go-xz v0.1.0 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
-	github.com/tklauser/go-sysconf v0.3.12 // indirect
-	github.com/tklauser/numcpus v0.6.1 // indirect
+	github.com/tklauser/go-sysconf v0.3.15 // indirect
+	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
