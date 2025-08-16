@@ -69,10 +69,15 @@ func NewSLESBackend(target *types.Target, reposDir string, logger types.Logger) 
 	// https://download.opensuse.org/repositories/Kernel:
 	if version := target.OSRelease["VERSION"]; version != "" {
 		addKernelRepository := func(version string) {
+			versionSplit := strings.SplitN(version, "-", 2)
 			version = "SLE" + version
 			repoID := "Kernel_" + version
-			baseurl := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/", version)
-			gpgKey := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/standard/repodata/repomd.xml.key", version)
+			subPath := "standard"
+			if versionSplit[0] == "15" {
+				subPath = "pool"
+			}
+			baseurl := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/%s/", version, subPath)
+			gpgKey := fmt.Sprintf("https://download.opensuse.org/repositories/Kernel:/%s/%s/repodata/repomd.xml.key", version, subPath)
 
 			b.AppendRepository(repo.Repo{
 				Name:     repoID,
