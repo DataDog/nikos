@@ -10,10 +10,10 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/klauspost/compress v1.18.0
 	github.com/sassoftware/go-rpmutils v0.4.0
-	github.com/shirou/gopsutil/v4 v4.25.7
+	github.com/shirou/gopsutil/v4 v4.25.8
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 	github.com/xor-gate/ar v0.0.0-20170530204233-5c72ae81e2b7
 	golang.org/x/sys v0.35.0
@@ -51,7 +51,7 @@ require (
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/power-devops/perfstat v0.0.0-20220216144756-c35f1ee13d7c // indirect
+	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/rs/zerolog v1.28.0 // indirect
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
