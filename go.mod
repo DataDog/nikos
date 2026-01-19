@@ -11,7 +11,7 @@ require (
 	github.com/klauspost/compress v1.18.2
 	github.com/sassoftware/go-rpmutils v0.4.0
 	github.com/shirou/gopsutil/v4 v4.25.9
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
