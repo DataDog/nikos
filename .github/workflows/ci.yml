@@ -105,3 +105,10 @@ jobs:
           export ANSIBLE_LIBRARY="${PYTHON_LIB_PATH}/molecule/provisioner/ansible/plugins/modules:${PYTHON_LIB_PATH}/molecule_plugins/vagrant/modules:${HOME}/.ansible/plugins/modules:/usr/share/ansible/plugins/modules"
           export ANSIBLE_FILTER_PLUGINS="${PYTHON_LIB_PATH}/molecule/provisioner/ansible/plugins/filter:${HOME}/.ansible/plugins/filter:/usr/share/ansible/plugins/filter"
           molecule test -s ${{ matrix.platform }}-${{ matrix.test_type }}
+
+      - name: Upload ansible logs
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: always()
+        with:
+          name: ansible-logs-${{ matrix.platform }}-${{ matrix.test_type }}
+          path: .ansible/tmp/
