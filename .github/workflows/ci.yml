@@ -111,4 +111,4 @@ jobs:
         if: always()
         with:
           name: ansible-logs-${{ matrix.platform }}-${{ matrix.test_type }}
-          path: .ansible/tmp/
+          path: /home/runner/.ansible/tmp/
