@@ -75,8 +75,8 @@ jobs:
 
       - name: Install virtualbox and vagrant
         run: |
-          sudo rmmod kvm_amd
-          sudo rmmod kvm
+          sudo lsmod | grep kvm_amd | sudo xargs rmmod
+          sudo lsmod | grep kvm | sudo xargs rmmod
           
           wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/oracle-virtualbox-2016.gpg
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
