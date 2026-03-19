@@ -60,8 +60,6 @@ jobs:
             "amazon-linux",
           ]
         test_type: ["host", "container"]
-    env:
-      VBOX_HWVIRTEX_IGNORE_SVM_IN_USE: "true"
     steps:
       - name: Checkout source code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -77,6 +75,9 @@ jobs:
 
       - name: Install virtualbox and vagrant
         run: |
+          sudo rmmod kvm_amd
+          sudo rmmod kvm
+          
           wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/oracle-virtualbox-2016.gpg
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
 
