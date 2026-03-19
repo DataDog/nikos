@@ -60,6 +60,8 @@ jobs:
             "amazon-linux",
           ]
         test_type: ["host", "container"]
+    env:
+      VBOX_HWVIRTEX_IGNORE_SVM_IN_USE: "true"
     steps:
       - name: Checkout source code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -95,8 +97,6 @@ jobs:
 
       - name: Run molecule test
         working-directory: tests
-        env:
-          VBOX_HWVIRTEX_IGNORE_SVM_IN_USE: "true"
         # Fix breakage caused by https://github.com/ansible/molecule/pull/4380
         # See https://github.com/ansible-community/molecule-plugins/issues/301
         run: |
