@@ -4,12 +4,8 @@ dependency:
 driver:
   name: vagrant
 platforms:
-  - name: ubuntu1804
-    box: ubuntu/bionic64
-    memory: 512
-    cpus: 1
-  - name: ubuntu2004
-    box: ubuntu/focal64
+  - name: ubuntu2204
+    box: ubuntu/jammy64
     memory: 512
     cpus: 1
 provisioner:
