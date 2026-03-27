@@ -29,10 +29,10 @@
       when: ansible_lsb.id is defined and (ansible_lsb.id == 'Ubuntu' or ansible_lsb.id == 'Debian')
 
     - include_tasks: verify-package-rpm.yml
-      when: ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'openSUSE Leap' or ansible_distribution == 'Fedora' or ansible_distribution == 'OracleLinux' or ansible_distribution == 'Amazon')
+      when: ansible_facts["distribution"] is defined and (ansible_facts["distribution"] == 'CentOS' or ansible_facts["distribution"] == 'openSUSE Leap' or ansible_facts["distribution"] == 'Fedora' or ansible_facts["distribution"] == 'OracleLinux' or ansible_facts["distribution"] == 'Amazon')
 
     - include_tasks: verify-headers.yml
-      when: not (ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora' or ansible_distribution == 'OracleLinux' or ansible_distribution == 'Amazon'))
+      when: not (ansible_facts["distribution"] is defined and (ansible_facts["distribution"] == 'CentOS' or ansible_facts["distribution"] == 'Fedora' or ansible_facts["distribution"] == 'OracleLinux' or ansible_facts["distribution"] == 'Amazon'))
 
     - include_tasks: verify-headers-fedora-centos.yml
-      when: ansible_distribution is defined and (ansible_distribution == 'CentOS' or ansible_distribution == 'Fedora' or ansible_distribution == 'OracleLinux' or ansible_distribution == 'Amazon')
+      when: ansible_facts["distribution"] is defined and (ansible_facts["distribution"] == 'CentOS' or ansible_facts["distribution"] == 'Fedora' or ansible_facts["distribution"] == 'OracleLinux' or ansible_facts["distribution"] == 'Amazon')
