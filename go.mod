@@ -4,7 +4,6 @@ go 1.25.0
 
 require (
 	github.com/DataDog/aptly v1.5.3
-	github.com/DataDog/gopsutil v1.2.4
 	github.com/ProtonMail/go-crypto v1.4.1
 	github.com/acobaugh/osrelease v0.1.0
 	github.com/hashicorp/go-multierror v1.1.1
@@ -24,7 +23,6 @@ require (
 	github.com/AlekSi/pointer v1.2.0 // indirect
 	github.com/DataDog/zstd v1.5.6 // indirect
 	github.com/DisposaBoy/JsonConfigReader v0.0.0-20201129172854-99cf318d67e7 // indirect
-	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/awalterschulze/gographviz v2.0.3+incompatible // indirect
 	github.com/cavaliergopher/grab/v3 v3.0.1 // indirect
 	github.com/cheggaaa/pb v1.0.29 // indirect
@@ -53,7 +51,6 @@ require (
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/rs/zerolog v1.28.0 // indirect
-	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/smira/go-ftp-protocol v0.0.0-20140829150050-066b75c2b70d // indirect
 	github.com/smira/go-xz v0.1.0 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect

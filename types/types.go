@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/DataDog/gopsutil/host"
 	"github.com/acobaugh/osrelease"
+	"github.com/shirou/gopsutil/v4/host"
 	"golang.org/x/sys/unix"
 )
 
