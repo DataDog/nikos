@@ -1,4 +1,12 @@
 ---
+- name: Bootstrap Python 3.10
+  hosts: ubuntu2004
+  gather_facts: false
+  tasks:
+    - name: Install Python 3.10
+      raw: apt-get update -qq && apt-get install -y python3.10
+      become: true
+
 - name: Prepare
   hosts: all
   tasks:

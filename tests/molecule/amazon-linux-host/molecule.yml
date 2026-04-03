@@ -15,7 +15,7 @@ provisioner:
   inventory:
     host_vars:
       amzn2:
-        ansible_python_interpreter: /usr/bin/python3
+        ansible_python_interpreter: /usr/bin/python3.9
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml

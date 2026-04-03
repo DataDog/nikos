@@ -1,0 +1,8 @@
+---
+- name: Bootstrap Python 3.9
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Install Python 3.9 via EPEL
+      raw: amazon-linux-extras install -y epel && yum install -y python39
+      become: true

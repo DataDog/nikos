@@ -1,26 +1,31 @@
 ---
+- name: Bootstrap Python 3.9
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Install Python 3.9
+      raw: dnf install -y python39
+      become: true
+
 - name: Prepare
   hosts: all
   tasks:
-  - name: Install yum plugins
+  - name: Install yum-utils
     package:
       name: yum-utils
     become: true
 
-  - name: Set up Docker repository
-    shell: |
-      yum-config-manager --enable ol7_optional_latest
-      yum-config-manager --enable ol7_addons
-      yum install -y oraclelinux-developer-release-el7
-      yum-config-manager --enable ol7_developer
+  - name: Set up Docker CE repository
+    shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
     become: true
 
   - name: Install Docker
     package:
-      name: "{{ item }}"
+      name:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
       state: latest
-    with_items:
-    - docker-engine
     become: true
 
   - name: Install pip

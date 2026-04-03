@@ -16,6 +16,12 @@ platforms:
     cpus: 1
 provisioner:
   name: ansible
+  inventory:
+    host_vars:
+      centos7:
+        ansible_python_interpreter: /usr/bin/python3.9
+      almalinux8:
+        ansible_python_interpreter: /usr/bin/python3.9
   env:
     TEST_TYPE: 'host'
   playbooks:
