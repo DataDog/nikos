@@ -12,6 +12,10 @@ provisioner:
   name: ansible
   env:
     TEST_TYPE: "host"
+  inventory:
+    host_vars:
+      amzn2:
+        ansible_python_interpreter: /usr/bin/python3
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml

@@ -3,9 +3,11 @@ dependency:
   name: galaxy
 driver:
   name: vagrant
+  provider:
+    name: libvirt
 platforms:
   - name: ubuntu2204
-    box: ubuntu/jammy64
+    box: generic/ubuntu2204
     memory: 512
     cpus: 1
 provisioner:

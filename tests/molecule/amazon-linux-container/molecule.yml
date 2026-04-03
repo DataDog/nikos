@@ -13,6 +13,10 @@ provisioner:
   env:
     TEST_TYPE: "container"
     NIKOS_PREFIX: sudo docker exec -ti debian
+  inventory:
+    host_vars:
+      amzn2:
+        ansible_python_interpreter: /usr/bin/python3
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml

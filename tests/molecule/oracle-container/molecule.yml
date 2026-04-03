@@ -6,8 +6,8 @@ driver:
   provider:
     name: libvirt
 platforms:
-  - name: oracle7
-    box: generic/oracle7
+  - name: oracle8
+    box: generic/oracle8
     memory: 512
     cpus: 1
 provisioner:
