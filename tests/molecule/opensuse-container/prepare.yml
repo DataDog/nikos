@@ -22,10 +22,8 @@
       state: present
     become: true
 
-  - name: Install docker-py
-    package:
-      name: python3-docker
-      state: present
+  - name: Install docker-py for python3.11
+    shell: python3.11 -m ensurepip && python3.11 -m pip install docker
     become: true
     when: ansible_distribution_major_version == '15'
 

@@ -10,31 +10,13 @@
 - name: Prepare
   hosts: all
   tasks:
-  - name: Install yum-utils
-    package:
-      name: yum-utils
-    become: true
-
-  - name: Set up Docker CE repository
-    shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-    become: true
-
-  - name: Install Docker
-    package:
-      name:
-        - docker-ce
-        - docker-ce-cli
-        - containerd.io
-      state: latest
-    become: true
-
-  - name: Install pip
-    package:
-      name: python3-pip
-    become: true
-
-  - name: Install docker-py
-    shell: 'pip3 install docker'
+  - name: Install yum-utils and Docker
+    shell: |
+      dnf install -y yum-utils
+      yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      dnf install -y docker-ce docker-ce-cli containerd.io
+      dnf install -y python3-pip
+      pip3 install docker
     become: true
 
   - name: Start docker

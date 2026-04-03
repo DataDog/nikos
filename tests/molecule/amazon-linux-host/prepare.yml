@@ -4,5 +4,5 @@
   gather_facts: false
   tasks:
     - name: Install Python 3.9 via EPEL
-      raw: amazon-linux-extras install -y epel && yum install -y python39
+      raw: amazon-linux-extras install -y python3.9
       become: true
