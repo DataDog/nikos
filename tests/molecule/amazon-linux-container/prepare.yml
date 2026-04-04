@@ -1,18 +1,15 @@
 ---
+# AL2023 ships with Python 3.9 by default — no bootstrap needed
+
 - name: Prepare
   hosts: all
   tasks:
     - name: Install docker
-      shell: yes | amazon-linux-extras install docker
-      become: true
-
-    - name: Install pip
-      package:
-        name: python3-pip
+      shell: dnf install -y docker
       become: true
 
     - name: Install docker-py
-      shell: 'pip3 install docker "urllib3<2"'
+      shell: 'pip3 install docker'
       become: true
 
     - name: Start docker

@@ -1,4 +1,12 @@
 ---
+- name: Bootstrap Python 3.11
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Install Python 3.11
+      raw: zypper --non-interactive install python311
+      become: true
+
 - name: Prepare
   hosts: all
   tasks:

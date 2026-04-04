@@ -3,13 +3,19 @@ dependency:
   name: galaxy
 driver:
   name: vagrant
+  provider:
+    name: libvirt
 platforms:
   - name: opensuse15
-    box: roboxes/opensuse15
+    box: generic/opensuse15
     memory: 512
     cpus: 1
 provisioner:
   name: ansible
+  inventory:
+    host_vars:
+      opensuse15:
+        ansible_python_interpreter: /usr/bin/python3.11
   env:
     TEST_TYPE: "container"
     NIKOS_PREFIX: sudo docker exec -ti debian

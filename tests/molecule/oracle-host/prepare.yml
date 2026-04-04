@@ -1,0 +1,8 @@
+---
+- name: Bootstrap Python 3.9
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Install Python 3.9
+      raw: dnf install -y python39
+      become: true

@@ -3,13 +3,15 @@ dependency:
   name: galaxy
 driver:
   name: vagrant
+  provider:
+    name: libvirt
 platforms:
-  - name: debian9
-    box: roboxes/debian9
+  - name: debian11
+    box: generic/debian11
     memory: 512
     cpus: 1
-  - name: debian10
-    box: roboxes/debian10
+  - name: debian12
+    box: generic/debian12
     memory: 512
     cpus: 1
 provisioner:

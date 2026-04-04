@@ -3,24 +3,25 @@ dependency:
   name: galaxy
 driver:
   name: vagrant
+  provider:
+    name: libvirt
 platforms:
-  - name: centos7.1804.02
-    box: centos/7
-    box_version: 1804.02
+  - name: almalinux9
+    box: almalinux/9
     memory: 512
     cpus: 1
-  - name: centos7.1905.1
-    box: centos/7
-    box_version: 1905.1
-    memory: 512
-    cpus: 1
-  - name: centos8.1905.1
-    box: centos/8
-    box_version: 1905.1
+  - name: almalinux8
+    box: almalinux/8
     memory: 512
     cpus: 1
 provisioner:
   name: ansible
+  inventory:
+    host_vars:
+      almalinux9:
+        ansible_python_interpreter: /usr/bin/python3
+      almalinux8:
+        ansible_python_interpreter: /usr/bin/python3.9
   env:
     TEST_TYPE: 'container'
     NIKOS_PREFIX: sudo docker exec -ti debian

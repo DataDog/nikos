@@ -4,14 +4,18 @@ dependency:
 driver:
   name: vagrant
 platforms:
-  - name: amzn2
-    box: gbailey/amzn2
+  - name: al2023
+    box: gbailey/al2023
     memory: 512
     cpus: 1
 provisioner:
   name: ansible
   env:
     TEST_TYPE: "host"
+  inventory:
+    host_vars:
+      al2023:
+        ansible_python_interpreter: /usr/bin/python3
   playbooks:
     converge: ../resources/playbooks/converge.yml
     verify: ../resources/playbooks/verify.yml

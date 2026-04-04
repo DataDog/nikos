@@ -1,4 +1,13 @@
 ---
+- name: Bootstrap Python 3.9
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Install Python 3.9 on AlmaLinux 8
+      raw: dnf install -y python39
+      become: true
+      when: inventory_hostname == 'almalinux8'
+
 - name: Prepare
   hosts: all
   tasks:
@@ -38,32 +47,12 @@
       with_items: "{{ repos.files }}"
       when: ansible_distribution_major_version > '7'
 
-    - name: Install Docker
-      yum:
-        name:
-          - libseccomp
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-        state: latest
+    - name: Install Docker and docker-py
+      shell: |
+        yum install -y libseccomp docker-ce docker-ce-cli containerd.io
+        yum install -y python3-pip
+        pip3 install docker
       become: true
-
-    - name: Install Docker
-      package:
-        name: python-docker
-      become: true
-      when: ansible_distribution_major_version == '7'
-
-    - name: Install pip
-      package:
-        name: python3-pip
-      become: true
-      when: ansible_distribution_major_version > '7'
-
-    - name: Install docker-py
-      shell: "pip3 install docker"
-      become: true
-      when: ansible_distribution_major_version > '7'
 
     - name: Start docker
       service:

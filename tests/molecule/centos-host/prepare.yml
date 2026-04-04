@@ -1,0 +1,9 @@
+---
+- name: Bootstrap Python 3.9
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Install Python 3.9 on AlmaLinux 8
+      raw: dnf install -y python39
+      become: true
+      when: inventory_hostname == 'almalinux8'
