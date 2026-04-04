@@ -6,8 +6,8 @@ driver:
   provider:
     name: libvirt
 platforms:
-  - name: centos7
-    box: generic/centos7
+  - name: almalinux9
+    box: almalinux/9
     memory: 512
     cpus: 1
   - name: almalinux8
@@ -18,8 +18,8 @@ provisioner:
   name: ansible
   inventory:
     host_vars:
-      centos7:
-        ansible_python_interpreter: /usr/bin/python3.9
+      almalinux9:
+        ansible_python_interpreter: /usr/bin/python3
       almalinux8:
         ansible_python_interpreter: /usr/bin/python3.9
   env:

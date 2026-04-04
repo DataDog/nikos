@@ -6,14 +6,6 @@ driver:
   provider:
     name: libvirt
 platforms:
-  - name: fedora39
-    box: generic/fedora39
-    memory: 512
-    cpus: 1
-  - name: fedora40
-    box: generic/fedora40
-    memory: 512
-    cpus: 1
   - name: fedora41
     box: generic/fedora41
     memory: 512

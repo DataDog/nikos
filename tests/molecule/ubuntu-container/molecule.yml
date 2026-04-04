@@ -6,20 +6,12 @@ driver:
   provider:
     name: libvirt
 platforms:
-  - name: ubuntu2004
-    box: generic/ubuntu2004
-    memory: 512
-    cpus: 1
   - name: ubuntu2204
     box: generic/ubuntu2204
     memory: 512
     cpus: 1
 provisioner:
   name: ansible
-  inventory:
-    host_vars:
-      ubuntu2004:
-        ansible_python_interpreter: /usr/bin/python3.10
   env:
     TEST_TYPE: "container"
     NIKOS_PREFIX: sudo docker exec -ti debian
